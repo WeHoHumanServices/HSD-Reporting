@@ -134,6 +134,11 @@ const SUPABASE_PUBLISHABLE_KEY='sb_publishable_-nRc8G8cEgbrZ_L8x5OXjQ_z90s6Otd';
 const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const STORE_KEY='weho_hs_contract_reporting_portal';
 const ROLE_LABELS={agency:'Agency User',monitor:'City Program Monitor',admin:'City Administrator'};
+const PORTAL_ACCESS={
+  'fgomez@weho.org':{id:'admin-francisco',name:'Francisco Gomez',title:'Strategic Initiatives Program Administrator',email:'fgomez@weho.org',role:'admin',providerId:'city',programIds:['hia-program'],active:true},
+  'mporter@healthcareinaction.org':{id:'agency-melody',name:'Melody Porter',title:'Healthcare in Action Program Staff',email:'mporter@healthcareinaction.org',role:'agency',providerId:'hia',programIds:['hia-program'],active:true},
+  'nnguyen@healthcareinaction.org':{id:'agency-nancy',name:'Nancy Nguyen',title:'Healthcare in Action Program Staff',email:'nnguyen@healthcareinaction.org',role:'agency',providerId:'hia',programIds:['hia-program'],active:true}
+};
 const STATUS_LABELS={draft:'Draft',submitted:'Submitted',under_review:'Under Review',returned:'Returned for Revision',resubmitted:'Resubmitted',approved:'Approved'};
 const STATUS_CLASSES={draft:'draft',submitted:'submitted',under_review:'review',returned:'returned',resubmitted:'resubmitted',approved:'approved'};
 const AGES=['0–17','18–23','24–39','40–49','50–59','60–69','70–79','80–89','90+','Unknown/Declined'];
@@ -144,10 +149,10 @@ const AFFILIATIONS=['West Hollywood resident','Employed in West Hollywood','Atte
 const LANGUAGES=['English','Spanish','Russian','Farsi','American Sign Language','Other','Unknown/Declined'];
 const FINAL_VARIANCE_STATUSES=['Exceeds Pace','Watch','Off Track'];
 const PERIODS=[
-  {id:'q1-2026',label:'Q1',period:'October 1 – December 31, 2025',start:'2025-10-01',end:'2025-12-31',pace:.25,type:'backfill',due:'Backfill deadline to be set by City'},
-  {id:'q2-2026',label:'Q2',period:'January 1 – March 31, 2026',start:'2026-01-01',end:'2026-03-31',pace:.50,type:'backfill',due:'Backfill deadline to be set by City'},
-  {id:'q3-2026',label:'Q3',period:'April 1 – June 30, 2026',start:'2026-04-01',end:'2026-06-30',pace:.75,type:'backfill',due:'Backfill deadline to be set by City'},
-  {id:'q4-2026',label:'Q4',period:'July 1 – September 30, 2026',start:'2026-07-01',end:'2026-09-30',pace:1,type:'upcoming',due:'October 31, 2026'}
+  {id:'q1-2026',label:'Q1',period:'October 1 – December 31, 2025',start:'2025-10-01',end:'2025-12-31',pace:.25,type:'backfill',due:'August 15, 2026'},
+  {id:'q2-2026',label:'Q2',period:'January 1 – March 31, 2026',start:'2026-01-01',end:'2026-03-31',pace:.50,type:'backfill',due:'August 15, 2026'},
+  {id:'q3-2026',label:'Q3',period:'April 1 – June 30, 2026',start:'2026-04-01',end:'2026-06-30',pace:.75,type:'backfill',due:'August 15, 2026'},
+  {id:'q4-2026',label:'Q4',period:'July 1 – September 30, 2026',start:'2026-07-01',end:'2026-09-30',pace:1,type:'upcoming',open:'2026-10-01',due:'October 15, 2026'}
 ];
 const SERVICE_METRICS=[
   {id:'service_requests',area:'Service Delivery',name:'Service Requests from WeHo City Partners',goal:730,unit:'service requests',targetSource:'Healthcare in Action 2025–2028 Scope of Work, Deliverables & Performance Measures, page 7'},
@@ -216,17 +221,29 @@ function blankReport(programId,periodId){
 }
 function defaultDb(){
   const template={id:'hia-template-2025',name:'HIA Comprehensive Homelessness Solutions',version:'2025–2028 v1',active:true,threeYearGoal:336,threeYearGoalSource:'Healthcare in Action 2025–2028 Scope of Work, Unduplicated Client Goal, page 6',bipocTarget:.25,bipocTargetSource:'Healthcare in Action 2025–2028 Scope of Work, Unduplicated Client Goal, page 6',ageBands:clone(AGES),races:clone(RACES),affiliations:clone(AFFILIATIONS),languages:clone(LANGUAGES),serviceMetrics:clone(SERVICE_METRICS),outcomes:clone(OUTCOMES),narratives:clone(NARRATIVES)};
-  const db={providers:[{id:'hia',name:'Healthcare in Action',active:true}],programs:[{id:'hia-program',providerId:'hia',name:'Comprehensive Homelessness Solutions for West Hollywood',contractYears:'2025–2028',templateId:template.id,monitorName:'Isaac Arredondo',monitorEmail:'IArredondo@weho.org',active:true}],templates:[template],users:[
-    {id:'agency-hia',name:'HIA Reporting User',email:'reporting@healthcareinaction.org',role:'agency',providerId:'hia',active:true},
-    {id:'monitor-city',name:'City Program Monitor',email:'programmonitor@weho.org',role:'monitor',providerId:'city',programIds:['hia-program'],active:true},
-    {id:'admin-city',name:'City Administrator',email:'humanservices@weho.org',role:'admin',providerId:'city',active:true}
-  ],reports:[],notifications:[],activity:[],settings:{backfillDeadline:'',fiscalModule:false,emailNotifications:false}};
+  const db={providers:[{id:'hia',name:'Healthcare in Action—West Hollywood',active:true}],programs:[{id:'hia-program',providerId:'hia',name:'Healthcare in Action—West Hollywood',contractYears:'October 1, 2025–September 30, 2026',templateId:template.id,monitorName:'Francisco Gomez',monitorEmail:'fgomez@weho.org',primaryServiceCategory:'Housing & Homelessness',active:true}],templates:[template],users:Object.values(PORTAL_ACCESS).map(clone),reports:[],notifications:[],activity:[],settings:{backfillDeadline:'August 15, 2026',fiscalModule:false,emailNotifications:false}};
   PERIODS.forEach(p=>db.reports.push(blankReport('hia-program',p.id)));
   db.notifications.push({id:uid('note'),userRole:'agency',title:'Historical backfill periods are open',message:'Q1, Q2, and Q3 are available for direct entry. Each quarter will be reviewed separately by the City.',at:now(),read:false});
   db.notifications.push({id:uid('note'),userRole:'admin',title:'HIA template configured',message:'The initial 2025–2028 Healthcare in Action reporting template is ready for testing.',at:now(),read:false});
   return db;
 }
-function loadDb(){try{let raw=localStorage.getItem(STORE_KEY);return raw?JSON.parse(raw):defaultDb()}catch(e){console.warn(e);return defaultDb()}}
+function migrateDb(db){
+  db=db||defaultDb();
+  db.providers=db.providers||[];db.programs=db.programs||[];db.users=db.users||[];db.settings=db.settings||{};
+  let provider=db.providers.find(p=>p.id==='hia');
+  if(!provider){provider={id:'hia',active:true};db.providers.push(provider)}
+  Object.assign(provider,{name:'Healthcare in Action—West Hollywood',active:true});
+  let program=db.programs.find(p=>p.id==='hia-program');
+  if(!program){program={id:'hia-program',providerId:'hia',active:true};db.programs.push(program)}
+  Object.assign(program,{providerId:'hia',name:'Healthcare in Action—West Hollywood',contractYears:'October 1, 2025–September 30, 2026',monitorName:'Francisco Gomez',monitorEmail:'fgomez@weho.org',primaryServiceCategory:'Housing & Homelessness',active:true});
+  Object.values(PORTAL_ACCESS).forEach(seed=>{
+    let user=db.users.find(u=>String(u.email||'').trim().toLowerCase()===seed.email);
+    if(user)Object.assign(user,clone(seed));else db.users.push(clone(seed));
+  });
+  db.settings.backfillDeadline='August 15, 2026';
+  return db;
+}
+function loadDb(){try{let raw=localStorage.getItem(STORE_KEY),db=raw?JSON.parse(raw):defaultDb();db=migrateDb(db);localStorage.setItem(STORE_KEY,JSON.stringify(db));return db}catch(e){console.warn(e);return migrateDb(defaultDb())}}
 let state={db:loadDb(),userId:null,authUser:null,view:'home',currentReportId:null,reportTab:'access',selectedTemplateId:null,charts:{},filters:{provider:'all',program:'all',status:'all'},autosaveTimer:null};
 function saveDb(){localStorage.setItem(STORE_KEY,JSON.stringify(state.db))}
 function toast(message,type='ok'){let el=document.getElementById('toast');el.textContent=message;el.className='toast show '+type;clearTimeout(toast._t);toast._t=setTimeout(()=>el.className='toast',2600)}
@@ -236,11 +253,16 @@ function togglePassword(){let input=document.getElementById('login-password'),bt
 function resolvePortalUser(authUser){
   if(!authUser)return null;
   let email=String(authUser.email||'').trim().toLowerCase();
-  let existing=state.db.users.find(u=>String(u.email||'').trim().toLowerCase()===email&&u.active);
-  if(existing)return existing;
+  let seed=PORTAL_ACCESS[email];
+  let existing=state.db.users.find(u=>String(u.email||'').trim().toLowerCase()===email);
+  if(seed){
+    if(existing)Object.assign(existing,clone(seed));else{existing=clone(seed);state.db.users.push(existing)}
+    saveDb();return existing;
+  }
+  if(existing&&existing.active)return existing;
   let meta=authUser.app_metadata||{},role=meta.portal_role||meta.role;
   if(!['agency','monitor','admin'].includes(role))return null;
-  let profile={id:'auth-'+authUser.id,name:meta.display_name||authUser.user_metadata?.full_name||email,email:authUser.email,role,providerId:meta.provider_id||meta.providerId||(role==='agency'?'hia':'city'),programIds:Array.isArray(meta.program_ids)?meta.program_ids:(role==='monitor'?['hia-program']:[]),active:true};
+  let profile={id:'auth-'+authUser.id,name:meta.display_name||authUser.user_metadata?.full_name||email,title:meta.job_title||'',email:authUser.email,role,providerId:meta.provider_id||meta.providerId||(role==='agency'?'hia':'city'),programIds:Array.isArray(meta.program_ids)?meta.program_ids:(role==='monitor'?['hia-program']:[]),active:true};
   state.db.users.push(profile);saveDb();return profile;
 }
 async function enterPortal(authUser){
@@ -345,7 +367,7 @@ function canEditReport(r){return isAgency()&&!isLocked(r)&&periodById(r.periodId
 function canComment(){return isCity()}
 function renderHome(){let reports=roleScopeReports(),u=currentUser(),submitted=reports.filter(r=>['submitted','under_review','resubmitted','approved'].includes(r.status)).length,approved=reports.filter(r=>r.status==='approved').length,returned=reports.filter(r=>r.status==='returned').length,open=reports.filter(r=>r.status==='draft'||r.status==='returned').length;let hia=state.db.reports.filter(r=>r.programId==='hia-program');let latest=hia[2],ytdEnrollment=ytdAccess(latest,['enrollment']),threeGoal=getTemplateForReport(latest).threeYearGoal;
   let nextAction=isAgency()?`Enter and submit Q1–Q3 directly in the platform. Each quarter has its own certification and review history.`:`Review submitted reports, add comments, and return or approve each quarter separately.`;
-  document.getElementById('view-home').innerHTML=`<div class="page-head"><div><h1 class="page-title">Reporting Home</h1><p class="page-sub">${esc(u.role==='agency'?'Healthcare in Action reporting workspace.':'Citywide contract-reporting workspace.')}</p></div><div class="page-actions"><button class="btn" onclick="nav('reports')">Open Quarterly Reports</button></div></div>
+  document.getElementById('view-home').innerHTML=`<div class="page-head"><div><h1 class="page-title">Reporting Home</h1><p class="page-sub">${esc(u.role==='agency'?'Healthcare in Action—West Hollywood reporting workspace.':'Citywide contract-reporting workspace.')}</p></div><div class="page-actions"><button class="btn" onclick="nav('reports')">Open Quarterly Reports</button></div></div>
   <div class="notice"><strong>Launch setup:</strong> Q1, Q2, and Q3 are marked as historical backfill and opened for direct entry in the platform. Q4 remains upcoming until the live reporting cycle begins.</div>
   <div class="cards"><div class="card kpi"><div class="label">Open / editable</div><div class="value">${open}</div><div class="sub">Draft or returned reports</div></div><div class="card kpi"><div class="label">Submitted or in review</div><div class="value">${submitted-approved}</div><div class="sub">Locked pending City action</div></div><div class="card kpi"><div class="label">Approved</div><div class="value">${approved}</div><div class="sub">Finalized reports</div></div><div class="card kpi"><div class="label">Returned for revision</div><div class="value">${returned}</div><div class="sub">Agency action needed</div></div></div>
   <div class="actions-grid"><button class="action-card" onclick="nav('reports')"><p class="action-title">Quarterly reports</p><p class="action-desc">Enter or review aggregate program data for each reporting period.</p></button><button class="action-card" onclick="nav('dashboard')"><p class="action-title">Program dashboard</p><p class="action-desc">Review YTD enrollment, housing placements, health outcomes, and service progress.</p></button><button class="action-card" onclick="nav('notifications')"><p class="action-title">Notifications</p><p class="action-desc">See report submissions, returns, approvals, and reporting-period notices.</p></button></div>
