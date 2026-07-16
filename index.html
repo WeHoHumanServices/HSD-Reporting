@@ -423,6 +423,53 @@ input[inputmode="numeric"]{direction:ltr;text-align:left;font-variant-numeric:ta
 @media(min-width:1280px){.report-shell{grid-template-columns:minmax(0,1fr) 250px}.report-aside{position:sticky;top:88px}}
 @media(max-width:1279px){.report-shell{grid-template-columns:1fr}.report-aside{position:static}}
 
+
+/* ========================================================================== 
+   Program report compact header, demographic layout, and City-only activity
+   refinement — July 2026
+   ========================================================================== */
+.report-header{padding:14px 16px;margin-bottom:13px}
+.report-header-top{align-items:flex-start}
+.report-title-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.report-title-row .page-title{font-size:23px;margin:0}
+.report-title-row .status{margin-top:1px}
+.report-header .page-sub{font-size:12px;margin-top:4px}
+.report-period-bar{display:flex;align-items:stretch;flex-wrap:wrap;margin-top:10px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:#FAFBFC;border-radius:8px;overflow:hidden;width:fit-content;max-width:100%}
+.report-period-compact{display:flex;gap:6px;align-items:baseline;padding:7px 10px;border-right:1px solid var(--line);min-width:0}
+.report-period-compact:last-child{border-right:0}
+.report-period-compact .report-period-label{margin:0;white-space:nowrap}
+.report-period-compact .report-period-value{font-size:11.5px;white-space:nowrap}
+.report-header .page-actions{max-width:470px}
+.report-header .autosave{margin-top:8px;padding-top:7px;border-top:1px solid #EEF1F4}
+.age-gender-panels{display:grid;grid-template-columns:1fr;gap:14px}
+.demographic-table-panel{border:1px solid var(--line);border-radius:11px;background:#fff;overflow:hidden}
+.demographic-table-panel h3{font-size:13px;color:var(--navy);margin:0;padding:10px 12px;background:#F7F9FB;border-bottom:1px solid var(--line)}
+.demographic-table-panel .matrix-wrap{border:0;border-radius:0}
+.matrix.age-compact{min-width:650px}
+.matrix.age-compact th,.matrix.age-compact td{padding:8px 7px}
+.matrix.age-compact th:not(:first-child),.matrix.age-compact td:not(:first-child){min-width:82px}
+.matrix.age-compact th:first-child,.matrix.age-compact td:first-child{position:sticky;left:0;z-index:2;background:#fff;min-width:115px}
+.matrix.age-compact thead th:first-child{z-index:4;background:#F7F9FB}
+.matrix.age-compact .compact-input{width:66px!important;min-width:60px}
+.trans-identity-intro{max-width:900px;margin:7px 0 11px;color:var(--muted);font-size:12px;line-height:1.55}
+.trans-detail-panel{margin-top:13px;border:1px solid #C9D7E7;border-radius:11px;background:#F7FAFD;padding:13px}
+.trans-detail-panel h4{margin:0 0 5px;color:var(--navy);font-size:13px}
+.trans-detail-panel p{margin:0 0 10px;color:var(--muted);font-size:11.5px;line-height:1.5}
+.activity-details{margin-top:14px;border:1px solid var(--line);border-radius:var(--radius);background:#fff;box-shadow:var(--shadow);overflow:hidden}
+.activity-details summary{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 15px;color:var(--navy);font-weight:800;cursor:pointer;list-style:none}
+.activity-details summary::-webkit-details-marker{display:none}
+.activity-details summary::after{content:'+';font-size:18px;color:var(--muted);font-weight:500}
+.activity-details[open] summary::after{content:'–'}
+.activity-details[open] summary{border-bottom:1px solid var(--line)}
+.activity-details .activity-count{font-size:10px;color:var(--muted);font-weight:700;margin-left:auto}
+.activity-details .timeline{padding:14px}
+.export-demographic-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.export-subhead{font-size:11px;color:var(--navy);font-weight:800;margin:12px 0 6px}
+@media(min-width:1450px){.age-gender-panels{grid-template-columns:1fr 1fr}}
+@media(max-width:1100px){.report-period-bar{width:100%}.report-period-compact{flex:1 1 220px}.report-period-compact:nth-child(2){border-right:0}.report-header .page-actions{max-width:none}}
+@media(max-width:700px){.report-period-compact{border-right:0;border-bottom:1px solid var(--line);width:100%}.report-period-compact:last-child{border-bottom:0}.export-demographic-grid{grid-template-columns:1fr}}
+@media print{.export-demographic-grid{grid-template-columns:1fr 1fr;gap:10px}.activity-details{display:none!important}}
+
 </style>
 </head>
 <body>
@@ -1852,6 +1899,214 @@ let modalPreviousFocus=null;
 function openModal(title,body){modalPreviousFocus=document.activeElement;let modal=document.getElementById('modal');document.getElementById('modal-title').textContent=title;document.getElementById('modal-body').innerHTML=body;modal.classList.add('open');requestAnimationFrame(()=>{let focusable=modal.querySelector('textarea,input,select,button,[tabindex]:not([tabindex="-1"])');focusable?.focus()})}
 function closeModal(){let modal=document.getElementById('modal');modal.classList.remove('open');document.getElementById('modal-body').innerHTML='';try{modalPreviousFocus?.focus()}catch(_ignore){}modalPreviousFocus=null}
 document.addEventListener('keydown',event=>{let modal=document.getElementById('modal');if(event.key==='Escape'&&modal?.classList.contains('open')){event.preventDefault();closeModal()}});
+
+
+/* ========================================================================== 
+   Compact report header, complete demographic exports, inclusive transgender
+   reporting, narrower age/gender entry, and City-only activity timeline.
+   ========================================================================== */
+
+const HSD_TRANS_DETAIL_LABELS={
+  transMan:'Trans man / transgender man',
+  transWoman:'Trans woman / transgender woman',
+  anotherIdentity:'Another transgender identity'
+};
+const HSD_TRANS_DETAIL_KEYS=Object.keys(HSD_TRANS_DETAIL_LABELS);
+const HSD_GENDER_TABLE_LABELS={
+  'Male':'Male',
+  'Female':'Female',
+  'Nonbinary/Gender Nonconforming':'Nonbinary / GNC',
+  'Unknown/Declined':'Unknown'
+};
+
+function hsdBlankTransgenderDetail(){return{transMan:'',transWoman:'',anotherIdentity:''}}
+function hsdEnsureAccessShape(r){
+  if(!r)return r;
+  r.access=r.access||{};
+  r.access.transgender=r.access.transgender||{yes:'',no:'',unknown:''};
+  r.access.transgenderDetail={...hsdBlankTransgenderDetail(),...(r.access.transgenderDetail||{})};
+  return r;
+}
+function hsdTransgenderDetailTotal(r){hsdEnsureAccessShape(r);return HSD_TRANS_DETAIL_KEYS.reduce((sum,key)=>sum+n(r.access.transgenderDetail[key]),0)}
+
+DEMOGRAPHIC_CODE_MAP.transgender_identity_detail={
+  [HSD_TRANS_DETAIL_LABELS.transMan]:'trans_man',
+  [HSD_TRANS_DETAIL_LABELS.transWoman]:'trans_woman',
+  [HSD_TRANS_DETAIL_LABELS.anotherIdentity]:'another_transgender_identity'
+};
+DEMOGRAPHIC_LABEL_BY_CODE.transgender_identity_detail=Object.fromEntries(
+  Object.entries(DEMOGRAPHIC_CODE_MAP.transgender_identity_detail).map(([label,code])=>[code,label])
+);
+
+const hsdPreviousBlankReport=blankReport;
+blankReport=function(programId,periodId){let r=hsdPreviousBlankReport(programId,periodId);return hsdEnsureAccessShape(r)};
+const hsdPreviousBlankServerReport=blankServerReport;
+blankServerReport=function(row,template,user){let r=hsdPreviousBlankServerReport(row,template,user);return hsdEnsureAccessShape(r)};
+
+const hsdPreviousHydrateReportFromNormalized=hydrateReportFromNormalized;
+hydrateReportFromNormalized=function(r,template,server,workspace){
+  let workspaceDetail=clone(workspace?.payload?.access?.transgenderDetail||hsdBlankTransgenderDetail());
+  hsdPreviousHydrateReportFromNormalized(r,template,server,workspace);
+  hsdEnsureAccessShape(r);
+  Object.assign(r.access.transgenderDetail,workspaceDetail);
+  let dimensions=server.demographic_dimensions||[],options=server.demographic_options||[];
+  let detailDimension=dimensions.find(x=>x.code==='transgender_identity_detail');
+  if(detailDimension){
+    let optionById=Object.fromEntries(options.filter(x=>x.dimension_id===detailDimension.id).map(x=>[x.id,x]));
+    let rows=(server.report_demographic_values||[]).filter(x=>x.report_id===r.id&&x.dimension_id===detailDimension.id);
+    if(rows.length){
+      r.access.transgenderDetail=hsdBlankTransgenderDetail();
+      rows.forEach(row=>{
+        let code=optionById[row.option_id]?.code;
+        if(code==='trans_man')r.access.transgenderDetail.transMan=Number(row.value);
+        if(code==='trans_woman')r.access.transgenderDetail.transWoman=Number(row.value);
+        if(code==='another_transgender_identity')r.access.transgenderDetail.anotherIdentity=Number(row.value);
+      });
+    }
+  }
+};
+
+const hsdPreviousBuildDemographicValues=buildDemographicValues;
+buildDemographicValues=function(r){
+  hsdEnsureAccessShape(r);
+  let rows=hsdPreviousBuildDemographicValues(r),dimension_id=dimensionId('transgender_identity_detail');
+  if(!dimension_id)return rows;
+  HSD_TRANS_DETAIL_KEYS.forEach(key=>{
+    let value=r.access.transgenderDetail[key];
+    if(value==='')return;
+    let label=HSD_TRANS_DETAIL_LABELS[key],optionCode=DEMOGRAPHIC_CODE_MAP.transgender_identity_detail[label],option_id=optionId('transgender_identity_detail',optionCode);
+    if(option_id)rows.push({dimension_id,option_id,cross_dimension_id:null,cross_option_id:null,value:Number(value)});
+  });
+  return rows;
+};
+
+const hsdPreviousBuildSectionRequest=buildSectionRequest;
+buildSectionRequest=function(r,section){
+  hsdEnsureAccessShape(r);
+  let body=hsdPreviousBuildSectionRequest(r,section);
+  if(section==='access'){
+    let detailId=dimensionId('transgender_identity_detail');
+    if(detailId)body.replaceDimensionIds=[...new Set([...(body.replaceDimensionIds||[]),detailId])];
+  }
+  return body;
+};
+
+inputNum=function(path,value,opts={}){
+  let dis=opts.disabled?'disabled':'',aria=opts.ariaLabel?`aria-label="${esc(opts.ariaLabel)}"`:'';
+  return`<input class="compact-input" data-live-key="${esc(path)}" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" value="${esc(value)}" ${aria} ${dis} oninput="this.value=this.value.replace(/[^0-9]/g,'');updatePath('${path}',this.value)">`;
+};
+
+updatePath=function(path,value,type='text'){
+  let r=reportById(state.currentReportId);
+  if(!r||!canEditReport(r))return;
+  hsdEnsureAccessShape(r);
+  let preserveAdjustedBipoc=path.startsWith('access.race.')&&n(r.access.bipocCorrection)!==0;
+  let priorFinalBipoc=preserveAdjustedBipoc?finalBipoc(r):null;
+  let obj=r,keys=path.split('.');
+  for(let i=0;i<keys.length-1;i++)obj=obj[keys[i]];
+  obj[keys.at(-1)]=type==='checkbox'?Boolean(value):value;
+  if(preserveAdjustedBipoc)r.access.bipocCorrection=priorFinalBipoc-calculatedBipoc(r);
+  r.updatedAt=now();showAutosave();saveDb();
+  let isLiveDemographic=/^access\.(enrollment|ageGender|race|language|lgbtq|transgender|transgenderDetail|affiliation)\./.test(path)||path==='access.enrollment';
+  if(isLiveDemographic)refreshCurrentReportTabLive(path);else renderAsideOnly();
+};
+
+function hsdGenderHeader(g){return`<span title="${esc(g)}">${esc(HSD_GENDER_TABLE_LABELS[g]||g)}</span>`}
+function hsdRenderAgeAndTransSection(r){
+  hsdEnsureAccessShape(r);
+  let disabled=!canEditReport(r);
+  let quarterRows=AGES.map(age=>`<tr><td>${esc(age)}</td>${GENDERS.map(g=>`<td>${inputNum(`access.ageGender.${age}.${g}`,r.access.ageGender[age][g],{disabled,ariaLabel:`${age}, ${g}, quarter`})}</td>`).join('')}<td class="total">${fmt(sumObject(r.access.ageGender[age]))}</td></tr>`).join('');
+  let ytdRows=AGES.map(age=>`<tr><td>${esc(age)}</td>${GENDERS.map(g=>`<td class="num readonly">${fmt(ytdAccess(r,['ageGender',age,g]))}</td>`).join('')}<td class="total">${fmt(GENDERS.reduce((sum,g)=>sum+ytdAccess(r,['ageGender',age,g]),0))}</td></tr>`).join('');
+  let quarterTotals=GENDERS.map(g=>AGES.reduce((sum,a)=>sum+n(r.access.ageGender[a][g]),0));
+  let ytdTotals=GENDERS.map(g=>AGES.reduce((sum,a)=>sum+ytdAccess(r,['ageGender',a,g]),0));
+  let transTotal=sumObject(r.access.transgender),detailTotal=hsdTransgenderDetailTotal(r),showDetail=n(r.access.transgender.yes)>0||detailTotal>0;
+  let statusRows=[['yes','Identifies as transgender'],['no','Does not identify as transgender'],['unknown','Unknown/Declined']].map(([key,label])=>`<tr><td>${esc(label)}</td><td>${inputNum(`access.transgender.${key}`,r.access.transgender[key],{disabled,ariaLabel:`${label}, quarter`})}</td><td class="num readonly">${fmt(ytdAccess(r,['transgender',key]))}</td></tr>`).join('');
+  let detailRows=HSD_TRANS_DETAIL_KEYS.map(key=>`<tr><td>${esc(HSD_TRANS_DETAIL_LABELS[key])}</td><td>${inputNum(`access.transgenderDetail.${key}`,r.access.transgenderDetail[key],{disabled,ariaLabel:`${HSD_TRANS_DETAIL_LABELS[key]}, quarter`})}</td><td class="num readonly">${fmt(ytdAccess(r,['transgenderDetail',key]))}</td></tr>`).join('');
+  return`<div class="section"><div class="section-title"><span>Age and Gender Identity</span><small>Quarter and year-to-date totals</small></div><div class="section-body"><p class="section-intro">Enter the quarter counts below. Year-to-date counts are shown in a separate table to keep the entry area easier to read.</p><div class="age-gender-panels"><div class="demographic-table-panel"><h3>Quarter</h3><div class="matrix-wrap"><table class="matrix age-compact"><thead><tr><th>Age</th>${GENDERS.map(hsdGenderHeader).map(x=>`<th>${x}</th>`).join('')}<th>Total</th></tr></thead><tbody>${quarterRows}<tr><td class="total">Total</td>${quarterTotals.map(value=>`<td class="total">${fmt(value)}</td>`).join('')}<td class="total">${fmt(ageGenderTotal(r))}</td></tr></tbody></table></div></div><div class="demographic-table-panel"><h3>Year to Date</h3><div class="matrix-wrap"><table class="matrix age-compact"><thead><tr><th>Age</th>${GENDERS.map(hsdGenderHeader).map(x=>`<th>${x}</th>`).join('')}<th>Total</th></tr></thead><tbody>${ytdRows}<tr><td class="total">Total</td>${ytdTotals.map(value=>`<td class="total">${fmt(value)}</td>`).join('')}<td class="total">${fmt(ytdTotals.reduce((sum,value)=>sum+value,0))}</td></tr></tbody></table></div></div></div>${demographicTotalNote(ageGenderTotal(r),r.access.enrollment,'Age and gender')}<h3 class="card-title" style="margin-top:19px">Transgender identity <span style="font-weight:500;color:var(--muted)">(optional, when collected)</span></h3><p class="trans-identity-intro">A participant may identify as transgender and also be represented in the gender identity table above. When this information is collected, enter one response for each newly enrolled participant.</p><div class="table-wrap" style="box-shadow:none;max-width:720px"><table><thead><tr><th>Response</th><th>Quarter</th><th>YTD</th></tr></thead><tbody>${statusRows}<tr><td><strong>Total reported</strong></td><td class="num"><strong>${fmt(transTotal)}</strong></td><td class="num"><strong>${fmt(['yes','no','unknown'].reduce((sum,key)=>sum+ytdAccess(r,['transgender',key]),0))}</strong></td></tr></tbody></table></div>${showDetail?`<div class="trans-detail-panel"><h4>Participants who identify as transgender</h4><p>Break down the quarter’s “Identifies as transgender” total using the categories below. Count each participant once.</p><div class="table-wrap" style="box-shadow:none;max-width:720px"><table><thead><tr><th>Identity</th><th>Quarter</th><th>YTD</th></tr></thead><tbody>${detailRows}<tr><td><strong>Total</strong></td><td class="num"><strong>${fmt(detailTotal)}</strong></td><td class="num"><strong>${fmt(HSD_TRANS_DETAIL_KEYS.reduce((sum,key)=>sum+ytdAccess(r,['transgenderDetail',key]),0))}</strong></td></tr></tbody></table></div>${demographicTotalNote(detailTotal,r.access.transgender.yes,'Transgender identity breakdown')}</div>`:`<div class="help" style="margin-top:8px">The identity breakdown will appear after a quarter count is entered under “Identifies as transgender.”</div>`}</div></div>`;
+}
+
+const hsdPreviousRenderAccess=renderAccess;
+renderAccess=function(r){
+  hsdEnsureAccessShape(r);
+  let html=hsdPreviousRenderAccess(r);
+  return html.replace(/<div class="section">\s*<div class="section-title"><span>Age and Gender Identity<\/span>[\s\S]*?(?=<div class="grid2">)/,hsdRenderAgeAndTransSection(r)+'\n');
+};
+
+const hsdPreviousQualityChecks=qualityChecks;
+qualityChecks=function(r){
+  hsdEnsureAccessShape(r);
+  let checks=hsdPreviousQualityChecks(r),enrollment=n(r.access.enrollment),statusTotal=sumObject(r.access.transgender),yes=n(r.access.transgender.yes),detailTotal=hsdTransgenderDetailTotal(r);
+  let statusCheck=checks.find(x=>x.id==='transgender');
+  if(statusCheck){statusCheck.label='Transgender identity responses are complete or left uncollected';statusCheck.ok=statusTotal===0||statusTotal===enrollment;statusCheck.detail=`Current subtotal: ${statusTotal}; enrollment: ${enrollment}.`}
+  let detailCheck={id:'transgenderDetail',label:'Transgender identity breakdown matches the reported transgender total',ok:yes===0?detailTotal===0:detailTotal===yes,detail:yes===0?'No transgender participants are reported for this quarter.':`Breakdown subtotal: ${detailTotal}; identifies as transgender: ${yes}.`};
+  let index=checks.findIndex(x=>x.id==='transgender');checks.splice(index>=0?index+1:checks.length,0,detailCheck);
+  return checks;
+};
+
+renderReportAsideBase=function(r){
+  let comp=completeness(r),timeline=isCity()?`<details class="activity-details"><summary><span>Activity timeline</span><span class="activity-count">${r.history.length} ${r.history.length===1?'item':'items'}</span></summary><div class="timeline">${r.history.length?r.history.slice().reverse().map(h=>`<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-copy"><strong>${esc(h.action)}</strong><span>${esc(h.actor)} · ${dateTime(h.at)}</span></div></div>`).join(''):'<div class="empty">No report activity has been recorded.</div>'}</div></details>`:'';
+  return`<div class="card"><div class="card-head"><h2 class="card-title">Report Completion</h2></div><div class="card-body"><div class="completeness">${comp.pct}%</div><div class="progress gold" style="margin:8px 0 12px"><span style="width:${comp.pct}%"></span></div><div class="checklist">${comp.checks.slice(0,8).map(x=>`<div class="check-row ${x.ok?'ok':'check'}"><div class="check-mark">${x.ok?'✓':'!'}</div><div><strong>${esc(x.label)}</strong><span>${x.ok?'Complete':esc(x.detail)}</span></div></div>`).join('')}</div>${comp.checks.length>8?`<button class="btn-link" onclick="openQualityModal('${r.id}')">View all ${comp.checks.length} checks</button>`:''}<div class="aside-actions">${agencyWorkflowButtons(r,comp)}${isCity()?cityWorkflowButtons(r):''}</div></div></div>${timeline}`;
+};
+
+function hsdCleanProgramReportHeader(){
+  let r=reportById(state.currentReportId),header=document.querySelector('#view-report .report-header');if(!r||!header)return;
+  let p=periodById(r.periodId),program=programById(r.programId),left=header.querySelector('.report-header-top > div:first-child');if(!left)return;
+  left.innerHTML=`<div class="report-title-row"><h1 class="page-title">${esc(p.label)} Program Report</h1>${statusBadge(r.status)}</div><p class="page-sub">${esc(program.name)}</p><div class="report-period-bar"><div class="report-period-compact"><span class="report-period-label">Quarter</span><span class="report-period-value">${esc(p.period)}</span></div><div class="report-period-compact"><span class="report-period-label">Service year</span><span class="report-period-value">${esc(p.serviceYearLabel||program.contractYears)}</span></div><div class="report-period-compact"><span class="report-period-label">Due</span><span class="report-period-value">${esc(p.due)}</span></div></div>`;
+}
+const hsdPreviousRenderReport=renderReport;
+renderReport=function(){hsdPreviousRenderReport();hsdCleanProgramReportHeader()};
+
+function hsdDemographicExportRows(r){
+  hsdEnsureAccessShape(r);
+  let rows=[['Demographic section','Category','Quarter','YTD','Notes'],['Enrollment','New, unduplicated participants',r.access.enrollment,ytdAccess(r,['enrollment']),'Count each participant once in the quarter first enrolled.'],['Access','BIPOC participants',finalBipoc(r),priorReports(r).reduce((sum,x)=>sum+finalBipoc(x),0),r.access.bipocCorrectionExplanation||'Calculated from race and ethnicity entries.']];
+  AGES.forEach(age=>GENDERS.forEach(gender=>rows.push(['Age and gender identity',`${age} · ${gender}`,r.access.ageGender[age][gender],ytdAccess(r,['ageGender',age,gender]),''])));
+  [['yes','Yes — identifies as LGBTQ+'],['no','No'],['unknown','Unknown/Declined']].forEach(([key,label])=>rows.push(['LGBTQ+ identity',label,r.access.lgbtq[key],ytdAccess(r,['lgbtq',key]),'']));
+  [['yes','Identifies as transgender'],['no','Does not identify as transgender'],['unknown','Unknown/Declined']].forEach(([key,label])=>rows.push(['Transgender identity',label,r.access.transgender[key],ytdAccess(r,['transgender',key]),'Optional, when collected.']));
+  HSD_TRANS_DETAIL_KEYS.forEach(key=>rows.push(['Transgender identity breakdown',HSD_TRANS_DETAIL_LABELS[key],r.access.transgenderDetail[key],ytdAccess(r,['transgenderDetail',key]),'Among participants who identify as transgender.']));
+  RACES.forEach(label=>rows.push(['Race and ethnicity',label,r.access.race[label],ytdAccess(r,['race',label]),'']));
+  LANGUAGES.forEach(label=>rows.push(['Household language',label,r.access.language[label],ytdAccess(r,['language',label]),label==='Other'?(r.access.languageOther||''):'']));
+  AFFILIATIONS.forEach(label=>rows.push(['Connection to West Hollywood',label,r.access.affiliation[label],ytdAccess(r,['affiliation',label]),'Primary category; count each participant once.']));
+  return rows;
+}
+
+const hsdPreviousFlattenReport=flattenReport;
+flattenReport=function(r){
+  hsdEnsureAccessShape(r);
+  let rows=hsdPreviousFlattenReport(r),serviceIndex=rows.findIndex(row=>row[0]==='Service Delivery');
+  let additions=[['Transgender Identity','Identifies as transgender',r.access.transgender.yes,ytdAccess(r,['transgender','yes']),'Optional, when collected.'],['Transgender Identity','Does not identify as transgender',r.access.transgender.no,ytdAccess(r,['transgender','no']),'Optional, when collected.'],['Transgender Identity','Unknown/Declined',r.access.transgender.unknown,ytdAccess(r,['transgender','unknown']),'Optional, when collected.'],...HSD_TRANS_DETAIL_KEYS.map(key=>['Transgender Identity Breakdown',HSD_TRANS_DETAIL_LABELS[key],r.access.transgenderDetail[key],ytdAccess(r,['transgenderDetail',key]),'Among participants who identify as transgender.'])];
+  rows.splice(serviceIndex>=0?serviceIndex:rows.length,0,...additions);
+  return rows;
+};
+
+downloadReportExcel=function(id){
+  let r=reportById(id);if(typeof XLSX==='undefined'){toast('Excel export library did not load.','err');return}
+  let wb=XLSX.utils.book_new(),rows=flattenReport(r),ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[{wch:28},{wch:58},{wch:20},{wch:20},{wch:72}];XLSX.utils.book_append_sheet(wb,ws,'Program Report');
+  let demographicSheet=XLSX.utils.aoa_to_sheet(hsdDemographicExportRows(r));demographicSheet['!cols']=[{wch:30},{wch:48},{wch:14},{wch:14},{wch:55}];XLSX.utils.book_append_sheet(wb,demographicSheet,'Demographics');
+  let quality=XLSX.utils.json_to_sheet(completeness(r).checks.map(x=>({Check:x.label,Status:x.ok?'Complete':'Review needed',Detail:x.detail})));XLSX.utils.book_append_sheet(wb,quality,'Report Checks');
+  XLSX.writeFile(wb,`HIA_${periodById(r.periodId).label}_Program_Report.xlsx`);addActivity('Exported report Excel',r);
+};
+
+function hsdExportSimpleTable(title,items){return`<div><div class="export-subhead">${esc(title)}</div><table class="export-table"><thead><tr><th>Category</th><th>Quarter</th><th>YTD</th></tr></thead><tbody>${items.map(item=>`<tr><td>${esc(item.label)}</td><td class="num">${fmt(item.quarter)}</td><td class="num">${fmt(item.ytd)}</td></tr>`).join('')}</tbody></table></div>`}
+function hsdExportDemographicsHtml(r){
+  hsdEnsureAccessShape(r);
+  let ageQuarter=AGES.map(age=>`<tr><td>${esc(age)}</td>${GENDERS.map(g=>`<td class="num">${fmt(r.access.ageGender[age][g])}</td>`).join('')}<td class="num">${fmt(sumObject(r.access.ageGender[age]))}</td></tr>`).join('');
+  let ageYtd=AGES.map(age=>`<tr><td>${esc(age)}</td>${GENDERS.map(g=>`<td class="num">${fmt(ytdAccess(r,['ageGender',age,g]))}</td>`).join('')}<td class="num">${fmt(GENDERS.reduce((sum,g)=>sum+ytdAccess(r,['ageGender',age,g]),0))}</td></tr>`).join('');
+  let headers=GENDERS.map(g=>`<th>${esc(HSD_GENDER_TABLE_LABELS[g]||g)}</th>`).join('');
+  let lgbtq=[['Yes — identifies as LGBTQ+',r.access.lgbtq.yes,ytdAccess(r,['lgbtq','yes'])],['No',r.access.lgbtq.no,ytdAccess(r,['lgbtq','no'])],['Unknown/Declined',r.access.lgbtq.unknown,ytdAccess(r,['lgbtq','unknown'])]].map(([label,quarter,ytd])=>({label,quarter,ytd}));
+  let trans=[['Identifies as transgender',r.access.transgender.yes,ytdAccess(r,['transgender','yes'])],['Does not identify as transgender',r.access.transgender.no,ytdAccess(r,['transgender','no'])],['Unknown/Declined',r.access.transgender.unknown,ytdAccess(r,['transgender','unknown'])]].map(([label,quarter,ytd])=>({label,quarter,ytd}));
+  let detail=HSD_TRANS_DETAIL_KEYS.map(key=>({label:HSD_TRANS_DETAIL_LABELS[key],quarter:r.access.transgenderDetail[key],ytd:ytdAccess(r,['transgenderDetail',key])}));
+  let race=RACES.map(label=>({label,quarter:r.access.race[label],ytd:ytdAccess(r,['race',label])})),language=LANGUAGES.map(label=>({label,quarter:r.access.language[label],ytd:ytdAccess(r,['language',label])})),affiliation=AFFILIATIONS.map(label=>({label,quarter:r.access.affiliation[label],ytd:ytdAccess(r,['affiliation',label])}));
+  return`<div class="export-section page-break"><h2>Detailed Demographics</h2><div class="export-subhead">Age and gender identity — Quarter</div><table class="export-table"><thead><tr><th>Age</th>${headers}<th>Total</th></tr></thead><tbody>${ageQuarter}</tbody></table><div class="export-subhead">Age and gender identity — Year to Date</div><table class="export-table"><thead><tr><th>Age</th>${headers}<th>Total</th></tr></thead><tbody>${ageYtd}</tbody></table><div class="export-demographic-grid">${hsdExportSimpleTable('Race and ethnicity',race)}${hsdExportSimpleTable('Household language',language)}${hsdExportSimpleTable('LGBTQ+ identity',lgbtq)}${hsdExportSimpleTable('Transgender identity',trans)}${n(r.access.transgender.yes)>0||hsdTransgenderDetailTotal(r)>0?hsdExportSimpleTable('Participants who identify as transgender',detail):''}${hsdExportSimpleTable('Connection to West Hollywood',affiliation)}</div></div>`;
+}
+
+printReport=function(id){
+  let r=reportById(id),p=periodById(r.periodId),program=programById(r.programId),t=getTemplateForReport(r);hsdEnsureAccessShape(r);
+  let serviceRows=t.serviceMetrics.map(m=>`<tr><td>${esc(m.name)}</td><td class="num">${fmt(m.goal)}</td><td class="num">${fmt(r.services[m.id]?.actual)}</td><td class="num">${fmt(ytdService(r,m.id))}</td><td class="num">${fmt(Math.round(n(m.goal)*p.pace))}</td><td>${esc(finalServiceStatus(r,m))}</td></tr>`).join('');
+  let outcomeRows=t.outcomes.map(o=>{let qn=outcomeQuarterNumerator(r,o),qd=n(r.outcomes[o.id]?.denominator),yn=o.id==='housing'?priorReports(r).reduce((s,x)=>s+outcomeQuarterNumerator(x,o),0):ytdOutcome(r,o.id,'numerator'),yd=ytdOutcome(r,o.id,'denominator');return`<tr><td><strong>${esc(o.name)}</strong></td><td>≥${pct(o.target)}</td><td>${fmt(qn)} / ${fmt(qd)}</td><td>${qd?pct(qn/qd):'—'}</td><td>${fmt(yn)} / ${fmt(yd)}</td><td>${yd?pct(yn/yd):'—'}</td></tr>`}).join('');
+  let narratives=t.narratives.filter(x=>r.narratives.values[x.id]).map(x=>`<div class="export-section"><h2>${esc(x.label)}</h2><p style="white-space:pre-wrap;line-height:1.55">${esc(r.narratives.values[x.id])}</p></div>`).join('');
+  document.getElementById('print-view').innerHTML=`<div class="export-page"><div class="export-head"><div><p style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:800">City of West Hollywood Human Services Division</p><h1>Quarterly Program Report</h1><p>${esc(program.name)}</p></div><div class="export-meta"><strong>${esc(p.label)}</strong><br>Reporting quarter: ${esc(p.period)}<br>Service year: ${esc(p.serviceYearLabel||program.contractYears)}<br>Status: ${esc(DB_STATUS_LABELS[r.status]||r.status)}</div></div><div class="export-note" style="margin-top:16px">This report contains aggregate information only. Unduplicated enrollment and time-based outcomes are reported and certified by the agency and may be verified through City monitoring or audits.</div><div class="export-section"><h2>Enrollment and Access Summary</h2><table class="export-table"><tbody><tr><th>New, unduplicated enrollment</th><td>${fmt(r.access.enrollment)}</td><th>YTD enrollment</th><td>${fmt(ytdAccess(r,['enrollment']))}</td></tr><tr><th>BIPOC participants</th><td>${fmt(finalBipoc(r))}</td><th>BIPOC rate</th><td>${n(r.access.enrollment)?pct(finalBipoc(r)/n(r.access.enrollment)):'—'}</td></tr><tr><th>LGBTQ+ participants</th><td>${fmt(r.access.lgbtq.yes)}</td><th>YTD LGBTQ+ participants</th><td>${fmt(ytdAccess(r,['lgbtq','yes']))}</td></tr></tbody></table></div>${hsdExportDemographicsHtml(r)}<div class="export-section page-break"><h2>Service Delivery</h2><table class="export-table"><thead><tr><th>Measure</th><th>Annual Goal</th><th>Quarter</th><th>YTD</th><th>Expected YTD</th><th>Status</th></tr></thead><tbody>${serviceRows}</tbody></table></div><div class="export-section"><h2>Outcomes</h2><table class="export-table"><thead><tr><th>Outcome</th><th>Target</th><th>Quarter Result</th><th>Quarter Rate</th><th>YTD Result</th><th>YTD Rate</th></tr></thead><tbody>${outcomeRows}</tbody></table></div><div class="page-break">${narratives}</div><div class="export-section"><h2>Certification</h2><div class="signature-grid"><div class="signature-line">${esc(r.certification.name||'')} · ${esc(r.certification.title||'')}<br>${esc(r.certification.email||'')}<br>Agency representative</div><div class="signature-line">${esc(r.certification.date||'')}<br>Date</div></div></div></div>`;
+  document.querySelectorAll('.view').forEach(v=>v.classList.add('hidden'));document.getElementById('print-view').classList.remove('hidden');setTimeout(()=>{window.print();document.getElementById('print-view').classList.add('hidden');document.getElementById('view-report').classList.remove('hidden')},100);
+};
 
 
 initializeAuth();
