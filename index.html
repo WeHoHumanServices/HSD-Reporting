@@ -848,6 +848,131 @@ function renderUsers(){if(!isAdmin())return;let rows=state.db.users.map(u=>`<tr>
 
 function flattenReport(r){let p=periodById(r.periodId),program=programById(r.programId),rows=[['Section','Field','Quarter Value','YTD Value','Notes'],['Report','Provider',providerName(program.providerId),'',''],['Report','Program',program.name,'',''],['Report','Reporting Period',p.label+' · '+p.period,'',''],['Report','Status',DB_STATUS_LABELS[r.status]||r.status,'',''],['Access','New unduplicated enrollment',r.access.enrollment,ytdAccess(r,['enrollment']),'Count each person once, in the quarter first enrolled.'],['Access','Calculated BIPOC',calculatedBipoc(r),'','Excludes White, Other, and Unknown/Declined.'],['Access','Agency BIPOC correction',r.access.bipocCorrection,'',r.access.bipocCorrectionExplanation],['Access','Final BIPOC',finalBipoc(r),priorReports(r).reduce((s,x)=>s+finalBipoc(x),0),'']];Object.entries(r.access.lgbtq).forEach(([k,v])=>rows.push(['LGBTQ+',k,v,ytdAccess(r,['lgbtq',k]),'']));AFFILIATIONS.forEach(k=>rows.push(['Community Affiliation',k,r.access.affiliation[k],ytdAccess(r,['affiliation',k]),'']));AGES.forEach(a=>GENDERS.forEach(g=>rows.push(['Age and Gender',a+' · '+g,r.access.ageGender[a][g],ytdAccess(r,['ageGender',a,g]),''])));RACES.forEach(k=>rows.push(['Race/Ethnicity',k,r.access.race[k],ytdAccess(r,['race',k]),'']));LANGUAGES.forEach(k=>rows.push(['Household Language',k,r.access.language[k],ytdAccess(r,['language',k]),'']));let t=getTemplateForReport(r);t.serviceMetrics.forEach(m=>rows.push(['Service Delivery',m.name,r.services[m.id]?.actual,ytdService(r,m.id),`Annual goal ${m.goal}; ${m.countingRule}; final status ${finalServiceStatus(r,m)}; ${r.services[m.id]?.explanation||''}`]));t.outcomes.forEach(o=>{let qn=outcomeQuarterNumerator(r,o),qd=n(r.outcomes[o.id]?.denominator),yn=o.id==='housing'?priorReports(r).reduce((s,x)=>s+outcomeQuarterNumerator(x,o),0):ytdOutcome(r,o.id,'numerator'),yd=ytdOutcome(r,o.id,'denominator');rows.push(['Outcome Reporting Population',o.denominatorQuestion,qd,yd,o.duplicationNote],['Outcome Result',o.numeratorQuestion,qn,yn,`Target ${pct(o.target)}; ${o.methodNote}; final status ${finalOutcomeStatus(r,o)}; ${r.outcomes[o.id]?.explanation||''}`])});t.narratives.forEach(x=>rows.push(['Narrative',x.label,r.narratives.values[x.id]||'','','']));rows.push(['Certification','Affiliation records maintained',r.certification.affiliationRecords,'',''],['Certification','Intake records maintained',r.certification.intakeRecords,'',''],['Certification','Completed by',r.certification.name,'',r.certification.email]);return rows}
 
+/* ========================================================================== */
+/* Secure user management                                                     */
+/* ========================================================================== */
+
+function portalRolesForUser(user){
+  let rows=(state.server?.user_roles||[]).filter(x=>x.user_id===user.id).map(x=>x.role);
+  if(rows.length)return rows;
+  if(user.role==='admin')return['city_administrator'];
+  if(user.role==='monitor')return['program_monitor'];
+  return['agency_user'];
+}
+function roleLabelsForUser(user){return portalRolesForUser(user).map(displayRole).join(', ')}
+function programNamesForUser(user){
+  let ids=user.programIds||[];
+  if(!ids.length)return user.role==='admin'?'All programs':'No programs assigned';
+  return ids.map(id=>programById(id)?.name).filter(Boolean).join(', ')||'No programs assigned';
+}
+function selectedPortalRoles(){return[...document.querySelectorAll('.usr-role:checked')].map(x=>x.value)}
+function selectedPortalPrograms(){return[...document.querySelectorAll('.usr-program:checked')].map(x=>x.value)}
+function validateTemporaryPassword(password){
+  if(password.length<12)return'Temporary passwords must contain at least 12 characters.';
+  return'';
+}
+async function refreshPortalAfterUserChange(){
+  let portalUser=await resolvePortalUser(state.authUser);
+  if(!portalUser)throw new Error('Your administrator session could not be refreshed.');
+  await loadPortalData(portalUser);
+  renderShell();
+  nav('users');
+}
+async function invokeUserManagement(body){
+  let{data,error}=await supabaseClient.functions.invoke('manage-portal-user',{body});
+  if(error){
+    let message=error.message||'The user-management request failed.';
+    try{
+      if(error.context){let parsed=await error.context.json();message=parsed?.error||message}
+    }catch(_ignore){}
+    throw new Error(message);
+  }
+  if(data?.error)throw new Error(data.error);
+  return data;
+}
+function renderUsers(){
+  if(!isAdmin())return;
+  let rows=state.db.users
+    .slice()
+    .sort((a,b)=>(a.name||a.email).localeCompare(b.name||b.email))
+    .map(u=>`<tr>
+      <td><strong>${esc(u.name||'Unnamed user')}</strong><br><span style="color:var(--muted);font-size:11px">${esc(u.email)}</span>${u.title?`<br><span style="color:var(--muted);font-size:11px">${esc(u.title)}</span>`:''}</td>
+      <td>${esc(roleLabelsForUser(u))}</td>
+      <td>${esc(programNamesForUser(u))}</td>
+      <td><span class="status ${u.active?'approved':'draft'}">${u.active?'Active':'Inactive'}</span>${u.mustChangePassword?'<br><span style="color:var(--muted);font-size:11px">Password change required</span>':''}</td>
+      <td><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn secondary sm" onclick="editUser('${u.id}')">Edit</button><button class="btn secondary sm" onclick="resetUserPassword('${u.id}')">Reset password</button></div></td>
+    </tr>`).join('');
+  document.getElementById('view-users').innerHTML=`<div class="page-head"><div><h1 class="page-title">User Management</h1><p class="page-sub">Create portal accounts, assign roles and programs, reset temporary passwords, and activate or deactivate access.</p></div><button class="btn" onclick="addUser()">Add User</button></div><div class="notice"><strong>Temporary password:</strong> The administrator sets a temporary password when creating or resetting an account. The user must choose a new password at the first sign-in.</div><div class="table-wrap"><table><thead><tr><th>User</th><th>Role</th><th>Program Access</th><th>Status</th><th>Actions</th></tr></thead><tbody>${rows||'<tr><td colspan="5">No users found.</td></tr>'}</tbody></table></div>`;
+}
+function userForm(user={}){
+  let isEdit=Boolean(user.id),roles=new Set(isEdit?portalRolesForUser(user):['agency_user']),assigned=new Set(user.programIds||[]);
+  let programChecks=state.db.programs.filter(p=>p.active).map(p=>`<label class="checkbox-row"><input type="checkbox" class="usr-program" value="${p.id}" ${assigned.has(p.id)?'checked':''}><span><strong>${esc(providerName(p.providerId))}</strong><br>${esc(p.name)}</span></label>`).join('');
+  return`<form onsubmit="saveUser(event,'${user.id||''}')"><div class="form-grid">
+    <div class="field"><label>Full name</label><input id="usr-name" required value="${esc(user.name||'')}"></div>
+    <div class="field"><label>Job title</label><input id="usr-title" required value="${esc(user.title||'')}"></div>
+    <div class="field full"><label>Email address</label><input id="usr-email" type="email" required value="${esc(user.email||'')}" ${isEdit?'readonly':''}>${isEdit?'<div class="help">Email changes are managed in Supabase Authentication to avoid breaking account links.</div>':''}</div>
+    ${isEdit?'':`<div class="field full"><label>Temporary password</label><input id="usr-temp-password" type="password" minlength="12" autocomplete="new-password" required><div class="help">At least 12 characters. The user will be required to replace it after signing in.</div></div>`}
+    <div class="field full"><label>Portal roles</label><div class="checklist">
+      <label class="checkbox-row"><input type="checkbox" class="usr-role" value="agency_user" ${roles.has('agency_user')?'checked':''}><span><strong>Agency User</strong><br>Enter and submit reports for assigned programs.</span></label>
+      <label class="checkbox-row"><input type="checkbox" class="usr-role" value="program_monitor" ${roles.has('program_monitor')?'checked':''}><span><strong>City Program Monitor</strong><br>Review reports and manage assigned program templates.</span></label>
+      <label class="checkbox-row"><input type="checkbox" class="usr-role" value="city_administrator" ${roles.has('city_administrator')?'checked':''}><span><strong>City Administrator</strong><br>Full portal administration and access to all programs.</span></label>
+    </div><div class="help">Agency User cannot be combined with a City role.</div></div>
+    <div class="field full"><label>Assigned programs</label><div class="checklist">${programChecks||'<div class="help">No active programs are configured.</div>'}</div><div class="help">Program assignment is required for Agency Users and Program Monitors. City Administrators automatically have access to all programs.</div></div>
+    <div class="field"><label>Status</label><select id="usr-active"><option value="true" ${user.active!==false?'selected':''}>Active</option><option value="false" ${user.active===false?'selected':''}>Inactive</option></select></div>
+  </div><div class="modal-actions"><button class="btn secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn" id="usr-save" type="submit">${isEdit?'Save Changes':'Create User'}</button></div></form>`;
+}
+function addUser(){openModal('Add User',userForm())}
+function editUser(id){let user=state.db.users.find(u=>u.id===id);if(!user)return;openModal('Edit User',userForm(user))}
+async function saveUser(event,id){
+  event.preventDefault();
+  let roles=selectedPortalRoles(),programIds=selectedPortalPrograms(),name=document.getElementById('usr-name').value.trim(),jobTitle=document.getElementById('usr-title').value.trim(),email=document.getElementById('usr-email').value.trim().toLowerCase(),active=document.getElementById('usr-active').value==='true';
+  if(!roles.length){toast('Select at least one portal role.','err');return}
+  if(roles.includes('agency_user')&&roles.some(r=>r!=='agency_user')){toast('Agency User cannot be combined with a City role.','err');return}
+  if((roles.includes('agency_user')||roles.includes('program_monitor'))&&!programIds.length){toast('Select at least one assigned program.','err');return}
+  let body={action:id?'update':'create',userId:id||undefined,email,name,jobTitle,roles,programIds,active};
+  if(!id){let password=document.getElementById('usr-temp-password').value;let error=validateTemporaryPassword(password);if(error){toast(error,'err');return}body.temporaryPassword=password}
+  let button=document.getElementById('usr-save');button.disabled=true;button.textContent=id?'Saving…':'Creating…';
+  try{await invokeUserManagement(body);closeModal();await refreshPortalAfterUserChange();toast(id?'User updated.':'User created.','ok')}catch(error){console.error(error);toast(error.message,'err');button.disabled=false;button.textContent=id?'Save Changes':'Create User'}
+}
+function resetUserPassword(id){
+  let user=state.db.users.find(u=>u.id===id);if(!user)return;
+  openModal('Reset Temporary Password',`<form onsubmit="saveTemporaryPassword(event,'${id}')"><p class="page-sub" style="margin-bottom:16px">Set a temporary password for <strong>${esc(user.name||user.email)}</strong>. The user will be required to replace it at the next sign-in.</p><div class="field"><label>Temporary password</label><input id="reset-temp-password" type="password" minlength="12" autocomplete="new-password" required><div class="help">At least 12 characters.</div></div><div class="modal-actions"><button class="btn secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn" id="reset-save" type="submit">Reset Password</button></div></form>`)
+}
+async function saveTemporaryPassword(event,userId){
+  event.preventDefault();let password=document.getElementById('reset-temp-password').value;let error=validateTemporaryPassword(password);if(error){toast(error,'err');return}
+  let button=document.getElementById('reset-save');button.disabled=true;button.textContent='Resetting…';
+  try{await invokeUserManagement({action:'reset_password',userId,temporaryPassword:password});closeModal();await refreshPortalAfterUserChange();toast('Temporary password reset.','ok')}catch(error){console.error(error);toast(error.message,'err');button.disabled=false;button.textContent='Reset Password'}
+}
+function openRequiredPasswordChange(){
+  let user=currentUser();if(!user?.mustChangePassword)return;
+  document.getElementById('modal-title').textContent='Create a New Password';
+  document.getElementById('modal-body').innerHTML=`<form onsubmit="completeRequiredPasswordChange(event)"><p class="page-sub" style="margin-bottom:16px">Your account is using a temporary password. Create a new password before continuing.</p><div class="form-grid"><div class="field full"><label>New password</label><input id="required-new-password" type="password" minlength="12" autocomplete="new-password" required><div class="help">Use at least 12 characters.</div></div><div class="field full"><label>Confirm new password</label><input id="required-confirm-password" type="password" minlength="12" autocomplete="new-password" required></div></div><div class="modal-actions"><button class="btn" id="required-password-save" type="submit">Save New Password</button></div></form>`;
+  let closeButton=document.querySelector('#modal .modal-head button');if(closeButton)closeButton.style.display='none';
+  document.getElementById('modal').classList.add('open');
+}
+async function completeRequiredPasswordChange(event){
+  event.preventDefault();let password=document.getElementById('required-new-password').value,confirm=document.getElementById('required-confirm-password').value,error=validateTemporaryPassword(password);if(error){toast(error,'err');return}if(password!==confirm){toast('The passwords do not match.','err');return}
+  let button=document.getElementById('required-password-save');button.disabled=true;button.textContent='Saving…';
+  try{
+    let{error:updateError}=await supabaseClient.auth.updateUser({password});if(updateError)throw updateError;
+    let{error:rpcError}=await supabaseClient.rpc('complete_password_change');if(rpcError)throw rpcError;
+    let user=currentUser();if(user)user.mustChangePassword=false;
+    let closeButton=document.querySelector('#modal .modal-head button');if(closeButton)closeButton.style.display='';
+    closeModal();toast('Your new password has been saved.','ok')
+  }catch(error){console.error(error);toast(error.message||'Unable to update the password.','err');button.disabled=false;button.textContent='Save New Password'}
+}
+async function enterPortal(authUser){
+  try{
+    setLoginMessage('Loading your secure reporting workspace…','info');
+    let portalUser=await resolvePortalUser(authUser);
+    if(!portalUser){await supabaseClient.auth.signOut();setLoginMessage('Your account is valid, but it has not been assigned access to this portal. Contact the Human Services Division.','error');return}
+    state.authUser=authUser;await loadPortalData(portalUser);
+    document.getElementById('login').classList.add('hidden');document.getElementById('app').classList.remove('hidden');setLoginMessage('');renderShell();nav('home');
+    if(currentUser()?.mustChangePassword)setTimeout(openRequiredPasswordChange,50);
+  }catch(error){console.error(error);await supabaseClient.auth.signOut();setLoginMessage(`The portal could not load its shared data: ${error.message}. Confirm the database upgrades have been installed and try again.`,'error')}
+}
+
+
 initializeAuth();
 </script>
 </body>
