@@ -107,6 +107,7 @@ th{background:#F7F9FB;color:#4B5969;text-align:left;padding:11px 12px;font-size:
 td{padding:10px 12px;border-top:1px solid var(--line);vertical-align:middle}
 tbody tr:hover td{background:#FBFDFF}
 .num{text-align:right;font-variant-numeric:tabular-nums}
+.empty{padding:30px;text-align:center;color:var(--muted)}
 .status{display:inline-flex;align-items:center;border-radius:999px;padding:4px 9px;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.025em;white-space:nowrap}
 .status.draft{background:#E8EBEF;color:#485667}
 .status.submitted,.status.resubmitted{background:#E7F0FC;color:#24558E}
@@ -141,6 +142,7 @@ tbody tr:hover td{background:#FBFDFF}
 .home-summary-row:last-child{border-bottom:0}
 .home-summary-value{font-weight:800;color:var(--navy);font-variant-numeric:tabular-nums;white-space:nowrap}
 input[inputmode="numeric"]{direction:ltr;text-align:left;font-variant-numeric:tabular-nums}
+
 .metric-label{font-weight:700;color:var(--navy)}
 .metric-sub{font-size:11px;color:var(--muted);margin-top:2px}
 .report-main{min-width:0}
@@ -171,6 +173,7 @@ input[inputmode="numeric"]{direction:ltr;text-align:left;font-variant-numeric:ta
 .matrix-wrap{overflow:auto;border:1px solid var(--line);border-radius:10px}
 .matrix{min-width:700px}
 .matrix th,.matrix td{text-align:center}
+.matrix th:first-child,.matrix td:first-child{text-align:left;font-weight:700}
 .matrix input{width:78px;border:1px solid var(--line);border-radius:7px;padding:7px;text-align:right}
 .matrix .total{font-weight:800;color:var(--navy);background:#F7F9FB}
 .metric-table{min-width:1050px}
@@ -330,7 +333,8 @@ input[inputmode="numeric"]{direction:ltr;text-align:left;font-variant-numeric:ta
 .autosave.saving{color:var(--amber)}
 .autosave.saved{color:var(--green)}
 .main{flex:1;min-width:0;padding:28px 30px 56px;max-width:1760px}
-.report-header-top>div:first-child{min-width:0;flex:1}
+.report-header{background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:18px 20px;margin-bottom:16px}
+.report-header-top{display:flex;justify-content:space-between;gap:18px;align-items:flex-start}.report-header-top>div:first-child{min-width:0;flex:1}.report-header .page-actions{flex:0 0 auto}
 .report-period-grid{display:grid;grid-template-columns:repeat(3,minmax(180px,1fr));gap:10px;margin-top:14px;max-width:980px}
 .report-period-item{border:1px solid var(--line);background:#F8FAFC;border-radius:10px;padding:10px 12px;min-width:0}
 .report-period-label{display:block;color:var(--muted);font-size:10px;font-weight:800;letter-spacing:.055em;text-transform:uppercase;margin-bottom:4px}
@@ -379,6 +383,7 @@ input[inputmode="numeric"]{direction:ltr;text-align:left;font-variant-numeric:ta
 .outcome-result .value{font-size:17px;font-weight:800;color:var(--navy);margin-top:4px}
 .certification-list{display:grid;gap:10px}
 .certification-list .checkbox-row{margin:0;border:1px solid var(--line);background:#FBFCFD;border-radius:10px;padding:12px}
+.report-header .page-sub{max-width:760px}
 @media(max-width:1600px){
   .report-shell{grid-template-columns:1fr}
   .report-aside{position:static}
@@ -387,12 +392,51 @@ input[inputmode="numeric"]{direction:ltr;text-align:left;font-variant-numeric:ta
   .report-period-grid,.identity-access-grid,.bipoc-summary-grid,.demographic-lead{grid-template-columns:1fr}
   .tabbar{position:static}
 }
+
+
+/* City portfolio dashboard */
+.portfolio-filterbar{display:grid;grid-template-columns:repeat(7,minmax(130px,1fr));gap:10px;padding:14px;margin-bottom:16px;background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.portfolio-filterbar .control{min-width:0}
+.portfolio-filterbar select{width:100%;min-width:0}
+.portfolio-kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.portfolio-kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:15px 16px;box-shadow:var(--shadow)}
+.portfolio-kpi .label{font-size:10px;text-transform:uppercase;letter-spacing:.055em;color:var(--muted);font-weight:800}
+.portfolio-kpi .value{font-size:25px;font-weight:800;color:var(--navy);margin-top:5px;font-variant-numeric:tabular-nums;letter-spacing:-.025em}
+.portfolio-kpi .sub{font-size:11px;color:var(--muted);line-height:1.4;margin-top:3px}
+.portfolio-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(360px,.8fr);gap:16px;margin-bottom:16px}
+.portfolio-full{grid-column:1/-1}
+.portfolio-bar-track{height:7px;background:#E7EBEF;border-radius:999px;overflow:hidden;min-width:110px}
+.portfolio-bar-fill{height:100%;background:var(--blue);border-radius:999px}
+.portfolio-bar-fill.gold{background:var(--gold)}
+.portfolio-bar-fill.green{background:var(--green)}
+.portfolio-bar-fill.amber{background:var(--amber)}
+.portfolio-cell-stack{display:grid;gap:5px;min-width:150px}
+.portfolio-cell-stack small{color:var(--muted);font-size:10.5px}
+.portfolio-table th,.portfolio-table td{vertical-align:middle}
+.portfolio-table .drill{white-space:nowrap;text-align:right}
+.portfolio-section-note{font-size:11px;line-height:1.45;color:var(--muted);margin:5px 0 0}
+.portfolio-demographic-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.portfolio-demographic-card{border:1px solid var(--line);border-radius:11px;background:#fff;overflow:hidden}
+.portfolio-demographic-card h3{font-size:13px;margin:0;padding:10px 12px;background:#F7F9FB;color:var(--navy);border-bottom:1px solid var(--line)}
+.portfolio-demographic-card table{font-size:12px}
+.portfolio-empty-note{padding:18px;border:1px dashed #C9D2DC;border-radius:10px;color:var(--muted);background:#FBFCFD;text-align:center;line-height:1.5}
+.portfolio-filter-summary{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:-4px 0 14px;color:var(--muted);font-size:11px;flex-wrap:wrap}
+.portfolio-quality-list{display:grid;gap:8px}
+.portfolio-quality-item{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:#FBFCFD}
+.portfolio-quality-item strong{font-size:12px;color:var(--navy)}
+.portfolio-quality-item span{font-weight:800;font-variant-numeric:tabular-nums}
+@media(max-width:1500px){.portfolio-filterbar{grid-template-columns:repeat(4,minmax(150px,1fr))}.portfolio-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:1100px){.portfolio-filterbar{grid-template-columns:repeat(2,minmax(0,1fr))}.portfolio-grid{grid-template-columns:1fr}.portfolio-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){.portfolio-filterbar,.portfolio-kpis,.portfolio-demographic-grid{grid-template-columns:1fr}}
+
 .spinner{display:inline-block;width:13px;height:13px;border:2px solid rgba(27,47,91,.18);border-top-color:var(--navy);border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px;margin-right:7px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .login-message.error .spinner{border-color:rgba(178,58,50,.25);border-top-color:var(--red)}
 .login-message.success .spinner{border-color:rgba(35,122,75,.25);border-top-color:var(--green)}
 .empty{padding:38px 20px;text-align:center;color:var(--muted);font-size:12.5px;line-height:1.5}
 .empty::before{content:"";display:block;width:34px;height:34px;margin:0 auto 10px;opacity:.4;background-color:currentColor;-webkit-mask:url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%221.6%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M3 7h18M4 7l1.3 12.1a1 1 0 0 0 1 .9h11.4a1 1 0 0 0 1-.9L20 7M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M9.5 12h5%22/%3E%3C/svg%3E') center/28px no-repeat;mask:url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%221.6%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M3 7h18M4 7l1.3 12.1a1 1 0 0 0 1 .9h11.4a1 1 0 0 0 1-.9L20 7M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M9.5 12h5%22/%3E%3C/svg%3E') center/28px no-repeat}
+
+/* Collaboration and usability upgrade */
 .section-navigation{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:14px 0 2px;padding:12px 0;border-top:1px solid var(--line)}
 .section-navigation .right{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
 .conflict-banner{border:1px solid #E7CF91;border-left:4px solid var(--amber);background:#FFF9E8;border-radius:10px;padding:11px 13px;color:#704600;font-size:12px;line-height:1.5;margin-bottom:14px}
@@ -408,30 +452,30 @@ input[inputmode="numeric"]{direction:ltr;text-align:left;font-variant-numeric:ta
 .outcome-details summary{cursor:pointer;padding:10px 12px;font-size:12px;font-weight:800;color:var(--navy)}
 .outcome-details>div{padding:0 12px 12px;font-size:12px;color:#405168;line-height:1.55}
 .city-correct-button{margin-top:10px}
-.matrix th:first-child,.matrix td:first-child{text-align:left;font-weight:700;position:sticky;left:0;z-index:2;background:#fff;box-shadow:1px 0 0 var(--line)}
+.matrix th:first-child,.matrix td:first-child{position:sticky;left:0;z-index:2;background:#fff;box-shadow:1px 0 0 var(--line)}
 .matrix thead th:first-child{z-index:4;background:#F7F9FB}
 .notification-button{width:100%;border:0;text-align:left;font:inherit;color:inherit;cursor:pointer}
 .notification-button:focus-visible{outline:3px solid rgba(201,162,74,.42);outline-offset:-3px}
-@media(min-width:1280px){
-  .report-shell{grid-template-columns:minmax(0,1fr) 250px}
-  .report-aside{position:sticky;top:88px}
-}
-@media(max-width:1279px){
-  .report-shell{grid-template-columns:1fr}
-  .report-aside{position:static}
-}
-.report-header{background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:14px 16px;margin-bottom:13px}
-.report-header-top{display:flex;justify-content:space-between;gap:18px;align-items:flex-start}
+@media(min-width:1280px){.report-shell{grid-template-columns:minmax(0,1fr) 250px}.report-aside{position:sticky;top:88px}}
+@media(max-width:1279px){.report-shell{grid-template-columns:1fr}.report-aside{position:static}}
+
+
+/* ========================================================================== 
+   Program report compact header, demographic layout, and City-only activity
+   refinement — July 2026
+   ========================================================================== */
+.report-header{padding:14px 16px;margin-bottom:13px}
+.report-header-top{align-items:flex-start}
 .report-title-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .report-title-row .page-title{font-size:23px;margin:0}
 .report-title-row .status{margin-top:1px}
-.report-header .page-sub{max-width:760px;font-size:12px;margin-top:4px}
+.report-header .page-sub{font-size:12px;margin-top:4px}
 .report-period-bar{display:grid;grid-template-columns:minmax(170px,1.15fr) minmax(210px,1.35fr) minmax(125px,.75fr);margin-top:10px;border:1px solid var(--line);background:#FAFBFC;border-radius:8px;overflow:hidden;width:min(100%,760px);max-width:100%}
 .report-period-compact{display:block;padding:8px 11px;border-right:1px solid var(--line);min-width:0}
 .report-period-compact:last-child{border-right:0}
 .report-period-compact .report-period-label{margin:0 0 3px;white-space:normal}
 .report-period-compact .report-period-value{display:block;font-size:11.5px;line-height:1.35;white-space:normal;overflow-wrap:anywhere;word-break:normal}
-.report-header .page-actions{flex:0 0 auto;max-width:470px}
+.report-header .page-actions{max-width:470px}
 .report-header .autosave{margin-top:8px;padding-top:7px;border-top:1px solid #EEF1F4}
 .age-gender-panels{display:grid;grid-template-columns:1fr;gap:14px}
 .demographic-table-panel{border:1px solid var(--line);border-radius:11px;background:#fff;overflow:hidden}
@@ -457,23 +501,11 @@ input[inputmode="numeric"]{direction:ltr;text-align:left;font-variant-numeric:ta
 .activity-details .timeline{padding:14px}
 .export-demographic-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .export-subhead{font-size:11px;color:var(--navy);font-weight:800;margin:12px 0 6px}
-@media(min-width:1450px){
-  .age-gender-panels{grid-template-columns:1fr 1fr}
-}
-@media(max-width:1100px){
-  .report-period-bar{width:100%;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr) minmax(0,.7fr)}
-  .report-header .page-actions{max-width:none}
-}
-@media(max-width:760px){
-  .report-period-bar{grid-template-columns:1fr}
-  .report-period-compact{border-right:0;border-bottom:1px solid var(--line)}
-  .report-period-compact:last-child{border-bottom:0}
-  .export-demographic-grid{grid-template-columns:1fr}
-}
-@media print{
-  .export-demographic-grid{grid-template-columns:1fr 1fr;gap:10px}
-  .activity-details{display:none!important}
-}
+@media(min-width:1450px){.age-gender-panels{grid-template-columns:1fr 1fr}}
+@media(max-width:1100px){.report-period-bar{width:100%;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr) minmax(0,.7fr)}.report-header .page-actions{max-width:none}}
+@media(max-width:760px){.report-period-bar{grid-template-columns:1fr}.report-period-compact{border-right:0;border-bottom:1px solid var(--line)}.report-period-compact:last-child{border-bottom:0}.export-demographic-grid{grid-template-columns:1fr}}
+@media print{.export-demographic-grid{grid-template-columns:1fr 1fr;gap:10px}.activity-details{display:none!important}}
+
 </style>
 </head>
 <body>
@@ -521,6 +553,7 @@ input[inputmode="numeric"]{direction:ltr;text-align:left;font-variant-numeric:ta
     <aside class="side" id="sidebar"></aside>
     <main class="main">
       <section id="view-home" class="view"></section>
+      <section id="view-portfolio" class="view hidden"></section>
       <section id="view-dashboard" class="view hidden"></section>
       <section id="view-reports" class="view hidden"></section>
       <section id="view-report" class="view hidden"></section>
@@ -652,7 +685,7 @@ function migrateDb(db){
   db.settings.backfillDeadline='August 15, 2026';
   return db;
 }
-let state={db:loadDb(),server:{saveTimers:{},normalizeTimers:{},saveChains:{}},userId:null,authUser:null,view:'home',currentReportId:null,reportTab:'access',selectedTemplateId:null,charts:{},filters:{provider:'all',program:'all',status:'all'},autosaveTimer:null};
+let state={db:loadDb(),server:{saveTimers:{},normalizeTimers:{},saveChains:{}},userId:null,authUser:null,view:'home',currentReportId:null,reportTab:'access',selectedTemplateId:null,charts:{},filters:{provider:'all',program:'all',status:'all'},portfolioFilters:{basis:'approved',serviceYear:'',provider:'all',program:'all',category:'all',outcomeDomain:'all',quarter:'all'},dashboardProgramId:null,autosaveTimer:null};
 function toast(message,type='ok'){let el=document.getElementById('toast');el.textContent=message;el.className='toast show '+type;clearTimeout(toast._t);toast._t=setTimeout(()=>el.className='toast',2600)}
 function setLoginMessage(message,type='info',busy=false){let el=document.getElementById('login-message');if(!el)return;el.innerHTML=message?(busy?'<span class="spinner"></span>':'')+esc(message):'';el.className='login-message'+(message?' show '+type:'')}
 function setLoginBusy(busy){let btn=document.getElementById('login-submit');if(!btn)return;btn.disabled=busy;btn.textContent=busy?'Signing in…':'Sign in'}
@@ -693,6 +726,7 @@ async function initializeAuth(){
 function renderShell(){let u=currentUser();document.getElementById('user-agency').textContent=u.role==='agency'?providerName(u.providerId):'City of West Hollywood';document.getElementById('user-role').textContent=ROLE_LABELS[u.role];document.getElementById('user-name').textContent=u.name;let admin=isAdmin();let city=isCity();document.getElementById('sidebar').innerHTML=`
   <div class="side-label">Workspace</div>
   ${navButton('home','Home','<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10.5V20h13v-9.5"/><path d="M9.5 20v-6h5v6"/>')}
+  ${city?navButton('portfolio','Portfolio Dashboard','<path d="M4 19V9"/><path d="M10 19V5"/><path d="M16 19v-7"/><path d="M22 19H2"/>'):''}
   ${navButton('dashboard','Program Dashboard','<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>')}
   ${navButton('reports','Quarterly Reports','<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h8"/>')}
   ${navButton('notifications','Notifications','<path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/>')}
@@ -702,8 +736,10 @@ function renderShell(){let u=currentUser();document.getElementById('user-agency'
   ${admin?navButton('users','User Management','<circle cx="9" cy="7" r="4"/><path d="M3 21v-2a6 6 0 0 1 6-6h1"/><circle cx="17" cy="17" r="3"/><path d="M17 12v2M17 20v2M12 17h2M20 17h2"/>'):''}
   ${city?navButton('activity','Activity History','<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'):''}`;
 }
-function nav(view,opts={}){state.view=view;document.querySelectorAll('.view').forEach(v=>v.classList.add('hidden'));let el=document.getElementById('view-'+view);if(!el)return;el.classList.remove('hidden');document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('active',b.dataset.view===view));if(view==='home')renderHome();if(view==='dashboard')renderDashboard();if(view==='reports')renderReports();if(view==='notifications')renderNotifications();if(view==='providers')renderProviders();if(view==='templates')renderTemplates();if(view==='users')renderUsers();if(view==='activity')renderActivity();if(!opts.fromHash)setRouteHash('#/'+view,false)}
+function navButton(view,label,icon){return`<button class="navbtn ${state.view===view?'active':''}" data-view="${view}" onclick="nav('${view}')"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">${icon}</svg><span>${label}</span></button>`}
+function nav(view,opts={}){state.view=view;document.querySelectorAll('.view').forEach(v=>v.classList.add('hidden'));let el=document.getElementById('view-'+view);if(!el)return;el.classList.remove('hidden');document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('active',b.dataset.view===view));if(view==='home')renderHome();if(view==='portfolio')renderPortfolio();if(view==='dashboard')renderDashboard();if(view==='reports')renderReports();if(view==='notifications')renderNotifications();if(view==='providers')renderProviders();if(view==='templates')renderTemplates();if(view==='users')renderUsers();if(view==='activity')renderActivity();if(!opts.fromHash)setRouteHash('#/'+view,false)}
 function reportHasAnyData(r){return n(r.access.enrollment)>0||Object.values(r.services).some(x=>x.actual!=='')||Object.values(r.narratives.values).some(Boolean)}
+function priorIncompleteWarning(r){let idx=PERIODS.findIndex(p=>p.id===r.periodId);if(idx<=0)return'';let earlier=reportsForProgram(r.programId).filter(x=>PERIODS.findIndex(p=>p.id===x.periodId)<idx);let missing=earlier.filter(x=>!reportHasAnyData(x)).map(x=>periodById(x.periodId).label);return missing.length?`Year-to-date totals may be incomplete because ${missing.join(' and ')} ${missing.length===1?'has':'have'} not been entered.`:''}
 function ytdService(r,metricId){return priorReports(r).reduce((s,x)=>s+n(x.services[metricId]?.actual),0)}
 function ytdOutcome(r,outcomeId,key){return priorReports(r).reduce((s,x)=>s+n(x.outcomes[outcomeId]?.[key]),0)}
 function ytdAccess(r,path){return priorReports(r).reduce((s,x)=>{let v=x.access;for(let k of path)v=v?.[k];return s+n(v)},0)}
@@ -729,11 +765,12 @@ function openReport(id,opts={}){state.currentReportId=id;state.reportTab=opts.ta
 function setReportTab(tab,opts={}){state.reportTab=tab;renderReport();if(!opts.fromHash)setRouteHash('#/report/'+state.currentReportId+'/'+tab,true)}
 
 function setRouteHash(hash,replace){if(location.hash===hash)return;if(replace)history.replaceState(null,"",hash);else history.pushState(null,"",hash)}
-function applyRoute(){let h=(location.hash||"").replace(/^#\/?/,"");let parts=h.split("/").filter(Boolean);let simple=["home","dashboard","reports","notifications","providers","templates","users","activity"];if(parts[0]==="report"&&parts[1]&&reportById(parts[1])){openReport(parts[1],{fromHash:true,tab:parts[2]||"access"});return}if(simple.includes(parts[0])){nav(parts[0],{fromHash:true});return}nav("home",{fromHash:true})}
+function applyRoute(){let h=(location.hash||"").replace(/^#\/?/,"");let parts=h.split("/").filter(Boolean);let simple=["home","portfolio","dashboard","reports","notifications","providers","templates","users","activity"];if(parts[0]==="report"&&parts[1]&&reportById(parts[1])){openReport(parts[1],{fromHash:true,tab:parts[2]||"access"});return}if(simple.includes(parts[0])){nav(parts[0],{fromHash:true});return}nav("home",{fromHash:true})}
 window.addEventListener("hashchange",()=>{if(state.authUser)applyRoute()});
 
 function reportTabButton(id,label,ok){return`<button class="tabbtn ${state.reportTab===id?'active':''}" onclick="setReportTab('${id}')"><span class="tab-dot ${ok?'ok':'check'}"></span>${label}</button>`}
 function renderReportTabBase(r){if(state.reportTab==='access')return renderAccess(r);if(state.reportTab==='services')return renderServices(r);if(state.reportTab==='outcomes')return renderOutcomes(r);if(state.reportTab==='narratives')return renderNarratives(r);if(state.reportTab==='certification')return renderCertification(r);if(state.reportTab==='review')return renderReview(r);return''}
+function reviewComment(section,r){if(canComment())return`<div class="comment-box"><label>City review comment · ${esc(section)}</label><textarea oninput="updateComment('${section}',this.value)" placeholder="Add a section-level comment for the agency…">${esc(r.comments[section])}</textarea></div>`;if(r.comments[section])return`<div class="comment-readonly"><strong>City review comment:</strong><br>${esc(r.comments[section])}</div>`;return''}
 function narrativeVisible(item,r){if(item.required||!item.conditional)return true;if(item.conditional==='variance')return varianceExists(r);return r.narratives.flags[item.conditional]==='Yes'}
 function copyPriorNarratives(){let r=reportById(state.currentReportId),idx=PERIODS.findIndex(p=>p.id===r.periodId);if(idx<=0){toast('There is no prior quarter to copy.','err');return}let prior=reportsForProgram(r.programId).find(x=>x.periodId===PERIODS[idx-1].id);if(!prior){toast('Prior-quarter report not found.','err');return}confirmDialog(`Copy narrative text from ${PERIODS[idx-1].label}? Existing current-quarter text will be replaced.`,()=>{r.narratives=clone(prior.narratives);r.updatedAt=now();addActivity('Copied prior-quarter narratives',r,PERIODS[idx-1].label);saveDb();renderReport();toast('Prior-quarter narratives copied.','ok')},{title:'Copy prior-quarter narratives',confirmLabel:'Copy text'})}
 function renderNarratives(r){
@@ -768,6 +805,7 @@ function addTemplateNarrative(){let t=selectedTemplate();if(!t||!canManageTempla
 function removeTemplateNarrative(i){let t=selectedTemplate();if(!t||!canManageTemplate(t.id)||!t.narratives[i])return;confirmDialog('Remove this narrative prompt from the assigned template?',()=>{let label=t.narratives[i].label;t.narratives.splice(i,1);addActivity('Removed narrative prompt',null,label);saveDb();renderTemplates()},{title:'Remove narrative prompt',confirmLabel:'Remove',danger:true})}
 function duplicateTemplate(id){if(!isAdmin())return;let src=templateById(id);if(!src)return;let copy=clone(src);copy.id=uid('template');copy.version=src.version+' copy';copy.active=false;state.db.templates.push(copy);state.selectedTemplateId=copy.id;addActivity('Created template version',null,copy.version);saveDb();toast('New template version created. Assign it to a program when ready.','ok');renderTemplates()}
 function renderActivity(){if(!isCity())return;let rows=state.db.activity.map(a=>`<tr><td>${dateTime(a.at)}</td><td><strong>${esc(a.actor)}</strong><br><span style="color:var(--muted);font-size:11px">${esc(a.email)}</span></td><td>${esc(a.action)}</td><td>${a.periodId?esc(periodById(a.periodId)?.label||a.periodId):'—'}</td><td>${esc(a.detail||'—')}</td></tr>`).join('')||'<tr><td colspan="5" class="empty">No activity has been recorded.</td></tr>';document.getElementById('view-activity').innerHTML=`<div class="page-head"><div><h1 class="page-title">Activity History</h1><p class="page-sub">Administrative audit history for report submissions, reviews, approvals, and configuration changes.</p></div></div><div class="table-wrap"><table><thead><tr><th>Date</th><th>User</th><th>Action</th><th>Period</th><th>Detail</th></tr></thead><tbody>${rows}</tbody></table></div>`}
+function openModal(title,body){document.getElementById('modal-title').textContent=title;document.getElementById('modal-body').innerHTML=body;document.getElementById('modal').classList.add('open')}function closeModal(){document.getElementById('modal').classList.remove('open')}
 function confirmDialog(message,onConfirm,opts={}){openModal(opts.title||'Please confirm',`<p style="margin:0 0 18px;line-height:1.55;color:#425064">${esc(message)}</p><div class="modal-actions"><button class="btn secondary" onclick="closeModal()">Cancel</button><button class="btn ${opts.danger?'danger':''}" id="modal-confirm-btn">${esc(opts.confirmLabel||'Confirm')}</button></div>`);document.getElementById('modal-confirm-btn').onclick=()=>{closeModal();onConfirm()}}
 function promptDialog(message,onSubmit,opts={}){openModal(opts.title||'Please provide details',`<p style="margin:0 0 12px;line-height:1.55;color:#425064">${esc(message)}</p><textarea id="modal-prompt-input" style="width:100%;min-height:90px;border:1px solid var(--line);border-radius:9px;padding:9px 11px">${esc(opts.defaultValue||'')}</textarea><div class="modal-actions"><button class="btn secondary" onclick="closeModal()">Cancel</button><button class="btn" id="modal-prompt-btn">${esc(opts.confirmLabel||'Submit')}</button></div>`);let ta=document.getElementById('modal-prompt-input');ta.focus();ta.setSelectionRange(0,ta.value.length);document.getElementById('modal-prompt-btn').onclick=()=>{let val=document.getElementById('modal-prompt-input').value;if(!val.trim()){toast(opts.requiredMessage||'This field is required.','err');return}closeModal();onSubmit(val.trim())}}
 function csvEscape(v){let s=String(v??'');return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s}
@@ -817,11 +855,16 @@ const DB_STATUS_CODES={
 };
 
 function loadDb(){return{providers:[],programs:[],templates:[],users:[],reports:[],periods:[],notifications:[],activity:[],settings:{backfillDeadline:'August 15, 2026',fiscalModule:false,emailNotifications:false}}}
+function saveDb(){if(state.currentReportId)scheduleReportSave(state.currentReportId)}
 function periodById(id){return(state.db.periods||[]).find(p=>p.id===id)||PERIODS.find(p=>p.id===id)}
+function reportsForProgram(programId){return state.db.reports.filter(r=>r.programId===programId).sort((a,b)=>(periodById(a.periodId)?.quarterNumber||0)-(periodById(b.periodId)?.quarterNumber||0))}
+function priorReports(r){let q=periodById(r.periodId)?.quarterNumber||0;return reportsForProgram(r.programId).filter(x=>(periodById(x.periodId)?.quarterNumber||0)<=q)}
 function getTemplateForReport(report){return templateById(report.templateId)||templateById(programById(report.programId)?.templateId)||state.db.templates[0]}
+function roleScopeReports(){let u=currentUser();if(!u)return[];if(u.role==='admin')return state.db.reports;if(['monitor','agency'].includes(u.role))return state.db.reports.filter(r=>(u.programIds||[]).includes(r.programId));return[]}
 function statusBadge(status){return`<span class="status ${DB_STATUS_CLASSES[status]||'draft'}">${esc(DB_STATUS_LABELS[status]||status)}</span>`}
 function periodBadge(p){if(!p)return'';if(p.type==='backfill')return'<span class="status backfill">Historical Backfill</span>';if(p.type==='upcoming')return'<span class="status upcoming">Upcoming</span>';return'<span class="status approved">Open</span>'}
 function isLocked(r){return['submitted','under_review','resubmitted','approved'].includes(r.status)}
+function canEditReport(r){return isAgency()&&!isLocked(r)&&r.status!=='not_open'&&periodById(r.periodId)?.type!=='upcoming'}
 
 function localDateLabel(value){
   if(!value)return'—';
@@ -899,12 +942,12 @@ function buildTemplate(version,server){
   tMeasures.forEach(tm=>{
     let ml=server.measureLibrary.find(x=>x.id===tm.measure_id);if(!ml)return;
     let fields=server.templateFields.filter(f=>f.template_measure_id===tm.id).sort((a,b)=>a.display_order-b.display_order),fieldIds=Object.fromEntries(fields.map(f=>[f.code,f.id]));
-    let area=server.serviceCategories.find(x=>x.id===tm.reporting_service_category_id)?.name||'';
+    let area=server.serviceCategories.find(x=>x.id===tm.reporting_service_category_id)?.name||'';let outcomeDomain=(server.outcomeDomains||[]).find(x=>x.id===ml.outcome_domain_id)?.name||'';
     if(tm.entry_mode==='count'){
-      serviceMetrics.push({id:SERVICE_UI_IDS[ml.code]||ml.code,name:tm.display_name||ml.name,goal:Number(tm.annual_goal||0),unit:ml.unit_label,area,targetSource:'',countingRule:ml.duplicated_count?'Count all qualifying activities delivered during this quarter. The same client may appear more than once when separate services or contacts occurred.':'Count each qualifying activity or event once during this quarter.',_templateMeasureId:tm.id,_measureCode:ml.code,_fieldIds:fieldIds});
+      serviceMetrics.push({id:SERVICE_UI_IDS[ml.code]||ml.code,name:tm.display_name||ml.name,goal:Number(tm.annual_goal||0),unit:ml.unit_label,area,outcomeDomain,targetSource:'',countingRule:ml.duplicated_count?'Count all qualifying activities delivered during this quarter. The same client may appear more than once when separate services or contacts occurred.':'Count each qualifying activity or event once during this quarter.',_templateMeasureId:tm.id,_measureCode:ml.code,_fieldIds:fieldIds});
     }else if(['rate','calculated_rate'].includes(tm.entry_mode)){
       let g=mapOutcomeGuidance(ml.code);
-      outcomes.push({id:OUTCOME_UI_IDS[ml.code]||ml.code,area,name:g.name,target:Number(tm.target_value||0),targetSource:'',denominator:g.denominator,denominatorQuestion:g.denominatorQuestion,numeratorQuestion:g.numeratorQuestion,methodNote:g.methodNote,duplicationNote:g.duplicationNote,_templateMeasureId:tm.id,_measureCode:ml.code,_fieldIds:fieldIds});
+      outcomes.push({id:OUTCOME_UI_IDS[ml.code]||ml.code,area,outcomeDomain,name:g.name,target:Number(tm.target_value||0),targetSource:'',denominator:g.denominator,denominatorQuestion:g.denominatorQuestion,numeratorQuestion:g.numeratorQuestion,methodNote:g.methodNote,duplicationNote:g.duplicationNote,_templateMeasureId:tm.id,_measureCode:ml.code,_fieldIds:fieldIds});
     }
   });
   let narratives=server.templateNarratives.filter(x=>x.template_version_id===version.id&&x.active).sort((a,b)=>a.display_order-b.display_order).map(x=>({id:NARRATIVE_UI_IDS[x.code]||x.code,label:x.title,required:x.required,conditional:x.code==='performance_factors'||x.code==='corrective_strategies'?'variance':x.code==='staffing_changes'?'staffing':x.code==='budget_modification'?'budget':'',_promptId:x.id,_code:x.code,prompt:x.prompt}));
@@ -923,10 +966,10 @@ function blankServerReport(row,template,user){
 
 async function loadPortalData(portalUser){
   try{let activation=await supabaseClient.rpc('activate_open_reports');if(activation.error)console.warn('Report activation check:',activation.error.message)}catch(error){console.warn('Report activation check failed:',error)}
-  let names=['profiles','user_roles','user_program_assignments','organizations','service_categories','programs','program_targets','program_template_versions','template_measures','measure_library','template_measure_fields','template_narrative_prompts','demographic_dimensions','demographic_options','reporting_periods','reports','report_workspaces','report_population_summary','report_demographic_values','report_measure_values','report_measure_reviews','report_narrative_responses','report_certifications','review_comments','report_section_activity','notifications','audit_log'];
+  let names=['profiles','user_roles','user_program_assignments','organizations','service_categories','outcome_domains','programs','program_targets','program_template_versions','template_measures','measure_library','template_measure_fields','template_narrative_prompts','demographic_dimensions','demographic_options','reporting_periods','reports','report_workspaces','report_population_summary','report_demographic_values','report_measure_values','report_measure_reviews','report_narrative_responses','report_certifications','review_comments','report_section_activity','notifications','audit_log'];
   let rows=await Promise.all(names.map(fetchRows));
   let server={};names.forEach((name,i)=>server[name]=rows[i]);
-  server.programs=server.programs;server.programTargets=server.program_targets;server.templateVersions=server.program_template_versions;server.templateMeasures=server.template_measures;server.measureLibrary=server.measure_library;server.templateFields=server.template_measure_fields;server.templateNarratives=server.template_narrative_prompts;server.serviceCategories=server.service_categories;
+  server.programs=server.programs;server.programTargets=server.program_targets;server.templateVersions=server.program_template_versions;server.templateMeasures=server.template_measures;server.measureLibrary=server.measure_library;server.templateFields=server.template_measure_fields;server.templateNarratives=server.template_narrative_prompts;server.serviceCategories=server.service_categories;server.outcomeDomains=server.outcome_domains||[];
   state.server=state.server||{};Object.assign(state.server,server,{saveTimers:{},normalizeTimers:{},saveChains:{}});
 
   let providers=server.organizations.map(o=>({id:o.id,name:o.name,active:o.active}));
@@ -968,6 +1011,23 @@ async function loadPortalData(portalUser){
 function reportPayload(r){return{schemaVersion:2,access:clone(r.access),services:clone(r.services),outcomes:clone(r.outcomes),narratives:clone(r.narratives),certification:clone(r.certification),comments:clone(r.comments)}}
 function setAutosave(message,kind='saved'){let el=document.getElementById('autosave');if(!el)return;el.textContent=message;el.className=`autosave ${kind}`}
 function showAutosave(){setAutosave('Saving to the secure portal…','saving')}
+function scheduleReportSave(reportId){
+  if(!reportId||!state.authUser)return;state.server=state.server||{};state.server.saveTimers=state.server.saveTimers||{};
+  clearTimeout(state.server.saveTimers[reportId]);showAutosave();
+  state.server.saveTimers[reportId]=setTimeout(()=>persistReportNow(reportId),850);
+}
+async function persistReportNow(reportId,forceNormalize=false){
+  let r=reportById(reportId);if(!r)return;
+  clearTimeout(state.server?.saveTimers?.[reportId]);
+  let prior=state.server.saveChains?.[reportId]||Promise.resolve();
+  let task=prior.catch(()=>{}).then(async()=>{
+    let{data,error}=await supabaseClient.from('report_workspaces').upsert({report_id:r.id,payload:reportPayload(r),updated_by:state.authUser.id},{onConflict:'report_id'}).select('updated_at').single();
+    if(error)throw error;r.updatedAt=data.updated_at;setAutosave(`Saved to the secure portal ${new Date(data.updated_at).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}`,'saved');
+    if(forceNormalize)await syncNormalizedReport(r);else scheduleNormalizedSync(r.id);
+  });
+  state.server.saveChains[reportId]=task;
+  try{await task}catch(error){console.error(error);setAutosave('Not saved. Check your connection and try again.','saving');toast(`Save failed: ${error.message}`,'err');throw error}
+}
 function scheduleNormalizedSync(reportId){state.server.normalizeTimers=state.server.normalizeTimers||{};clearTimeout(state.server.normalizeTimers[reportId]);state.server.normalizeTimers[reportId]=setTimeout(()=>{let r=reportById(reportId);if(r)syncNormalizedReport(r).catch(e=>console.error('Background report sync failed',e))},2500)}
 function valueOrNull(v){return v===''||v===null||v===undefined?null:Number(v)}
 function statusCode(v){return v?DB_STATUS_CODES[v]||null:null}
@@ -1018,6 +1078,7 @@ async function syncDemographics(r){
   for(let row of updates){let{error:e}=await supabaseClient.from('report_demographic_values').update({value:row.value,updated_by:row.updated_by}).eq('id',row.id);if(e)throw e}
 }
 
+function updateComment(section,value){let r=reportById(state.currentReportId);if(!r||!canComment())return;r.comments[section]=value;r.updatedAt=now();showAutosave();saveDb()}
 function addActivity(){}
 function notify(){}
 
@@ -1028,6 +1089,7 @@ function notify(){}
 async function refreshAfterWorkflow(reportId){let user=await resolvePortalUser(state.authUser);await loadPortalData(user);state.currentReportId=reportId;renderShell();openReport(reportId)}
 async function submitReport(id){let r=reportById(id),comp=completeness(r);if(!canEditReport(r)){toast('This report cannot be edited or submitted in its current status.','err');return}if(!comp.ready){toast('Complete all required report items before submission.','err');return}try{setAutosave('Saving final changes before submission…','saving');await persistReportNow(id,true);let c=r.certification,{error}=await supabaseClient.rpc('submit_report',{p_report_id:id,p_certified_name:c.name,p_certified_title:c.title,p_certification_date:c.date,p_accuracy_certified:c.accuracy,p_supporting_records_certified:c.recordsAvailable,p_deidentified_story_certified:c.noPhi});if(error)throw error;await refreshAfterWorkflow(id);toast('Report submitted and locked.','ok')}catch(error){toast(`Submission failed: ${error.message}`,'err')}}
 async function startReview(id){let r=reportById(id);if(!isCity()||!['submitted','resubmitted'].includes(r.status))return;try{let{error}=await supabaseClient.rpc('start_report_review',{p_report_id:id});if(error)throw error;await refreshAfterWorkflow(id);toast('City review started.','ok')}catch(error){toast(error.message,'err')}}
+async function returnReport(id){let r=reportById(id);if(!isCity()||r.status!=='under_review')return;promptDialog('Reason for returning the report:',async(reason)=>{try{await persistReportNow(id);let{error}=await supabaseClient.rpc('return_report_for_revision',{p_report_id:id,p_reason:reason});if(error)throw error;await refreshAfterWorkflow(id);toast('Report returned for agency revision.','ok')}catch(error){toast(error.message,'err')}},{title:'Return report for revision',defaultValue:r.comments.overall||'Corrections requested by City review.',confirmLabel:'Return report',requiredMessage:'A return reason is required.'})}
 async function approveReport(id){let r=reportById(id);if(!isCity()||r.status!=='under_review')return;confirmDialog('Approve this quarterly report?',async()=>{try{let{error}=await supabaseClient.rpc('approve_report',{p_report_id:id});if(error)throw error;await refreshAfterWorkflow(id);toast('Report approved.','ok')}catch(error){toast(error.message,'err')}},{title:'Approve report',confirmLabel:'Approve'})}
 async function reopenApprovedReport(id){if(!isAdmin())return;promptDialog('Reason for reopening the approved report:',async(reason)=>{try{let{error}=await supabaseClient.rpc('reopen_approved_report',{p_report_id:id,p_reason:reason});if(error)throw error;await refreshAfterWorkflow(id);toast('Approved report reopened.','ok')}catch(error){toast(error.message,'err')}},{title:'Reopen approved report',confirmLabel:'Reopen report',requiredMessage:'A reopening reason is required.'})}
 function cityWorkflowButtons(r){if(!isCity())return'';if(r.status==='submitted'||r.status==='resubmitted')return`<button class="btn" onclick="startReview('${r.id}')">Start City Review</button>`;if(r.status==='under_review')return`<button class="btn danger" onclick="returnReport('${r.id}')">Return for Revision</button><button class="btn gold" onclick="approveReport('${r.id}')">Approve Report</button>`;if(r.status==='approved')return isAdmin()?`<button class="btn danger" onclick="reopenApprovedReport('${r.id}')">Reopen Approved Report</button>`:'<button class="btn" disabled>Approved</button>';return'<button class="btn" disabled>Awaiting agency submission</button>'}
@@ -1043,7 +1105,7 @@ function renderHome(){
   let returned=reports.filter(r=>r.status==='returned').length;
   let open=reports.filter(r=>r.status==='draft'||r.status==='returned').length;
   let programId=(u.programIds||[])[0]||state.db.programs[0]?.id;
-  let programReports=reportsForProgram(programId).filter(r=>periodById(r.periodId)?.type!=='upcoming');
+  let programReports=reports.filter(r=>r.programId===programId&&periodById(r.periodId)?.type!=='upcoming');
   let latest=programReports.at(-1);
   let t=latest?getTemplateForReport(latest):state.db.templates[0];
   let included=latest?priorReports(latest):[];
@@ -1079,8 +1141,8 @@ function renderHome(){
     </div>`;
 }
 
-function renderDashboardBase(){let reports=roleScopeReports().filter(r=>periodById(r.periodId)?.type!=='upcoming'),programId=reports[0]?.programId||state.db.programs[0]?.id,programReports=reportsForProgram(programId).filter(r=>periodById(r.periodId)?.type!=='upcoming'),latest=programReports.at(-1),t=latest?getTemplateForReport(latest):state.db.templates[0];if(!latest||!t){document.getElementById('view-dashboard').innerHTML='<div class="empty">No report data is available.</div>';return}let enrollment=ytdAccess(latest,['enrollment']),bipoc=priorReports(latest).reduce((sum,r)=>sum+finalBipoc(r),0),lgbtq=priorReports(latest).reduce((sum,r)=>sum+n(r.access.lgbtq.yes),0),outcomes=Object.fromEntries((t.outcomes||[]).map(o=>{let numerator=o.id==='housing'?priorReports(latest).reduce((sum,r)=>sum+outcomeQuarterNumerator(r,o),0):ytdOutcome(latest,o.id,'numerator'),denominator=ytdOutcome(latest,o.id,'denominator');return[o.id,{...o,numerator,denominator,rate:denominator?numerator/denominator:0}]})),housing=outcomes.housing||{},specialty=outcomes.specialty_care||{},psych=outcomes.psychiatric_followup||{},med=outcomes.medication_adherence||{},transitional=ytdOutcome(latest,'housing','transitional'),permanent=ytdOutcome(latest,'housing','permanent'),latestPeriod=periodById(latest.periodId),rateValue=x=>x.denominator?pct(x.rate):'—',resultValue=x=>x.denominator?`${fmt(x.numerator)} of ${fmt(x.denominator)}`:'No data entered',gapText=x=>{if(!x.denominator)return'<span>—</span>';let gap=Math.round((x.rate-x.target)*100);return`<span class="${gap>=0?'gap-positive':'gap-negative'}">${gap>=0?'+':''}${gap} pts</span>`},outcomeRows=[housing,specialty,psych,med].map(o=>`<tr><td><strong>${esc(o.name||'Outcome')}</strong></td><td class="result">${resultValue(o)}</td><td>${rateValue(o)}</td><td>≥${pct(o.target||0)}</td><td>${gapText(o)}</td></tr>`).join('');document.getElementById('view-dashboard').innerHTML=`<div class="page-head"><div><h1 class="page-title">Program Performance Dashboard</h1><p class="page-sub">Year-to-date participation, housing placements, health-care linkage, and treatment outcomes.</p></div><div class="page-actions"><button class="btn secondary" onclick="nav('reports')">Open quarterly reports</button></div></div><div class="notice">YTD rates use combined counts: total YTD results divided by total YTD reporting population. Quarterly percentages are not averaged.</div><div class="outcome-kpi-grid"><div class="insight-card"><div class="label">Unduplicated participants</div><div class="value">${fmt(enrollment)}</div><div class="sub">${pct(t.threeYearGoal?enrollment/t.threeYearGoal:0)} of the three-year goal of ${fmt(t.threeYearGoal)}</div></div><div class="insight-card featured"><div class="label">Housing placements</div><div class="value">${fmt(housing.numerator)}</div><div class="sub">${fmt(permanent)} permanent · ${fmt(transitional)} transitional</div></div><div class="insight-card featured"><div class="label">Housing placement rate</div><div class="value">${rateValue(housing)}</div><div class="sub">${resultValue(housing)} · target ≥${pct(housing.target||0)}</div></div><div class="insight-card"><div class="label">Specialty care linkage</div><div class="value">${rateValue(specialty)}</div><div class="sub">${resultValue(specialty)} · target ≥${pct(specialty.target||0)}</div></div><div class="insight-card"><div class="label">Psychiatric follow-up</div><div class="value">${rateValue(psych)}</div><div class="sub">${resultValue(psych)} · target ≥${pct(psych.target||0)}</div></div><div class="insight-card"><div class="label">Medication refill or adherence</div><div class="value">${rateValue(med)}</div><div class="sub">${resultValue(med)} · target ≥${pct(med.target||0)}</div></div></div><div class="grid2"><div class="card"><div class="card-head"><h2 class="card-title">Housing placements by quarter</h2></div><div class="card-body"><div class="chartbox"><canvas id="housing-chart"></canvas></div></div></div><div class="card"><div class="card-head"><h2 class="card-title">Quarterly outcome rates</h2></div><div class="card-body"><div class="chartbox"><canvas id="outcome-chart"></canvas></div></div></div></div><div class="card" style="margin-top:16px"><div class="card-head"><div><h2 class="card-title">Year-to-date outcome summary</h2><p class="page-sub" style="font-size:12px;margin-top:4px">Combined results, weighted rates, targets, and difference from target.</p></div></div><div class="card-body"><div class="table-wrap" style="box-shadow:none"><table class="dashboard-table"><thead><tr><th>Outcome</th><th>YTD result</th><th>YTD rate</th><th>Target</th><th>Difference</th></tr></thead><tbody>${outcomeRows}</tbody></table></div></div></div><div class="grid2" style="margin-top:16px"><div class="card"><div class="card-head"><h2 class="card-title">Service delivery through ${esc(latestPeriod.label)}</h2></div><div class="card-body">${t.serviceMetrics.map(m=>{let y=ytdService(latest,m.id),goal=m.goal;return`<div class="metric-row" style="grid-template-columns:minmax(210px,1.5fr) 105px 1fr"><div><div class="metric-label">${esc(m.name)}</div><div class="metric-sub">${fmt(y)} of ${fmt(goal)} annual goal</div></div><strong>${pct(goal?y/goal:0)}</strong><div class="progress"><span style="width:${Math.min(100,goal?y/goal*100:0)}%"></span></div></div>`}).join('')}</div></div><div class="card"><div class="card-head"><h2 class="card-title">People reached</h2></div><div class="card-body"><div class="metric-row"><div><div class="metric-label">Unduplicated enrollment</div><div class="metric-sub">Three-year goal: ${fmt(t.threeYearGoal)}</div></div><strong>${fmt(enrollment)}</strong><div class="progress gold" style="grid-column:3/-1"><span style="width:${Math.min(100,t.threeYearGoal?enrollment/t.threeYearGoal*100:0)}%"></span></div></div><div class="metric-row"><div><div class="metric-label">BIPOC participants</div><div class="metric-sub">Target: ${pct(t.bipocTarget)} of enrollment</div></div><strong>${fmt(bipoc)} · ${pct(enrollment?bipoc/enrollment:0)}</strong><div class="progress" style="grid-column:3/-1"><span style="width:${Math.min(100,enrollment?bipoc/enrollment*100:0)}%"></span></div></div><div class="metric-row"><div><div class="metric-label">LGBTQ+ participants</div><div class="metric-sub">Agency-reported Yes responses</div></div><strong>${fmt(lgbtq)}</strong><div></div></div></div></div></div>`;setTimeout(renderDashboardCharts,0)}
-const CHART_PALETTE={navy:'#1B2F5B',blue:'#315F9B',gold:'#C9A24A',purple:'#6D4EB4',amber:'#9A5A00'};function renderDashboardCharts(){destroyCharts();if(typeof Chart==='undefined')return;let programId=roleScopeReports()[0]?.programId||state.db.programs[0]?.id,reps=reportsForProgram(programId).filter(r=>periodById(r.periodId)?.type!=='upcoming'),labels=reps.map(r=>periodById(r.periodId).label),template=reps.length?getTemplateForReport(reps.at(-1)):state.db.templates[0],housingCtx=document.getElementById('housing-chart');if(housingCtx)state.charts.housing=new Chart(housingCtx,{type:'bar',data:{labels,datasets:[{label:'Transitional housing',data:reps.map(r=>n(r.outcomes.housing?.transitional)),backgroundColor:CHART_PALETTE.blue,borderRadius:4},{label:'Permanent housing',data:reps.map(r=>n(r.outcomes.housing?.permanent)),backgroundColor:CHART_PALETTE.gold,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true,ticks:{precision:0}}}}});let labelsMap={housing:'Housing placement',specialty_care:'Specialty care linkage',psychiatric_followup:'Psychiatric follow-up',medication_adherence:'Medication adherence'},colorMap={housing:CHART_PALETTE.navy,specialty_care:CHART_PALETTE.blue,psychiatric_followup:CHART_PALETTE.purple,medication_adherence:CHART_PALETTE.amber},ctx=document.getElementById('outcome-chart');if(ctx)state.charts.outcomes=new Chart(ctx,{type:'line',data:{labels,datasets:(template.outcomes||[]).map(o=>{let c=colorMap[o.id]||CHART_PALETTE.navy;return{label:labelsMap[o.id]||o.name,data:reps.map(r=>{let den=n(r.outcomes[o.id]?.denominator),num=outcomeQuarterNumerator(r,o);return den?Math.round(num/den*100):null}),tension:.25,spanGaps:true,borderColor:c,backgroundColor:c,pointBackgroundColor:c,borderWidth:2,fill:false}})},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true,max:100,ticks:{callback:v=>v+'%'}}}}})}
+function renderDashboardBase(){let reports=roleScopeReports().filter(r=>periodById(r.periodId)?.type!=='upcoming'),programId=dashboardProgramId(reports),programReports=reportsForProgram(programId).filter(r=>periodById(r.periodId)?.type!=='upcoming'),latest=programReports.at(-1),t=latest?getTemplateForReport(latest):state.db.templates[0];if(!latest||!t){document.getElementById('view-dashboard').innerHTML='<div class="empty">No report data is available.</div>';return}let enrollment=ytdAccess(latest,['enrollment']),bipoc=priorReports(latest).reduce((sum,r)=>sum+finalBipoc(r),0),lgbtq=priorReports(latest).reduce((sum,r)=>sum+n(r.access.lgbtq.yes),0),outcomes=Object.fromEntries((t.outcomes||[]).map(o=>{let numerator=o.id==='housing'?priorReports(latest).reduce((sum,r)=>sum+outcomeQuarterNumerator(r,o),0):ytdOutcome(latest,o.id,'numerator'),denominator=ytdOutcome(latest,o.id,'denominator');return[o.id,{...o,numerator,denominator,rate:denominator?numerator/denominator:0}]})),housing=outcomes.housing||{},specialty=outcomes.specialty_care||{},psych=outcomes.psychiatric_followup||{},med=outcomes.medication_adherence||{},transitional=ytdOutcome(latest,'housing','transitional'),permanent=ytdOutcome(latest,'housing','permanent'),latestPeriod=periodById(latest.periodId),rateValue=x=>x.denominator?pct(x.rate):'—',resultValue=x=>x.denominator?`${fmt(x.numerator)} of ${fmt(x.denominator)}`:'No data entered',gapText=x=>{if(!x.denominator)return'<span>—</span>';let gap=Math.round((x.rate-x.target)*100);return`<span class="${gap>=0?'gap-positive':'gap-negative'}">${gap>=0?'+':''}${gap} pts</span>`},outcomeRows=[housing,specialty,psych,med].map(o=>`<tr><td><strong>${esc(o.name||'Outcome')}</strong></td><td class="result">${resultValue(o)}</td><td>${rateValue(o)}</td><td>≥${pct(o.target||0)}</td><td>${gapText(o)}</td></tr>`).join('');document.getElementById('view-dashboard').innerHTML=`<div class="page-head"><div><h1 class="page-title">Program Performance Dashboard</h1><p class="page-sub">Year-to-date participation, housing placements, health-care linkage, and treatment outcomes.</p></div><div class="page-actions"><button class="btn secondary" onclick="nav('reports')">Open quarterly reports</button></div></div><div class="notice">YTD rates use combined counts: total YTD results divided by total YTD reporting population. Quarterly percentages are not averaged.</div><div class="outcome-kpi-grid"><div class="insight-card"><div class="label">Unduplicated participants</div><div class="value">${fmt(enrollment)}</div><div class="sub">${pct(t.threeYearGoal?enrollment/t.threeYearGoal:0)} of the three-year goal of ${fmt(t.threeYearGoal)}</div></div><div class="insight-card featured"><div class="label">Housing placements</div><div class="value">${fmt(housing.numerator)}</div><div class="sub">${fmt(permanent)} permanent · ${fmt(transitional)} transitional</div></div><div class="insight-card featured"><div class="label">Housing placement rate</div><div class="value">${rateValue(housing)}</div><div class="sub">${resultValue(housing)} · target ≥${pct(housing.target||0)}</div></div><div class="insight-card"><div class="label">Specialty care linkage</div><div class="value">${rateValue(specialty)}</div><div class="sub">${resultValue(specialty)} · target ≥${pct(specialty.target||0)}</div></div><div class="insight-card"><div class="label">Psychiatric follow-up</div><div class="value">${rateValue(psych)}</div><div class="sub">${resultValue(psych)} · target ≥${pct(psych.target||0)}</div></div><div class="insight-card"><div class="label">Medication refill or adherence</div><div class="value">${rateValue(med)}</div><div class="sub">${resultValue(med)} · target ≥${pct(med.target||0)}</div></div></div><div class="grid2"><div class="card"><div class="card-head"><h2 class="card-title">Housing placements by quarter</h2></div><div class="card-body"><div class="chartbox"><canvas id="housing-chart"></canvas></div></div></div><div class="card"><div class="card-head"><h2 class="card-title">Quarterly outcome rates</h2></div><div class="card-body"><div class="chartbox"><canvas id="outcome-chart"></canvas></div></div></div></div><div class="card" style="margin-top:16px"><div class="card-head"><div><h2 class="card-title">Year-to-date outcome summary</h2><p class="page-sub" style="font-size:12px;margin-top:4px">Combined results, weighted rates, targets, and difference from target.</p></div></div><div class="card-body"><div class="table-wrap" style="box-shadow:none"><table class="dashboard-table"><thead><tr><th>Outcome</th><th>YTD result</th><th>YTD rate</th><th>Target</th><th>Difference</th></tr></thead><tbody>${outcomeRows}</tbody></table></div></div></div><div class="grid2" style="margin-top:16px"><div class="card"><div class="card-head"><h2 class="card-title">Service delivery through ${esc(latestPeriod.label)}</h2></div><div class="card-body">${t.serviceMetrics.map(m=>{let y=ytdService(latest,m.id),goal=m.goal;return`<div class="metric-row" style="grid-template-columns:minmax(210px,1.5fr) 105px 1fr"><div><div class="metric-label">${esc(m.name)}</div><div class="metric-sub">${fmt(y)} of ${fmt(goal)} annual goal</div></div><strong>${pct(goal?y/goal:0)}</strong><div class="progress"><span style="width:${Math.min(100,goal?y/goal*100:0)}%"></span></div></div>`}).join('')}</div></div><div class="card"><div class="card-head"><h2 class="card-title">People reached</h2></div><div class="card-body"><div class="metric-row"><div><div class="metric-label">Unduplicated enrollment</div><div class="metric-sub">Three-year goal: ${fmt(t.threeYearGoal)}</div></div><strong>${fmt(enrollment)}</strong><div class="progress gold" style="grid-column:3/-1"><span style="width:${Math.min(100,t.threeYearGoal?enrollment/t.threeYearGoal*100:0)}%"></span></div></div><div class="metric-row"><div><div class="metric-label">BIPOC participants</div><div class="metric-sub">Target: ${pct(t.bipocTarget)} of enrollment</div></div><strong>${fmt(bipoc)} · ${pct(enrollment?bipoc/enrollment:0)}</strong><div class="progress" style="grid-column:3/-1"><span style="width:${Math.min(100,enrollment?bipoc/enrollment*100:0)}%"></span></div></div><div class="metric-row"><div><div class="metric-label">LGBTQ+ participants</div><div class="metric-sub">Agency-reported Yes responses</div></div><strong>${fmt(lgbtq)}</strong><div></div></div></div></div></div>`;setTimeout(renderDashboardCharts,0)}
+const CHART_PALETTE={navy:'#1B2F5B',blue:'#315F9B',gold:'#C9A24A',purple:'#6D4EB4',amber:'#9A5A00'};function renderDashboardCharts(){destroyCharts();if(typeof Chart==='undefined')return;let scoped=roleScopeReports(),programId=dashboardProgramId(scoped),reps=scoped.filter(r=>r.programId===programId&&periodById(r.periodId)?.type!=='upcoming'),labels=reps.map(r=>periodById(r.periodId).label),template=reps.length?getTemplateForReport(reps.at(-1)):state.db.templates[0],housingCtx=document.getElementById('housing-chart');if(housingCtx)state.charts.housing=new Chart(housingCtx,{type:'bar',data:{labels,datasets:[{label:'Transitional housing',data:reps.map(r=>n(r.outcomes.housing?.transitional)),backgroundColor:CHART_PALETTE.blue,borderRadius:4},{label:'Permanent housing',data:reps.map(r=>n(r.outcomes.housing?.permanent)),backgroundColor:CHART_PALETTE.gold,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true,ticks:{precision:0}}}}});let labelsMap={housing:'Housing placement',specialty_care:'Specialty care linkage',psychiatric_followup:'Psychiatric follow-up',medication_adherence:'Medication adherence'},colorMap={housing:CHART_PALETTE.navy,specialty_care:CHART_PALETTE.blue,psychiatric_followup:CHART_PALETTE.purple,medication_adherence:CHART_PALETTE.amber},ctx=document.getElementById('outcome-chart');if(ctx)state.charts.outcomes=new Chart(ctx,{type:'line',data:{labels,datasets:(template.outcomes||[]).map(o=>{let c=colorMap[o.id]||CHART_PALETTE.navy;return{label:labelsMap[o.id]||o.name,data:reps.map(r=>{let den=n(r.outcomes[o.id]?.denominator),num=outcomeQuarterNumerator(r,o);return den?Math.round(num/den*100):null}),tension:.25,spanGaps:true,borderColor:c,backgroundColor:c,pointBackgroundColor:c,borderWidth:2,fill:false}})},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true,max:100,ticks:{callback:v=>v+'%'}}}}})}
 
 function renderProviders(){if(!isAdmin())return;let rows=state.db.programs.map(p=>`<tr><td><strong>${esc(providerName(p.providerId))}</strong></td><td><strong>${esc(p.name)}</strong><br><span style="color:var(--muted);font-size:11px">${esc(p.contractYears)}</span></td><td>${esc(templateById(p.templateId)?.name||'—')}<br><span style="color:var(--muted);font-size:11px">${esc(templateById(p.templateId)?.version||'')}</span></td><td>${esc(p.monitorName)}<br><span style="color:var(--muted);font-size:11px">${esc(p.monitorEmail)}</span></td><td><span class="status ${p.active?'approved':'draft'}">${p.active?'Active':'Inactive'}</span></td></tr>`).join('');document.getElementById('view-providers').innerHTML=`<div class="page-head"><div><h1 class="page-title">Providers & Programs</h1><p class="page-sub">Provider and program records currently available in the portal.</p></div></div><div class="notice">Program configuration is read-only in this release. Database-backed editing will be added after report entry and workflow testing are complete.</div><div class="table-wrap"><table><thead><tr><th>Provider</th><th>Program / Contract</th><th>Assigned Template</th><th>Program Monitor</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table></div>`}
 function renderTemplates(){if(!isCity())return;let list=manageableTemplates();document.getElementById('view-templates').innerHTML=`<div class="page-head"><div><h1 class="page-title">Reporting Templates</h1><p class="page-sub">Published reporting requirements currently available in the portal.</p></div></div><div class="notice">Template editing is temporarily read-only so published reporting requirements cannot be changed accidentally during launch.</div>${list.map(t=>`<div class="card" style="margin-bottom:16px"><div class="card-head"><div><h2 class="card-title">${esc(t.name)}</h2><p class="page-sub" style="font-size:12px;margin-top:4px">${esc(t.version)}</p></div><span class="status approved">${esc(t.status||'published')}</span></div><div class="card-body"><strong>${t.serviceMetrics.length}</strong> service measures · <strong>${t.outcomes.length}</strong> outcome measures · <strong>${t.narratives.length}</strong> narrative prompts</div></div>`).join('')}`}
@@ -1258,7 +1320,27 @@ function demographicTotalNote(total,enrollment,label){
   return`<div class="demographic-total-note ${matches?'match':'review'}"><span>${esc(text)}</span><strong>${matches?'Complete':'Review'}</strong></div>`;
 }
 
+function updateBipocCount(value){
+  let r=reportById(state.currentReportId);
+  if(!r||!canEditReport(r))return;
+  let requested=Math.max(0,n(value));
+  r.access.bipocCorrection=requested-calculatedBipoc(r);
+  r.updatedAt=now();
+  showAutosave();
+  saveDb();
+  refreshCurrentReportTabLive('access.bipocFinal');
+}
 
+function resetBipocCount(){
+  let r=reportById(state.currentReportId);
+  if(!r||!canEditReport(r))return;
+  r.access.bipocCorrection=0;
+  r.access.bipocCorrectionExplanation='';
+  r.updatedAt=now();
+  showAutosave();
+  saveDb();
+  refreshCurrentReportTabLive('access.bipocFinal');
+}
 
 function updatePath(path,value,type='text'){
   let r=reportById(state.currentReportId);
@@ -1469,6 +1551,31 @@ function renderCertification(r){
   return`<div class="section"><div class="section-title"><span>Agency Certification</span><small>Aggregate reporting only</small></div><div class="section-body"><p class="section-intro">Review the report, complete each certification, and identify the person submitting it. Supporting records remain with the agency and may be reviewed during City monitoring or audits.</p><div class="certification-list"><div class="checkbox-row"><input type="checkbox" ${c.recordsAvailable?'checked':''} ${disabled?'disabled':''} onchange="updatePath('certification.recordsAvailable',this.checked,'checkbox')"><label>I certify that supporting records are maintained by the agency and are available for City review during monitoring or audits.</label></div><div class="checkbox-row"><input type="checkbox" ${c.noPhi?'checked':''} ${disabled?'disabled':''} onchange="updatePath('certification.noPhi',this.checked,'checkbox')"><label>I certify that the success story and narrative contain no names, exact birth dates, medical record numbers, identifiable photographs, or other identifying health information.</label></div><div class="checkbox-row"><input type="checkbox" ${c.accuracy?'checked':''} ${disabled?'disabled':''} onchange="updatePath('certification.accuracy',this.checked,'checkbox')"><label>I certify that the aggregate figures and narrative are accurate to the best of the agency’s knowledge and are supported by underlying agency records.</label></div></div><div class="form-grid" style="margin-top:16px">${fieldInput('Person completing report','certification.name',c.name,'text','',false,disabled)}${fieldInput('Title','certification.title',c.title,'text','',false,disabled)}${fieldInput('Email','certification.email',c.email,'email','',false,disabled)}${fieldInput('Certification date','certification.date',c.date,'date','',false,disabled)}</div>${reviewComment('certification',r)}</div></div>`;
 }
 
+function qualityChecks(r){
+  let e=n(r.access.enrollment),t=getTemplateForReport(r),checks=[],add=(id,label,ok,detail)=>checks.push({id,label,ok,detail});
+  add('enrollment','New unduplicated enrollment entered',r.access.enrollment!=='','Enter the number of people enrolled for the first time during this quarter, including zero when applicable.');
+  add('age','Age and gender matrix equals enrollment',ageGenderTotal(r)===e,`Current subtotal: ${ageGenderTotal(r)}; enrollment: ${e}.`);
+  add('race','Race/ethnicity responses equal enrollment',sumObject(r.access.race)===e,`Current subtotal: ${sumObject(r.access.race)}; enrollment: ${e}.`);
+  add('language','Household language responses equal enrollment',sumObject(r.access.language)===e,`Current subtotal: ${sumObject(r.access.language)}; enrollment: ${e}.`);
+  add('lgbtq','LGBTQ+ responses equal enrollment',sumObject(r.access.lgbtq)===e,`Current subtotal: ${sumObject(r.access.lgbtq)}; enrollment: ${e}.`);
+  add('affiliation','West Hollywood connection responses equal enrollment',sumObject(r.access.affiliation)===e,`Current subtotal: ${sumObject(r.access.affiliation)}; enrollment: ${e}.`);
+  let trans=sumObject(r.access.transgender);
+  add('transgender','Transgender identity is complete or left uncollected',trans===0||trans===e,`Current subtotal: ${trans}; enrollment: ${e}.`);
+  add('bipoc','BIPOC adjustment is documented',n(r.access.bipocCorrection)===0||r.access.bipocCorrectionExplanation.trim().length>0,'Explain any agency adjustment to the BIPOC count.');
+  add('services','All service-delivery totals entered',t.serviceMetrics.every(m=>r.services[m.id]?.actual!==''),'Enter a quarterly total, including zero when applicable.');
+  add('serviceVariance','Service explanations complete',t.serviceMetrics.every(m=>!FINAL_VARIANCE_STATUSES.includes(finalServiceStatus(r,m))||r.services[m.id]?.explanation?.trim()),'Required for Exceeds Pace, Watch, or Off Track.');
+  add('outcomes','All outcome questions completed',t.outcomes.every(o=>(o.id==='housing'?(r.outcomes[o.id]?.transitional!==''&&r.outcomes[o.id]?.permanent!==''):r.outcomes[o.id]?.numerator!=='')&&r.outcomes[o.id]?.denominator!==''),'Enter a value for each reporting population and result, including zero when applicable.');
+  add('outcomePopulation','Outcome counts do not exceed reporting populations',t.outcomes.every(o=>outcomeQuarterNumerator(r,o)<=n(r.outcomes[o.id]?.denominator)),'For each outcome, the result count must be less than or equal to its reporting population.');
+  add('outcomeVariance','Outcome explanations complete',t.outcomes.every(o=>!FINAL_VARIANCE_STATUSES.includes(finalOutcomeStatus(r,o))||r.outcomes[o.id]?.explanation?.trim()),'Required for Exceeds Pace, Watch, or Off Track.');
+  let reportNarratives=narrativesForReport(r);
+  reportNarratives.filter(x=>x.required).forEach(x=>add('narrative_'+x.id,x.label+' completed',Boolean(r.narratives.values[x.id]?.trim()),'Required narrative section.'));
+  if(varianceExists(r)){add('narrative_factors','Factors affecting performance completed',Boolean(r.narratives.values.factors?.trim()),'Required because one or more measures vary from pace.');add('narrative_corrective','Corrective strategies completed',Boolean(r.narratives.values.corrective?.trim()),'Required because one or more measures vary from pace.');}
+  ['staffing','budget'].forEach(flag=>{if(r.narratives.flags[flag]==='Yes')add('conditional_'+flag,(reportNarratives.find(x=>x.id===flag)?.label||flag)+' completed',Boolean(r.narratives.values[flag]?.trim()),'Required because Yes was selected.')});
+  let c=r.certification;
+  add('certs','Agency certifications acknowledged',c.recordsAvailable&&c.noPhi&&c.accuracy,'All three certifications are required.');
+  add('signer','Certification completed',Boolean(c.name&&c.title&&c.email&&c.date),'Name, title, email, and date are required.');
+  return checks;
+}
 
 function renderReportBase(){
   let r=reportById(state.currentReportId);
@@ -2038,6 +2145,125 @@ printReport=function(id){
   document.getElementById('print-view').innerHTML=`<div class="export-page"><div class="export-head"><div><p style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:800">City of West Hollywood Human Services Division</p><h1>Quarterly Program Report</h1><p>${esc(program.name)}</p></div><div class="export-meta"><strong>${esc(p.label)}</strong><br>Reporting quarter: ${esc(p.period)}<br>Service year: ${esc(p.serviceYearLabel||program.contractYears)}<br>Status: ${esc(DB_STATUS_LABELS[r.status]||r.status)}</div></div><div class="export-note" style="margin-top:16px">This report contains aggregate information only. Unduplicated enrollment and time-based outcomes are reported and certified by the agency and may be verified through City monitoring or audits.</div><div class="export-section"><h2>Enrollment and Access Summary</h2><table class="export-table"><tbody><tr><th>New, unduplicated enrollment</th><td>${fmt(r.access.enrollment)}</td><th>YTD enrollment</th><td>${fmt(ytdAccess(r,['enrollment']))}</td></tr><tr><th>BIPOC participants</th><td>${fmt(finalBipoc(r))}</td><th>BIPOC rate</th><td>${n(r.access.enrollment)?pct(finalBipoc(r)/n(r.access.enrollment)):'—'}</td></tr><tr><th>LGBTQ+ participants</th><td>${fmt(r.access.lgbtq.yes)}</td><th>YTD LGBTQ+ participants</th><td>${fmt(ytdAccess(r,['lgbtq','yes']))}</td></tr></tbody></table></div>${hsdExportDemographicsHtml(r)}<div class="export-section page-break"><h2>Service Delivery</h2><table class="export-table"><thead><tr><th>Measure</th><th>Annual Goal</th><th>Quarter</th><th>YTD</th><th>Expected YTD</th><th>Status</th></tr></thead><tbody>${serviceRows}</tbody></table></div><div class="export-section"><h2>Outcomes</h2><table class="export-table"><thead><tr><th>Outcome</th><th>Target</th><th>Quarter Result</th><th>Quarter Rate</th><th>YTD Result</th><th>YTD Rate</th></tr></thead><tbody>${outcomeRows}</tbody></table></div><div class="page-break">${narratives}</div><div class="export-section"><h2>Certification</h2><div class="signature-grid"><div class="signature-line">${esc(r.certification.name||'')} · ${esc(r.certification.title||'')}<br>${esc(r.certification.email||'')}<br>Agency representative</div><div class="signature-line">${esc(r.certification.date||'')}<br>Date</div></div></div></div>`;
   document.querySelectorAll('.view').forEach(v=>v.classList.add('hidden'));document.getElementById('print-view').classList.remove('hidden');setTimeout(()=>{window.print();document.getElementById('print-view').classList.add('hidden');document.getElementById('view-report').classList.remove('hidden')},100);
 };
+
+
+/* ========================================================================== */
+/* City portfolio dashboard                                                    */
+/* ========================================================================== */
+
+function portfolioOutcomeDomain(outcome){
+  if(outcome?.outcomeDomain)return outcome.outcomeDomain;
+  let id=outcome?.id||'';
+  if(id==='housing')return'Housing Stability';
+  if(id==='specialty_care')return'Access to Services';
+  if(['psychiatric_followup','medication_adherence'].includes(id))return'Health & Wellness';
+  return'Other Outcomes';
+}
+function dashboardEligiblePrograms(){
+  let u=currentUser();if(!u)return[];
+  let ids=u.role==='admin'?null:(u.programIds||[]);
+  return(state.db.programs||[]).filter(p=>p.active!==false&&(!ids||ids.includes(p.id)));
+}
+function dashboardProgramId(reports=roleScopeReports()){
+  let allowed=new Set(dashboardEligiblePrograms().map(p=>p.id)),available=[...new Set((reports||[]).map(r=>r.programId).filter(id=>allowed.has(id)))];
+  if(state.dashboardProgramId&&allowed.has(state.dashboardProgramId)&&(available.includes(state.dashboardProgramId)||!available.length))return state.dashboardProgramId;
+  state.dashboardProgramId=available[0]||dashboardEligiblePrograms()[0]?.id||null;
+  return state.dashboardProgramId;
+}
+function setDashboardProgram(value){state.dashboardProgramId=value;renderDashboard()}
+function openProgramDashboard(programId){state.dashboardProgramId=programId;nav('dashboard')}
+
+/* Override the dashboard wrapper to add a City program selector. */
+renderDashboard=function(){
+  let years=dashboardYears();
+  if(!state.dashboardServiceYear||!years.includes(state.dashboardServiceYear))state.dashboardServiceYear=years[0]||'';
+  if(!state.dashboardBasis)state.dashboardBasis=isAgency()?'working':'approved';
+  let scoped=filterDashboardReports(rawRoleScopeReports()),programId=dashboardProgramId(scoped);
+  renderDashboardBase();
+  let view=document.getElementById('view-dashboard'),head=view.querySelector('.page-head');
+  if(!head){view.innerHTML=`<div class="page-head"><div><h1 class="page-title">Program Performance Dashboard</h1><p class="page-sub">No ${state.dashboardBasis==='approved'?'approved':'working'} report data is available for the selected service year.</p></div></div><div class="notice">Change the program, data basis, or service year below to view available results.</div>`;head=view.querySelector('.page-head')}
+  let program=programById(programId),basis=dashboardBasis(),copy=basis==='approved'?'Only City-approved quarterly reports are included.':'The latest shared entries are included, including reports that are still draft or under review.',programs=dashboardEligiblePrograms();
+  let title=head.querySelector('.page-title');if(title)title.textContent='Program Performance Dashboard';
+  let sub=head.querySelector('.page-sub');if(sub)sub.textContent=program?`${program.name} · ${basis==='approved'?'Approved':'Preliminary'} year-to-date participation, services, and outcomes.`:'Select a program to view performance.';
+  head.insertAdjacentHTML('afterend',`<div class="dashboard-basis"><div><strong>Dashboard data</strong><div class="basis-copy">${esc(copy)}</div></div><div class="filters">${isCity()&&programs.length>1?`<div class="control"><label>Program</label><select onchange="setDashboardProgram(this.value)">${programs.map(p=>`<option value="${p.id}" ${programId===p.id?'selected':''}>${esc(p.name)}</option>`).join('')}</select></div>`:''}<div class="control"><label>Data basis</label><select onchange="setDashboardBasis(this.value)"><option value="working" ${basis==='working'?'selected':''}>Working Data</option><option value="approved" ${basis==='approved'?'selected':''}>Approved Data</option></select></div><div class="control"><label>Service year</label><select onchange="setDashboardServiceYear(this.value)">${years.map(y=>`<option ${state.dashboardServiceYear===y?'selected':''}>${esc(y)}</option>`).join('')}</select></div></div></div>`);
+}
+
+function portfolioYears(){return[...new Set(rawRoleScopeReports().map(serviceYearForReport).filter(Boolean))].sort().reverse()}
+function portfolioState(){
+  state.portfolioFilters=state.portfolioFilters||{};
+  let f=state.portfolioFilters,years=portfolioYears();
+  if(!['working','approved'].includes(f.basis))f.basis='approved';
+  if(!f.serviceYear||!years.includes(f.serviceYear))f.serviceYear=years[0]||'';
+  for(let key of['provider','program','category','outcomeDomain','quarter'])if(!f[key])f[key]='all';
+  return f;
+}
+function setPortfolioFilter(key,value){
+  let f=portfolioState();f[key]=value;
+  if(key==='provider'&&f.program!=='all'&&programById(f.program)?.providerId!==value)f.program='all';
+  if(key==='category'&&f.program!=='all'&&programById(f.program)?.primaryServiceCategory!==value)f.program='all';
+  renderPortfolio();
+}
+function portfolioProgramTemplate(program,year){
+  let reports=rawRoleScopeReports().filter(r=>r.programId===program.id&&serviceYearForReport(r)===year).sort((a,b)=>(periodById(a.periodId)?.quarterNumber||0)-(periodById(b.periodId)?.quarterNumber||0));
+  return reports.length?getTemplateForReport(reports.at(-1)):templateById(program.templateId);
+}
+function portfolioProgramHasDomain(program,domain,year){
+  if(domain==='all')return true;
+  let t=portfolioProgramTemplate(program,year);return(t?.outcomes||[]).some(o=>portfolioOutcomeDomain(o)===domain);
+}
+function portfolioFilteredPrograms(){
+  let f=portfolioState(),programs=dashboardEligiblePrograms();
+  return programs.filter(p=>(f.provider==='all'||p.providerId===f.provider)&&(f.program==='all'||p.id===f.program)&&(f.category==='all'||p.primaryServiceCategory===f.category)&&portfolioProgramHasDomain(p,f.outcomeDomain,f.serviceYear));
+}
+function portfolioAllReports(programs=portfolioFilteredPrograms()){
+  let f=portfolioState(),ids=new Set(programs.map(p=>p.id)),q=f.quarter==='all'?99:Number(f.quarter);
+  return rawRoleScopeReports().filter(r=>ids.has(r.programId)&&serviceYearForReport(r)===f.serviceYear&&(periodById(r.periodId)?.quarterNumber||0)<=q&&periodById(r.periodId)?.type!=='upcoming');
+}
+function portfolioPerformanceReports(programs=portfolioFilteredPrograms()){
+  let f=portfolioState(),reports=portfolioAllReports(programs);
+  return f.basis==='approved'?reports.filter(r=>r.status==='approved'):reports.filter(r=>r.status!=='not_open');
+}
+function portfolioReportsForProgram(programId,reports){return reports.filter(r=>r.programId===programId).sort((a,b)=>(periodById(a.periodId)?.quarterNumber||0)-(periodById(b.periodId)?.quarterNumber||0))}
+function portfolioLatestReport(programId,reports){return portfolioReportsForProgram(programId,reports).at(-1)||null}
+function portfolioStatusForService(actual,goal,quarter){
+  if(!actual)return'Not Reported';let expected=n(goal)*(quarter/4);if(!expected)return'Not Reported';let ratio=actual/expected;if(ratio>1.10)return'Exceeds Pace';if(ratio>=.90)return'On Track';if(ratio>=.75)return'Watch';return'Off Track';
+}
+function portfolioStatusClass(status){return['Exceeds Pace','On Track'].includes(status)?'approved':status==='Watch'?'watch':status==='Not Reported'?'not-reported':'off-track'}
+function portfolioProgramSummary(program,reports){
+  let reps=portfolioReportsForProgram(program.id,reports),latest=reps.at(-1),t=latest?getTemplateForReport(latest):portfolioProgramTemplate(program,portfolioState().serviceYear),quarter=latest?(periodById(latest.periodId)?.quarterNumber||0):0;
+  let enrollment=reps.reduce((sum,r)=>sum+n(r.access?.enrollment),0),bipoc=reps.reduce((sum,r)=>sum+finalBipoc(r),0),lgbtq=reps.reduce((sum,r)=>sum+n(r.access?.lgbtq?.yes),0),services=[],outcomes=[];
+  (t?.serviceMetrics||[]).forEach(m=>{let actual=reps.reduce((sum,r)=>sum+n(r.services?.[m.id]?.actual),0),status=portfolioStatusForService(actual,m.goal,quarter);services.push({...m,actual,status})});
+  (t?.outcomes||[]).filter(o=>portfolioState().outcomeDomain==='all'||portfolioOutcomeDomain(o)===portfolioState().outcomeDomain).forEach(o=>{let numerator=reps.reduce((sum,r)=>sum+outcomeQuarterNumerator(r,o),0),denominator=reps.reduce((sum,r)=>sum+n(r.outcomes?.[o.id]?.denominator),0),rate=denominator?numerator/denominator:null,status=!denominator?'Not Reported':rate>=o.target?'Meets Target':rate>=o.target*.9?'Near Target':'Below Target';outcomes.push({...o,numerator,denominator,rate,status,domain:portfolioOutcomeDomain(o)})});
+  return{program,latest,template:t,quarter,enrollment,bipoc,lgbtq,services,outcomes,reports:reps};
+}
+function portfolioPercent(part,whole){return whole?pct(part/whole):'—'}
+function portfolioTopRows(map,total,limit=6){return Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,limit).map(([label,value])=>`<tr><td>${esc(label)}</td><td class="num"><strong>${fmt(value)}</strong></td><td class="num">${portfolioPercent(value,total)}</td></tr>`).join('')||'<tr><td colspan="3" class="empty">No data reported.</td></tr>'}
+function portfolioDemographics(reports){
+  let enrollment=reports.reduce((s,r)=>s+n(r.access?.enrollment),0),race={},gender={},lgbtq={},affiliation={};
+  RACES.forEach(k=>race[k]=0);GENDERS.forEach(k=>gender[k]=0);['Yes','No','Unknown/Declined'].forEach(k=>lgbtq[k]=0);AFFILIATIONS.forEach(k=>affiliation[k]=0);
+  reports.forEach(r=>{RACES.forEach(k=>race[k]+=n(r.access?.race?.[k]));AGES.forEach(a=>GENDERS.forEach(g=>gender[g]+=n(r.access?.ageGender?.[a]?.[g])));lgbtq.Yes+=n(r.access?.lgbtq?.yes);lgbtq.No+=n(r.access?.lgbtq?.no);lgbtq['Unknown/Declined']+=n(r.access?.lgbtq?.unknown);AFFILIATIONS.forEach(k=>affiliation[k]+=n(r.access?.affiliation?.[k]))});
+  return{enrollment,race,gender,lgbtq,affiliation};
+}
+function portfolioFilterOptions(){
+  let f=portfolioState(),programs=dashboardEligiblePrograms(),providers=(state.db.providers||[]).filter(p=>programs.some(x=>x.providerId===p.id)),categories=[...new Set(programs.map(p=>p.primaryServiceCategory).filter(Boolean))].sort(),domains=[...new Set(programs.flatMap(p=>(portfolioProgramTemplate(p,f.serviceYear)?.outcomes||[]).map(portfolioOutcomeDomain)).filter(Boolean))].sort(),years=portfolioYears();
+  let programOptions=programs.filter(p=>(f.provider==='all'||p.providerId===f.provider)&&(f.category==='all'||p.primaryServiceCategory===f.category));
+  if(f.program!=='all'&&!programOptions.some(p=>p.id===f.program))f.program='all';
+  return{programs,providers,categories,domains,years,programOptions};
+}
+function renderPortfolio(){
+  let view=document.getElementById('view-portfolio');if(!view)return;if(!isCity()){view.innerHTML='<div class="empty">The Portfolio Dashboard is available to City users.</div>';return}
+  let f=portfolioState(),opts=portfolioFilterOptions(),programs=portfolioFilteredPrograms(),allReports=portfolioAllReports(programs),performanceReports=portfolioPerformanceReports(programs),summaries=programs.map(p=>portfolioProgramSummary(p,performanceReports)),demographics=portfolioDemographics(performanceReports);
+  let providerCount=new Set(programs.map(p=>p.providerId)).size,enrollment=summaries.reduce((s,x)=>s+x.enrollment,0),serviceMeasures=summaries.flatMap(x=>x.services),outcomeMeasures=summaries.flatMap(x=>x.outcomes),serviceMeeting=serviceMeasures.filter(x=>['Exceeds Pace','On Track'].includes(x.status)).length,outcomeMeeting=outcomeMeasures.filter(x=>x.status==='Meets Target').length;
+  let approved=allReports.filter(r=>r.status==='approved').length,review=allReports.filter(r=>['submitted','under_review','resubmitted'].includes(r.status)).length,agencyAction=allReports.filter(r=>['draft','returned'].includes(r.status)).length,nowMs=Date.now(),overdue=allReports.filter(r=>{let due=periodById(r.periodId)?.dueAt;return due&&new Date(due).getTime()<nowMs&&!['submitted','under_review','resubmitted','approved'].includes(r.status)}).length;
+  let incompleteDemographics=allReports.filter(r=>{let e=n(r.access?.enrollment);if(!e)return false;return ageGenderTotal(r)!==e||sumObject(r.access?.race)!==e||sumObject(r.access?.lgbtq)!==e||sumObject(r.access?.affiliation)!==e}).length,missingCertification=allReports.filter(r=>r.status!=='not_open'&&(!r.certification?.name||!r.certification?.accuracy)).length;
+  let categories=[...new Set(programs.map(p=>p.primaryServiceCategory||'Uncategorized'))].sort();
+  let categoryRows=categories.map(category=>{let rows=summaries.filter(x=>(x.program.primaryServiceCategory||'Uncategorized')===category),catEnrollment=rows.reduce((s,x)=>s+x.enrollment,0),services=rows.flatMap(x=>x.services),meeting=services.filter(x=>['Exceeds Pace','On Track'].includes(x.status)).length,reported=services.filter(x=>x.status!=='Not Reported').length,outcomes=rows.flatMap(x=>x.outcomes),outcomeAt=outcomes.filter(x=>x.status==='Meets Target').length;let serviceRate=reported?meeting/reported:0,outcomeRate=outcomes.length?outcomeAt/outcomes.length:0;return`<tr><td><strong>${esc(category)}</strong></td><td class="num">${rows.length}</td><td class="num">${fmt(catEnrollment)}</td><td><div class="portfolio-cell-stack"><strong>${meeting} of ${reported||services.length}</strong><div class="portfolio-bar-track"><div class="portfolio-bar-fill green" style="width:${Math.min(100,serviceRate*100)}%"></div></div><small>service measures meeting pace</small></div></td><td><div class="portfolio-cell-stack"><strong>${outcomeAt} of ${outcomes.length}</strong><div class="portfolio-bar-track"><div class="portfolio-bar-fill gold" style="width:${Math.min(100,outcomeRate*100)}%"></div></div><small>outcomes at target</small></div></td><td class="drill"><button class="btn secondary sm" onclick="setPortfolioFilter('category','${escJs(category)}')">Filter</button></td></tr>`}).join('')||'<tr><td colspan="6" class="empty">No programs match the selected filters.</td></tr>';
+  let domainMap={};outcomeMeasures.forEach(o=>{let d=o.domain||(domainMap.Other?'Other Outcomes':portfolioOutcomeDomain(o)),x=domainMap[d]||(domainMap[d]={measures:0,numerator:0,denominator:0,at:0,weightedTarget:0,targetWeight:0});x.measures++;x.numerator+=o.numerator;x.denominator+=o.denominator;if(o.status==='Meets Target')x.at++;if(o.denominator){x.weightedTarget+=o.target*o.denominator;x.targetWeight+=o.denominator}});
+  let domainRows=Object.entries(domainMap).sort((a,b)=>a[0].localeCompare(b[0])).map(([domain,x])=>{let rate=x.denominator?x.numerator/x.denominator:null,target=x.targetWeight?x.weightedTarget/x.targetWeight:null;return`<tr><td><strong>${esc(domain)}</strong></td><td class="num">${x.measures}</td><td class="num">${x.denominator?`${fmt(x.numerator)} of ${fmt(x.denominator)}`:'—'}</td><td class="num"><strong>${rate===null?'—':pct(rate)}</strong></td><td class="num">${target===null?'—':`≥${pct(target)}`}</td><td class="num">${x.at}</td></tr>`}).join('')||'<tr><td colspan="6" class="empty">No outcome results are available for the selected filters.</td></tr>';
+  let programRows=summaries.map(x=>{let p=x.program,latest=x.latest,comp=latest?completeness(latest):null,meeting=x.services.filter(s=>['Exceeds Pace','On Track'].includes(s.status)).length,below=x.services.filter(s=>['Watch','Off Track'].includes(s.status)).length;return`<tr><td><strong>${esc(providerName(p.providerId))}</strong></td><td><strong>${esc(p.name)}</strong><br><span class="source">${esc(p.primaryServiceCategory||'Uncategorized')}</span></td><td>${latest?esc(periodById(latest.periodId)?.label||'—'):'—'}</td><td>${latest?statusBadge(latest.status):'<span class="status not-reported">No report</span>'}</td><td class="num">${fmt(x.enrollment)}</td><td><span class="status approved">${meeting} meeting</span> ${below?`<span class="status watch">${below} below</span>`:''}</td><td>${comp?`${comp.pct}% complete`:'—'}</td><td class="drill"><button class="btn secondary sm" onclick="openProgramDashboard('${p.id}')">Open dashboard</button></td></tr>`}).join('')||'<tr><td colspan="8" class="empty">No programs match the selected filters.</td></tr>';
+  let selectedQuarter=f.quarter==='all'?'Latest available quarter':`Through Q${f.quarter}`,basisCopy=f.basis==='approved'?'City-approved data only':'Latest working data, including draft and under-review reports';
+  view.innerHTML=`<div class="page-head"><div><h1 class="page-title">Portfolio Dashboard</h1><p class="page-sub">Citywide program performance, service categories, outcomes, demographics, and reporting compliance.</p></div><div class="page-actions"><button class="btn secondary" onclick="nav('reports')">Open quarterly reports</button></div></div><div class="portfolio-filterbar"><div class="control"><label>Data basis</label><select onchange="setPortfolioFilter('basis',this.value)"><option value="approved" ${f.basis==='approved'?'selected':''}>Approved Data</option><option value="working" ${f.basis==='working'?'selected':''}>Working Data</option></select></div><div class="control"><label>Service year</label><select onchange="setPortfolioFilter('serviceYear',this.value)">${opts.years.map(y=>`<option value="${esc(y)}" ${f.serviceYear===y?'selected':''}>${esc(y)}</option>`).join('')}</select></div><div class="control"><label>Provider</label><select onchange="setPortfolioFilter('provider',this.value)"><option value="all">All providers</option>${opts.providers.map(p=>`<option value="${p.id}" ${f.provider===p.id?'selected':''}>${esc(p.name)}</option>`).join('')}</select></div><div class="control"><label>Program</label><select onchange="setPortfolioFilter('program',this.value)"><option value="all">All programs</option>${opts.programOptions.map(p=>`<option value="${p.id}" ${f.program===p.id?'selected':''}>${esc(p.name)}</option>`).join('')}</select></div><div class="control"><label>Service category</label><select onchange="setPortfolioFilter('category',this.value)"><option value="all">All categories</option>${opts.categories.map(c=>`<option value="${esc(c)}" ${f.category===c?'selected':''}>${esc(c)}</option>`).join('')}</select></div><div class="control"><label>Outcome domain</label><select onchange="setPortfolioFilter('outcomeDomain',this.value)"><option value="all">All outcome domains</option>${opts.domains.map(d=>`<option value="${esc(d)}" ${f.outcomeDomain===d?'selected':''}>${esc(d)}</option>`).join('')}</select></div><div class="control"><label>Reporting period</label><select onchange="setPortfolioFilter('quarter',this.value)"><option value="all" ${f.quarter==='all'?'selected':''}>Latest available</option>${[1,2,3,4].map(q=>`<option value="${q}" ${String(f.quarter)===String(q)?'selected':''}>Through Q${q}</option>`).join('')}</select></div></div><div class="portfolio-filter-summary"><span>${esc(basisCopy)} · ${esc(selectedQuarter)}</span><span>${programs.length} ${programs.length===1?'program':'programs'} across ${providerCount} ${providerCount===1?'provider':'providers'}</span></div><div class="portfolio-kpis"><div class="portfolio-kpi"><div class="label">Active programs</div><div class="value">${programs.length}</div><div class="sub">${providerCount} ${providerCount===1?'provider':'providers'} in the selected portfolio</div></div><div class="portfolio-kpi"><div class="label">Program enrollments</div><div class="value">${fmt(enrollment)}</div><div class="sub">Summed program-reported unduplicated enrollments</div></div><div class="portfolio-kpi"><div class="label">Approved reports</div><div class="value">${approved} of ${allReports.length}</div><div class="sub">${review} under City review · ${agencyAction} need agency action</div></div><div class="portfolio-kpi"><div class="label">Service measures meeting pace</div><div class="value">${serviceMeeting} of ${serviceMeasures.filter(x=>x.status!=='Not Reported').length||serviceMeasures.length}</div><div class="sub">On Track or Exceeds Pace</div></div><div class="portfolio-kpi"><div class="label">Outcomes at target</div><div class="value">${outcomeMeeting} of ${outcomeMeasures.filter(x=>x.status!=='Not Reported').length||outcomeMeasures.length}</div><div class="sub">Weighted results are shown by outcome domain below</div></div></div><div class="notice">Program enrollments are unduplicated within each program reporting period but may include the same participant across different programs. Portfolio totals should not be interpreted as a Citywide unduplicated client count.</div><div class="portfolio-grid"><div class="card"><div class="card-head"><div><h2 class="card-title">Performance by Service Category</h2><p class="portfolio-section-note">Programs, enrollments, service pacing, and outcome performance grouped by primary category.</p></div></div><div class="card-body"><div class="table-wrap" style="box-shadow:none"><table class="portfolio-table"><thead><tr><th>Service category</th><th>Programs</th><th>Enrollments</th><th>Service performance</th><th>Outcome performance</th><th></th></tr></thead><tbody>${categoryRows}</tbody></table></div></div></div><div class="card"><div class="card-head"><div><h2 class="card-title">Reporting and Data Checks</h2><p class="portfolio-section-note">Open items across the selected programs and service year.</p></div></div><div class="card-body"><div class="portfolio-quality-list"><div class="portfolio-quality-item"><strong>Reports under City review</strong><span>${review}</span></div><div class="portfolio-quality-item"><strong>Reports needing agency action</strong><span>${agencyAction}</span></div><div class="portfolio-quality-item"><strong>Overdue reports</strong><span>${overdue}</span></div><div class="portfolio-quality-item"><strong>Demographic totals needing review</strong><span>${incompleteDemographics}</span></div><div class="portfolio-quality-item"><strong>Missing or incomplete certification</strong><span>${missingCertification}</span></div></div></div></div><div class="card portfolio-full"><div class="card-head"><div><h2 class="card-title">Outcome Domains</h2><p class="portfolio-section-note">Combined numerators and denominators are used. Quarterly percentages and program rates are not averaged.</p></div></div><div class="card-body"><div class="table-wrap" style="box-shadow:none"><table class="portfolio-table"><thead><tr><th>Outcome domain</th><th>Measures</th><th>Combined result</th><th>Weighted rate</th><th>Weighted target</th><th>At target</th></tr></thead><tbody>${domainRows}</tbody></table></div></div></div></div><div class="card" style="margin-bottom:16px"><div class="card-head"><div><h2 class="card-title">Portfolio Demographics</h2><p class="portfolio-section-note">Aggregated quarter entries for the selected programs and reporting period.</p></div></div><div class="card-body"><div class="portfolio-demographic-grid"><div class="portfolio-demographic-card"><h3>Race and ethnicity</h3><table><thead><tr><th>Category</th><th>Count</th><th>Share</th></tr></thead><tbody>${portfolioTopRows(demographics.race,demographics.enrollment,9)}</tbody></table></div><div class="portfolio-demographic-card"><h3>Gender identity</h3><table><thead><tr><th>Category</th><th>Count</th><th>Share</th></tr></thead><tbody>${portfolioTopRows(demographics.gender,demographics.enrollment,8)}</tbody></table></div><div class="portfolio-demographic-card"><h3>LGBTQ+ identity</h3><table><thead><tr><th>Response</th><th>Count</th><th>Share</th></tr></thead><tbody>${portfolioTopRows(demographics.lgbtq,demographics.enrollment,5)}</tbody></table></div><div class="portfolio-demographic-card"><h3>Connection to West Hollywood</h3><table><thead><tr><th>Primary category</th><th>Count</th><th>Share</th></tr></thead><tbody>${portfolioTopRows(demographics.affiliation,demographics.enrollment,8)}</tbody></table></div></div></div></div><div class="card"><div class="card-head"><div><h2 class="card-title">Programs</h2><p class="portfolio-section-note">Open an individual Program Dashboard for detailed quarterly and year-to-date results.</p></div></div><div class="card-body"><div class="table-wrap" style="box-shadow:none"><table class="portfolio-table dashboard-table"><thead><tr><th>Provider</th><th>Program</th><th>Latest quarter</th><th>Status</th><th>Enrollments</th><th>Service measures</th><th>Completion</th><th></th></tr></thead><tbody>${programRows}</tbody></table></div></div></div>`;
+}
 
 
 initializeAuth();
