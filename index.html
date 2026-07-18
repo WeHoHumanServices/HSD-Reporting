@@ -67,7 +67,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .nav-spacer{height:17px}
 .view{animation:fade .16s ease}
 @keyframes fade{from{opacity:.55;transform:translateY(3px)}to{opacity:1;transform:none}}
-.page-head{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;margin-bottom:22px}
+.page-head{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;margin-bottom:26px}
 .page-title{font-size:28px;line-height:1.12;margin:0;color:var(--navy);font-weight:800;letter-spacing:-.03em}
 .page-sub{margin:6px 0 0;color:var(--muted);line-height:1.5}
 .page-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
@@ -155,7 +155,7 @@ input[inputmode="numeric"]{direction:ltr;text-align:left;font-variant-numeric:ta
 .tabbtn .tab-dot{width:7px;height:7px;border-radius:50%;background:#B9C1CB;display:inline-block;margin-right:5px}
 .tabbtn .tab-dot.ok{background:#5AA36F}
 .tabbtn .tab-dot.check{background:#D0875C}
-.section{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:15px}
+.section{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:20px}
 .section-title small{font-weight:500;color:rgba(255,255,255,.72)}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
 .field{display:flex;flex-direction:column;gap:6px}
@@ -176,12 +176,8 @@ input[inputmode="numeric"]{direction:ltr;text-align:left;font-variant-numeric:ta
 .matrix th:first-child,.matrix td:first-child{text-align:left;font-weight:700}
 .matrix input{width:78px;border:1px solid var(--line);border-radius:7px;padding:7px;text-align:right}
 .matrix .total{font-weight:800;color:var(--navy);background:#F7F9FB}
-.metric-table{min-width:1050px}
-.metric-table input,.metric-table select,.outcome-table input,.outcome-table select{border:1px solid var(--line);border-radius:7px;padding:7px 8px;background:#fff;width:100%}
-.metric-table textarea,.outcome-table textarea{border:1px solid var(--line);border-radius:7px;padding:7px 8px;min-width:210px;min-height:58px;resize:vertical}
-.metric-table .readonly,.outcome-table .readonly{background:#F4F6F8;color:#596576}
 .status-select{min-width:130px}
-.outcome-list{display:grid;gap:14px}
+.outcome-list{display:grid;gap:18px}
 .outcome-card{border:1px solid var(--line);border-radius:13px;background:#fff;overflow:hidden}
 .outcome-card-head h3{margin:0;color:var(--navy);font-size:15px}
 .outcome-target{font-weight:800;color:var(--navy);white-space:nowrap}
@@ -245,7 +241,6 @@ input[inputmode="numeric"]{direction:ltr;text-align:left;font-variant-numeric:ta
 .gap-positive{color:var(--green)}
 .gap-negative{color:var(--red)}
 
-.matrix.age-ytd{min-width:1420px}
 .matrix .group-head{background:#EAF0F7;color:var(--navy);font-weight:900}
 .notification{display:flex;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line);background:#fff}
 .notification:last-child{border-bottom:0}
@@ -261,6 +256,14 @@ input[inputmode="numeric"]{direction:ltr;text-align:left;font-variant-numeric:ta
 .modal-head{position:sticky;top:0;z-index:1;background:var(--navy);color:#fff;padding:17px 20px;border-bottom:3px solid var(--gold);display:flex;justify-content:space-between;align-items:center}
 .modal-body{padding:20px}
 .modal-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:18px}
+.ai-draft-loading{display:flex;align-items:center;gap:10px;padding:24px 4px;color:var(--muted);font-size:13px}
+.ai-draft-section .card-title{margin-bottom:10px}
+.ai-draft-row{border:1px solid var(--line);border-radius:11px;padding:12px 14px;margin-bottom:10px;background:#fff}
+.ai-draft-row.excluded{opacity:.5}
+.ai-draft-check{display:flex;align-items:center;gap:9px;font-size:13px;cursor:pointer}
+.ai-draft-check input{width:16px;height:16px}
+.ai-source-quote{font-style:italic;background:#F7F9FB;border-left:3px solid var(--gold);padding:8px 10px;border-radius:6px}
+
 .toast{position:fixed;right:22px;bottom:22px;background:#111827;color:#fff;border-radius:11px;padding:12px 15px;box-shadow:var(--shadow-hover);opacity:0;pointer-events:none;transform:translateY(8px);transition:.18s;z-index:200;max-width:420px}
 .toast.show{opacity:1;transform:none}
 .toast.ok{background:var(--green)}
@@ -353,7 +356,7 @@ input[inputmode="numeric"]{direction:ltr;text-align:left;font-variant-numeric:ta
 .report-aside .card-head,.report-aside .card-body{padding-left:14px;padding-right:14px}
 .tabbar{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px;position:sticky;top:80px;z-index:12;background:var(--bg);padding:4px 0 10px}
 .section-title{background:var(--navy);color:#fff;padding:11px 15px;font-weight:800;display:flex;justify-content:space-between;align-items:center;gap:12px}
-.section-body{padding:15px}
+.section-body{padding:20px}
 .section-intro{font-size:12px;color:var(--muted);line-height:1.55;margin:0 0 14px;max-width:1000px}
 .demographic-lead{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(260px,.7fr);gap:14px;align-items:start}
 .progress-summary{border:1px solid var(--line);background:#F8FAFC;border-radius:11px;padding:13px 14px}
@@ -373,14 +376,6 @@ input[inputmode="numeric"]{direction:ltr;text-align:left;font-variant-numeric:ta
 .summary-number-input{width:100%;border:1px solid var(--line);border-radius:9px;padding:9px 10px;min-height:40px;background:#fff;font-weight:800;font-variant-numeric:tabular-nums}
 .adjustment-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px}
 .adjustment-badge{display:inline-flex;border-radius:999px;padding:5px 8px;background:var(--amber-bg);color:var(--amber);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.045em}
-.metric-table-v2{min-width:930px}
-.metric-table-v2 th,.metric-table-v2 td{padding:9px 10px}
-.metric-table-v2 .measure-name{min-width:230px}
-.metric-table-v2 .number-col{width:88px}
-.metric-table-v2 .status-col{min-width:155px}
-.metric-table-v2 .notes-col{min-width:210px}
-.metric-table-v2 textarea{min-width:190px;min-height:52px}
-.metric-table-v2 select{min-width:145px}
 .status-stack{display:grid;gap:7px}
 .status-stack .help{margin:0}
 .outcome-card-head{padding:13px 15px;background:#F7F9FB;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:18px;align-items:flex-start}
@@ -1715,21 +1710,31 @@ function renderAccessBase(r){
 
 function renderServices(r){
   let disabled=!canEditReport(r),t=getTemplateForReport(r),pace=periodById(r.periodId).pace;
-  let rows=t.serviceMetrics.map(m=>{
+  let cards=t.serviceMetrics.map(m=>{
     let x=r.services[m.id]||(r.services[m.id]={actual:'',override:'',explanation:''});
     let ytd=ytdService(r,m.id),expected=Math.round(n(m.goal)*pace),calculated=serviceSuggestedStatus(r,m),final=finalServiceStatus(r,m);
-    return`<tr>
-      <td class="measure-name"><strong>${esc(m.name)}</strong><div class="help">${esc(m.area)} · ${esc(m.unit)}</div><div class="counting-rule">${esc(m.countingRule||'Count activity completed during this quarter.')}</div></td>
-      <td class="num number-col">${fmt(m.goal)}</td>
-      <td class="number-col"><input data-live-key="service.${m.id}.actual" type="text" inputmode="numeric" pattern="[0-9]*" value="${esc(x.actual)}" ${disabled?'disabled':''} oninput="this.value=this.value.replace(/[^0-9]/g,'');updateService('${m.id}','actual',this.value)"></td>
-      <td class="num readonly number-col">${fmt(ytd)}</td>
-      <td class="num readonly number-col">${fmt(expected)}</td>
-      <td class="num number-col">${expected?pct(ytd/expected):'—'}</td>
-      <td class="status-col"><div class="status-stack">${statusLabel(final)}<select data-live-key="service.${m.id}.override" class="status-select" ${disabled?'disabled':''} onchange="updateService('${m.id}','override',this.value)"><option value="">Use calculated status</option>${['Exceeds Pace','On Track','Watch','Off Track','Not Reported','Not Applicable'].map(v=>`<option ${x.override===v?'selected':''}>${v}</option>`).join('')}</select><div class="help">Calculated: ${esc(calculated)}</div></div></td>
-      <td class="notes-col"><textarea data-live-key="service.${m.id}.explanation" ${disabled?'disabled':''} placeholder="Explain results above or below pace" oninput="updateService('${m.id}','explanation',this.value)">${esc(x.explanation)}</textarea></td>
-    </tr>`;
+    return`<div class="outcome-card">
+      <div class="outcome-card-head"><div><h3>${esc(m.name)}</h3><div class="outcome-source">${esc(m.area)} · ${esc(m.unit)}</div></div><div class="outcome-target">Annual goal: ${fmt(m.goal)}</div></div>
+      <div class="outcome-body">
+        <div class="outcome-counting"><strong>Counting rule</strong><span>${esc(m.countingRule||'Count activity completed during this quarter.')}</span></div>
+        <div class="outcome-question-grid">
+          <div class="outcome-question"><label>Quarter activity</label><input data-live-key="service.${m.id}.actual" type="text" inputmode="numeric" pattern="[0-9]*" value="${esc(x.actual)}" ${disabled?'disabled':''} oninput="this.value=this.value.replace(/[^0-9]/g,'');updateService('${m.id}','actual',this.value)"><div class="help">Enter only activity completed this quarter; do not carry a prior-quarter total forward.</div></div>
+        </div>
+        <div class="outcome-result-grid">
+          <div class="outcome-result"><div class="label">YTD</div><div class="value">${fmt(ytd)}</div></div>
+          <div class="outcome-result"><div class="label">Expected YTD</div><div class="value">${fmt(expected)}</div></div>
+          <div class="outcome-result"><div class="label">Progress</div><div class="value">${expected?pct(ytd/expected):'—'}</div></div>
+          <div class="outcome-result"><div class="label">Annual goal</div><div class="value">${fmt(m.goal)}</div></div>
+        </div>
+        <div class="outcome-review-grid">
+          <div><label>Final status</label>${statusLabel(final)}<div class="help" style="margin-top:6px">Calculated: ${esc(calculated)}</div></div>
+          <div><label>Optional status adjustment</label><select data-live-key="service.${m.id}.override" ${disabled?'disabled':''} onchange="updateService('${m.id}','override',this.value)"><option value="">Use calculated status</option>${['Exceeds Pace','On Track','Watch','Off Track','Not Reported','Not Applicable'].map(v=>`<option ${x.override===v?'selected':''}>${v}</option>`).join('')}</select></div>
+          <div style="grid-column:span 2"><label>Explanation</label><textarea data-live-key="service.${m.id}.explanation" ${disabled?'disabled':''} placeholder="Explain results above or below pace" oninput="updateService('${m.id}','explanation',this.value)">${esc(x.explanation)}</textarea></div>
+        </div>
+      </div>
+    </div>`;
   }).join('');
-  return`<div class="section"><div class="section-title"><span>Service Delivery</span><small>Quarter activity and annual progress</small></div><div class="section-body"><div class="guidance-box"><strong>Enter quarter totals</strong><span>YTD totals update as you type. Enter only activity completed during this quarter; do not carry a prior-quarter total forward. Repeated contacts or services may be counted when the measure is an activity count.</span></div><p class="section-intro">Expected YTD counts are rounded to the nearest whole number: 25% after Q1, 50% after Q2, 75% after Q3, and 100% after Q4.</p><div class="table-wrap" style="box-shadow:none"><table class="metric-table metric-table-v2"><thead><tr><th>Measure</th><th>Annual Goal</th><th>Quarter</th><th>YTD</th><th>Expected YTD</th><th>Progress</th><th>Status</th><th>Explanation</th></tr></thead><tbody>${rows}</tbody></table></div>${reviewComment('services',r)}</div></div>`;
+  return`<div class="section"><div class="section-title"><span>Service Delivery</span><small>Quarter activity and annual progress</small></div><div class="section-body"><div class="guidance-box"><strong>Enter quarter totals</strong><span>YTD totals update as you type. Enter only activity completed during this quarter; do not carry a prior-quarter total forward. Repeated contacts or services may be counted when the measure is an activity count.</span></div><p class="section-intro">Expected YTD counts are rounded to the nearest whole number: 25% after Q1, 50% after Q2, 75% after Q3, and 100% after Q4.</p><div class="outcome-list">${cards}</div>${reviewComment('services',r)}</div></div>`;
 }
 
 function outcomeCountingText(o){
@@ -2874,7 +2879,7 @@ function renderTemplates(){
   let primaryAction=hsdTemplateIsPublished(t)?`<button class="btn" onclick="hsdOpenCloneTemplate('${t.id}')">Create Draft Version</button>`:editable?`<button class="btn gold" onclick="hsdPublishTemplate('${t.id}')">Publish Draft</button>`:'';
   let deleteAction=editable?`<button class="btn danger" onclick="hsdDeleteDraftTemplate('${t.id}')">Delete Draft</button>`:'';
   let notice=hsdTemplateIsPublished(t)?`<div class="notice"><strong>Published versions are protected.</strong> Create a draft version to change reporting requirements. Existing reports remain tied to the version they were created with.</div>`:`<div class="notice warning"><strong>Draft editing is active.</strong> Changes save to the shared database but do not affect agency reports until this version is published. Publishing assigns it only to eligible reports that have not opened yet.</div>`;
-  document.getElementById('view-templates').innerHTML=`<div class="page-head"><div><h1 class="page-title">Reporting Templates</h1><p class="page-sub">Create versioned program requirements without changing historical reports.</p></div><div class="page-actions">${selector}${primaryAction}${deleteAction}</div></div>${notice}${hsdRenderTemplateSummary(t)}${hsdRenderTemplateMetadata(t,editable)}${hsdRenderTemplateMeasures(t,editable)}${hsdRenderTemplateOutcomes(t,editable)}${hsdRenderTemplateNarratives(t,editable)}`;
+  document.getElementById('view-templates').innerHTML=`<div class="page-head"><div><h1 class="page-title">Reporting Templates</h1><p class="page-sub">Create versioned program requirements without changing historical reports.</p></div><div class="page-actions">${selector}${editable?`<button class="btn gold" onclick="hsdOpenAiTemplateDesigner('${t.id}')">AI Draft from Scope of Services</button>`:''}${primaryAction}${deleteAction}</div></div>${notice}${hsdRenderTemplateSummary(t)}${hsdRenderTemplateMetadata(t,editable)}${hsdRenderTemplateMeasures(t,editable)}${hsdRenderTemplateOutcomes(t,editable)}${hsdRenderTemplateNarratives(t,editable)}`;
 }
 
 function hsdOpenCloneTemplate(id){
@@ -2945,12 +2950,146 @@ function hsdOpenCreateMeasure(templateId,type){
   let t=templateById(templateId);if(!hsdTemplateCanEdit(t))return;let nextOrder=type==='outcome'?hsdTemplateNextOrder(t.outcomes):hsdTemplateNextOrder(t.serviceMetrics);
   openModal(type==='outcome'?'Create Program-Specific Outcome':'Create Program-Specific Service Measure',`<form onsubmit="hsdCreateProgramMeasure(event,'${templateId}','${type}')"><p class="section-intro">This creates a program-specific measure in the shared measure library and adds it to this draft template.</p><div class="form-grid"><div class="field full"><label>Measure name <span class="required">*</span></label><input id="new-measure-name" required></div><div class="field"><label>Unit label <span class="required">*</span></label><input id="new-measure-unit" value="${type==='outcome'?'percent':'units'}" required></div><div class="field"><label>${type==='outcome'?'Target percentage':'Annual goal'}</label><input id="new-measure-target" type="number" min="0" ${type==='outcome'?'max="100" step="0.1"':'step="any"'} value="${type==='outcome'?'50':'0'}"></div><div class="field"><label>Reporting category</label><select id="new-measure-category">${hsdTemplateCategoryOptions('')}</select></div><div class="field"><label>Display order</label><input id="new-measure-order" type="number" step="1" value="${nextOrder}"></div>${type==='service'?`<div class="field"><label>Counting method</label><select id="new-measure-duplicated"><option value="false">Unique events / units</option><option value="true">Duplicated contacts or services allowed</option></select></div>`:''}<div class="field full"><label>Definition <span class="required">*</span></label><textarea id="new-measure-definition" required></textarea></div><div class="field full"><label>Target source</label><textarea id="new-measure-source"></textarea></div>${type==='outcome'?`<div class="field full"><label>Reporting-population question <span class="required">*</span></label><textarea id="new-measure-den" required></textarea></div><div class="field full"><label>Outcome-result question <span class="required">*</span></label><textarea id="new-measure-num" required></textarea></div><div class="field full"><label>Calculation guidance</label><textarea id="new-measure-instructions">YTD rate equals the combined outcome count divided by the combined reporting population. Quarterly percentages are not averaged.</textarea></div>`:`<div class="field full"><label>Quarter-entry question <span class="required">*</span></label><textarea id="new-measure-actual" required></textarea></div><div class="field full"><label>Counting instructions</label><textarea id="new-measure-instructions"></textarea></div>`}</div><div class="modal-actions"><button class="btn secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn" id="new-measure-submit" type="submit">Create and Add</button></div></form>`);
 }
+async function hsdInsertProgramMeasure(t,type,fields){
+  let isOutcome=type==='outcome';
+  let name=(fields.name||'').trim(),definition=(fields.definition||'').trim(),unit=(fields.unit||'').trim();
+  let code=hsdTemplateUniqueCode(t.programId,name,type);
+  let libraryPayload={code,name,description:definition,measure_kind:isOutcome?'outcome':'service_output',measure_scope:'program_specific',owner_program_id:t.programId,outcome_domain_id:null,unit_label:unit,aggregation_method:isOutcome?'weighted_rate':'sum',duplicated_count:isOutcome?false:Boolean(fields.duplicated),higher_is_better:true,comparability_level:'program_only',definition,default_numerator_definition:isOutcome?(fields.numeratorQuestion||'').trim():null,default_denominator_definition:isOutcome?(fields.denominatorQuestion||'').trim():null,active:true,created_by:state.authUser?.id||null};
+  let{data:measure,error:measureError}=await supabaseClient.from('measure_library').insert(libraryPayload).select('*').single();
+  if(measureError)throw measureError;
+  let target=Number(fields.target||0);
+  let tmPayload={template_version_id:t.id,measure_id:measure.id,reporting_service_category_id:fields.category||null,display_name:null,instructions:(fields.instructions||'').trim()||null,entry_mode:isOutcome?'calculated_rate':'count',annual_goal:isOutcome?null:target,target_value:isOutcome?target/100:null,target_type:isOutcome?'percentage':'count',target_source:(fields.targetSource||'').trim()||null,pace_tracking_enabled:!isOutcome,display_order:Number(fields.order||0),required:true,active:true,calculation_config:isOutcome?{type:'rate',numerator_fields:['outcome_result'],denominator_field:'reporting_population'}:{type:'count',actual_field:'quarter_actual'}};
+  let{data:tm,error:tmError}=await supabaseClient.from('template_measures').insert(tmPayload).select('*').single();
+  if(tmError)throw tmError;
+  let measureFields=isOutcome?[
+    {template_measure_id:tm.id,code:'reporting_population',label:(fields.denominatorQuestion||'').trim(),help_text:'Enter the unique reporting population for this quarter.',field_type:'number',field_role:'denominator',display_order:10,required:true},
+    {template_measure_id:tm.id,code:'outcome_result',label:(fields.numeratorQuestion||'').trim(),help_text:'Enter the number achieving the outcome.',field_type:'number',field_role:'numerator',display_order:20,required:true}
+  ]:[
+    {template_measure_id:tm.id,code:'quarter_actual',label:(fields.actualQuestion||'').trim(),help_text:'Enter the total delivered during this reporting quarter.',field_type:'number',field_role:'actual',display_order:10,required:true}
+  ];
+  let{error:fieldError}=await supabaseClient.from('template_measure_fields').insert(measureFields);
+  if(fieldError)throw fieldError;
+  return measure;
+}
 async function hsdCreateProgramMeasure(event,templateId,type){
   event.preventDefault();let t=templateById(templateId),button=document.getElementById('new-measure-submit');if(!hsdTemplateCanEdit(t))return;hsdTemplateButtonBusy(button,true,'Creating…');
-  try{let name=hsdTemplateFieldValue('new-measure-name').trim(),definition=hsdTemplateFieldValue('new-measure-definition').trim(),unit=hsdTemplateFieldValue('new-measure-unit').trim(),code=hsdTemplateUniqueCode(t.programId,name,type),isOutcome=type==='outcome';let libraryPayload={code,name,description:definition,measure_kind:isOutcome?'outcome':'service_output',measure_scope:'program_specific',owner_program_id:t.programId,outcome_domain_id:null,unit_label:unit,aggregation_method:isOutcome?'weighted_rate':'sum',duplicated_count:isOutcome?false:hsdTemplateFieldValue('new-measure-duplicated')==='true',higher_is_better:true,comparability_level:'program_only',definition,default_numerator_definition:isOutcome?hsdTemplateFieldValue('new-measure-num').trim():null,default_denominator_definition:isOutcome?hsdTemplateFieldValue('new-measure-den').trim():null,active:true,created_by:state.authUser?.id||null};let{data:measure,error:measureError}=await supabaseClient.from('measure_library').insert(libraryPayload).select('*').single();if(measureError)throw measureError;
-    let target=Number(hsdTemplateFieldValue('new-measure-target')||0),tmPayload={template_version_id:templateId,measure_id:measure.id,reporting_service_category_id:hsdTemplateFieldValue('new-measure-category')||null,display_name:null,instructions:hsdTemplateFieldValue('new-measure-instructions').trim()||null,entry_mode:isOutcome?'calculated_rate':'count',annual_goal:isOutcome?null:target,target_value:isOutcome?target/100:null,target_type:isOutcome?'percentage':'count',target_source:hsdTemplateFieldValue('new-measure-source').trim()||null,pace_tracking_enabled:!isOutcome,display_order:Number(hsdTemplateFieldValue('new-measure-order')||0),required:true,active:true,calculation_config:isOutcome?{type:'rate',numerator_fields:['outcome_result'],denominator_field:'reporting_population'}:{type:'count',actual_field:'quarter_actual'}};let{data:tm,error:tmError}=await supabaseClient.from('template_measures').insert(tmPayload).select('*').single();if(tmError)throw tmError;
-    let fields=isOutcome?[{template_measure_id:tm.id,code:'reporting_population',label:hsdTemplateFieldValue('new-measure-den').trim(),help_text:'Enter the unique reporting population for this quarter.',field_type:'number',field_role:'denominator',display_order:10,required:true},{template_measure_id:tm.id,code:'outcome_result',label:hsdTemplateFieldValue('new-measure-num').trim(),help_text:'Enter the number achieving the outcome.',field_type:'number',field_role:'numerator',display_order:20,required:true}]:[{template_measure_id:tm.id,code:'quarter_actual',label:hsdTemplateFieldValue('new-measure-actual').trim(),help_text:'Enter the total delivered during this reporting quarter.',field_type:'number',field_role:'actual',display_order:10,required:true}];let{error:fieldError}=await supabaseClient.from('template_measure_fields').insert(fields);if(fieldError)throw fieldError;closeModal();await hsdRefreshTemplateEditor(templateId);toast('Program-specific measure created and added.','ok')
+  try{
+    await hsdInsertProgramMeasure(t,type,{
+      name:hsdTemplateFieldValue('new-measure-name'),unit:hsdTemplateFieldValue('new-measure-unit'),
+      target:hsdTemplateFieldValue('new-measure-target'),category:hsdTemplateFieldValue('new-measure-category'),
+      order:hsdTemplateFieldValue('new-measure-order'),duplicated:hsdTemplateFieldValue('new-measure-duplicated')==='true',
+      definition:hsdTemplateFieldValue('new-measure-definition'),targetSource:hsdTemplateFieldValue('new-measure-source'),
+      denominatorQuestion:hsdTemplateFieldValue('new-measure-den'),numeratorQuestion:hsdTemplateFieldValue('new-measure-num'),
+      actualQuestion:hsdTemplateFieldValue('new-measure-actual'),instructions:hsdTemplateFieldValue('new-measure-instructions')
+    });
+    closeModal();await hsdRefreshTemplateEditor(templateId);toast('Program-specific measure created and added.','ok');
   }catch(error){console.error(error);toast(error.message||'Unable to create the measure.','err');hsdTemplateButtonBusy(button,false)}
+}
+
+/* ---------- AI Template Designer ---------- */
+function hsdOpenAiTemplateDesigner(templateId){
+  let t=templateById(templateId);if(!hsdTemplateCanEdit(t))return;
+  state.aiDraft={templateId,fileName:'',services:[],outcomes:[],status:'idle',error:''};
+  openModal('AI Template Designer',hsdAiTemplateDesignerBody());
+}
+function hsdRefreshAiModal(){let body=document.getElementById('modal-body');if(body)body.innerHTML=hsdAiTemplateDesignerBody()}
+function hsdAiTemplateDesignerBody(){
+  let d=state.aiDraft;if(!d)return'';
+  if(d.status==='idle'){
+    return`<p class="section-intro">Upload a program's scope-of-services document (PDF). Claude reads it and drafts program-specific service and outcome measures for you to review. Demographics and narrative prompts are not affected — those stay standard across every program.</p>
+      <div class="field full"><label>Scope of services (PDF) <span class="required">*</span></label><input id="ai-scope-file" type="file" accept="application/pdf"></div>
+      <div class="field full"><label>Anything else Claude should know? (optional)</label><textarea id="ai-scope-notes" placeholder="Example: focus only on the Behavioral Health section, pages 4-6."></textarea></div>
+      <div class="modal-actions"><button class="btn secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn gold" id="ai-generate-btn" onclick="hsdAiTemplateGenerate()">Generate Draft</button></div>`;
+  }
+  if(d.status==='loading'){
+    return`<div class="ai-draft-loading"><span class="spinner"></span> Reading ${esc(d.fileName)} and drafting measures… this can take up to a minute for longer documents.</div>`;
+  }
+  if(d.status==='error'){
+    return`<div class="notice danger"><strong>Could not draft a template from this document.</strong> ${esc(d.error)}</div><div class="modal-actions"><button class="btn secondary" type="button" onclick="closeModal()">Close</button><button class="btn" onclick="state.aiDraft.status='idle';hsdRefreshAiModal()">Try Again</button></div>`;
+  }
+  let serviceRows=d.services.map((m,i)=>hsdAiDraftRow(m,i,'service')).join('')||'<div class="empty">Claude did not propose any service measures. You can still add them manually after closing this window.</div>';
+  let outcomeRows=d.outcomes.map((m,i)=>hsdAiDraftRow(m,i,'outcome')).join('')||'<div class="empty">Claude did not propose any outcome measures. You can still add them manually after closing this window.</div>';
+  let selectedCount=d.services.filter(x=>x.selected).length+d.outcomes.filter(x=>x.selected).length;
+  return`<p class="section-intro">Review each proposed measure before adding it. Uncheck anything that doesn't apply, and edit names, goals, or targets as needed. Nothing is saved until you click "Add to Draft Template."</p>
+    <div class="ai-draft-section"><h3 class="card-title">Proposed service measures</h3>${serviceRows}</div>
+    <div class="ai-draft-section" style="margin-top:16px"><h3 class="card-title">Proposed outcome measures</h3>${outcomeRows}</div>
+    <div class="modal-actions"><button class="btn secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn gold" id="ai-commit-btn" onclick="hsdAiTemplateCommit()" ${selectedCount?'':'disabled'}>Add ${selectedCount} Selected to Draft Template</button></div>`;
+}
+function hsdAiDraftRow(m,i,type){
+  let prefix=`ai-${type}-${i}`;
+  let targetField=type==='outcome'
+    ?`<div class="field"><label>Target %</label><input id="${prefix}-target" type="number" min="0" max="100" step="0.1" value="${esc(m.target)}" oninput="hsdAiDraftUpdate('${type}',${i},'target',this.value)"></div>`
+    :`<div class="field"><label>Annual goal</label><input id="${prefix}-target" type="number" min="0" step="any" value="${esc(m.target)}" oninput="hsdAiDraftUpdate('${type}',${i},'target',this.value)"></div>`;
+  return`<div class="ai-draft-row ${m.selected?'':'excluded'}">
+    <label class="ai-draft-check"><input type="checkbox" ${m.selected?'checked':''} onchange="hsdAiDraftToggle('${type}',${i},this.checked)"><strong>${esc(m.name||'Untitled measure')}</strong></label>
+    <div class="form-grid" style="margin-top:8px">
+      <div class="field full"><label>Name</label><input value="${esc(m.name)}" oninput="hsdAiDraftUpdate('${type}',${i},'name',this.value)"></div>
+      <div class="field"><label>Unit</label><input value="${esc(m.unit)}" oninput="hsdAiDraftUpdate('${type}',${i},'unit',this.value)"></div>
+      ${targetField}
+      <div class="field full"><label>Definition</label><textarea oninput="hsdAiDraftUpdate('${type}',${i},'definition',this.value)">${esc(m.definition)}</textarea></div>
+      ${type==='outcome'?`<div class="field full"><label>Reporting-population question</label><textarea oninput="hsdAiDraftUpdate('${type}',${i},'denominatorQuestion',this.value)">${esc(m.denominatorQuestion)}</textarea></div><div class="field full"><label>Outcome-result question</label><textarea oninput="hsdAiDraftUpdate('${type}',${i},'numeratorQuestion',this.value)">${esc(m.numeratorQuestion)}</textarea></div>`:`<div class="field full"><label>Quarter-entry question</label><textarea oninput="hsdAiDraftUpdate('${type}',${i},'actualQuestion',this.value)">${esc(m.actualQuestion)}</textarea></div>`}
+      ${m.sourceQuote?`<div class="field full"><label>Source text in scope document</label><div class="help ai-source-quote">"${esc(m.sourceQuote)}"</div></div>`:''}
+    </div>
+  </div>`;
+}
+function hsdAiDraftToggle(type,i,checked){state.aiDraft[type+'s'][i].selected=checked;hsdRefreshAiModal()}
+function hsdAiDraftUpdate(type,i,key,value){state.aiDraft[type+'s'][i][key]=value}
+function hsdFileToBase64(file){
+  return new Promise((resolve,reject)=>{
+    let reader=new FileReader();
+    reader.onload=()=>{let result=String(reader.result||'');resolve(result.slice(result.indexOf(',')+1))};
+    reader.onerror=()=>reject(new Error('Could not read the selected file.'));
+    reader.readAsDataURL(file);
+  });
+}
+async function hsdAiTemplateGenerate(){
+  let fileInput=document.getElementById('ai-scope-file'),file=fileInput?.files?.[0];
+  if(!file){toast('Choose a PDF scope-of-services document first.','err');return}
+  if(file.type&&file.type!=='application/pdf'){toast('Please choose a PDF file.','err');return}
+  let notes=hsdTemplateFieldValue('ai-scope-notes');
+  state.aiDraft.fileName=file.name;state.aiDraft.status='loading';hsdRefreshAiModal();
+  try{
+    let base64=await hsdFileToBase64(file);
+    let{data,error}=await supabaseClient.functions.invoke('generate-program-template',{body:{
+      pdfBase64:base64,fileName:file.name,notes,
+      existingMeasures:(state.server?.measureLibrary||[]).filter(x=>x.active!==false).map(x=>({code:x.code,name:x.name,description:x.description,kind:x.measure_kind})).slice(0,150)
+    }});
+    if(error){
+      let message=error.message||'The AI drafting request failed.';
+      try{if(error.context){let parsed=await error.context.json();message=parsed?.error||message}}catch(_ignore){}
+      throw new Error(message);
+    }
+    if(data?.error)throw new Error(data.error);
+    let result=data?.result||data||{};
+    state.aiDraft.services=(result.serviceMetrics||[]).map(x=>({selected:true,name:x.name||'',unit:x.unit||'',target:x.goal??x.annualGoal??'',definition:x.definition||'',actualQuestion:x.quarterQuestion||x.actualQuestion||'',sourceQuote:x.sourceQuote||''}));
+    state.aiDraft.outcomes=(result.outcomes||[]).map(x=>({selected:true,name:x.name||'',unit:'percent',target:x.target!=null?Math.round(x.target*1000)/10:'',definition:x.definition||'',denominatorQuestion:x.denominatorQuestion||'',numeratorQuestion:x.numeratorQuestion||'',sourceQuote:x.sourceQuote||''}));
+    state.aiDraft.status='review';
+  }catch(error){
+    console.error(error);state.aiDraft.status='error';state.aiDraft.error=error.message||'Something went wrong reading this document.';
+  }
+  hsdRefreshAiModal();
+}
+async function hsdAiTemplateCommit(){
+  let d=state.aiDraft,t=templateById(d.templateId);if(!hsdTemplateCanEdit(t))return;
+  let button=document.getElementById('ai-commit-btn');hsdTemplateButtonBusy(button,true,'Adding…');
+  let toAdd=[...d.services.filter(x=>x.selected).map(x=>({...x,type:'service'})),...d.outcomes.filter(x=>x.selected).map(x=>({...x,type:'outcome'}))];
+  let nextServiceOrder=hsdTemplateNextOrder(t.serviceMetrics),nextOutcomeOrder=hsdTemplateNextOrder(t.outcomes);
+  let failures=[];
+  for(let m of toAdd){
+    try{
+      let order=m.type==='outcome'?nextOutcomeOrder:nextServiceOrder;
+      if(m.type==='outcome')nextOutcomeOrder+=10;else nextServiceOrder+=10;
+      await hsdInsertProgramMeasure(t,m.type,{
+        name:m.name,unit:m.unit||(m.type==='outcome'?'percent':'units'),target:m.target,category:'',order,duplicated:false,
+        definition:m.definition,targetSource:d.fileName?`AI-drafted from ${d.fileName}; confirm against the source scope of work before relying on this citation.`:'',
+        denominatorQuestion:m.denominatorQuestion,numeratorQuestion:m.numeratorQuestion,actualQuestion:m.actualQuestion,
+        instructions:m.type==='outcome'?'YTD rate equals the combined outcome count divided by the combined reporting population. Quarterly percentages are not averaged.':''
+      });
+    }catch(error){console.error(error);failures.push(m.name||'Untitled measure')}
+  }
+  closeModal();await hsdRefreshTemplateEditor(d.templateId);state.aiDraft=null;
+  if(failures.length)toast(`Added ${toAdd.length-failures.length} of ${toAdd.length} measures. Failed: ${failures.join(', ')}`,'err');
+  else toast(`Added ${toAdd.length} AI-drafted measure${toAdd.length===1?'':'s'} to the draft template. Review each one carefully before publishing.`,'ok');
 }
 async function hsdRemoveTemplateMeasure(templateId,templateMeasureId,label){
   let t=templateById(templateId);if(!hsdTemplateCanEdit(t))return;confirmDialog(`Remove “${label}” from this draft template? The measure remains available in the measure library.`,async()=>{try{let{error}=await supabaseClient.from('template_measures').delete().eq('id',templateMeasureId);if(error)throw error;await hsdRefreshTemplateEditor(templateId);toast('Measure removed from the draft template.','ok')}catch(error){console.error(error);toast(error.message||'Unable to remove the measure.','err')}},{title:'Remove Measure',confirmLabel:'Remove',danger:true})
