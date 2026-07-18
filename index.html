@@ -332,6 +332,8 @@ input[inputmode="numeric"]{direction:ltr;text-align:left;font-variant-numeric:ta
   .export-section,.export-table,.export-note{break-inside:avoid}
   .export-section.page-break{break-before:page}
   .signature-grid{break-inside:avoid}
+  .demo-block{break-inside:avoid;page-break-inside:avoid}
+  .export-subhead{break-after:avoid;page-break-after:avoid}
 }
 .guidance-box{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;margin:0 0 14px;border:1px solid #C9D7E7;border-radius:10px;background:#F5F9FD;color:#33445A;line-height:1.5}
 .guidance-box strong{flex:0 0 auto;color:var(--navy);font-size:12px;text-transform:uppercase;letter-spacing:.04em}
@@ -2313,7 +2315,7 @@ downloadReportExcel=function(id){
   XLSX.writeFile(wb,`HIA_${periodById(r.periodId).label}_Program_Report.xlsx`);addActivity('Exported report Excel',r);
 };
 
-function hsdExportSimpleTable(title,items){return`<div><div class="export-subhead">${esc(title)}</div><table class="export-table"><thead><tr><th>Category</th><th>Quarter</th><th>YTD</th></tr></thead><tbody>${items.map(item=>`<tr><td>${esc(item.label)}</td><td class="num">${fmt(item.quarter)}</td><td class="num">${fmt(item.ytd)}</td></tr>`).join('')}</tbody></table></div>`}
+function hsdExportSimpleTable(title,items){return`<div class="demo-block"><div class="export-subhead">${esc(title)}</div><table class="export-table"><thead><tr><th>Category</th><th>Quarter</th><th>YTD</th></tr></thead><tbody>${items.map(item=>`<tr><td>${esc(item.label)}</td><td class="num">${fmt(item.quarter)}</td><td class="num">${fmt(item.ytd)}</td></tr>`).join('')}</tbody></table></div>`}
 function hsdExportDemographicsHtml(r){
   hsdEnsureAccessShape(r);
   let ageQuarter=AGES.map(age=>`<tr><td>${esc(age)}</td>${GENDERS.map(g=>`<td class="num">${fmt(r.access.ageGender[age][g])}</td>`).join('')}<td class="num">${fmt(sumObject(r.access.ageGender[age]))}</td></tr>`).join('');
@@ -2323,7 +2325,7 @@ function hsdExportDemographicsHtml(r){
   let trans=[['Identifies as transgender',r.access.transgender.yes,ytdAccess(r,['transgender','yes'])],['Does not identify as transgender',r.access.transgender.no,ytdAccess(r,['transgender','no'])],['Unknown/Declined',r.access.transgender.unknown,ytdAccess(r,['transgender','unknown'])]].map(([label,quarter,ytd])=>({label,quarter,ytd}));
   let detail=HSD_TRANS_DETAIL_KEYS.map(key=>({label:HSD_TRANS_DETAIL_LABELS[key],quarter:r.access.transgenderDetail[key],ytd:ytdAccess(r,['transgenderDetail',key])}));
   let race=RACES.map(label=>({label,quarter:r.access.race[label],ytd:ytdAccess(r,['race',label])})),language=LANGUAGES.map(label=>({label,quarter:r.access.language[label],ytd:ytdAccess(r,['language',label])})),affiliation=AFFILIATIONS.map(label=>({label,quarter:r.access.affiliation[label],ytd:ytdAccess(r,['affiliation',label])}));
-  return`<div class="export-section page-break"><h2>Detailed Demographics</h2><div class="export-subhead">Age and gender identity — Quarter</div><table class="export-table"><thead><tr><th>Age</th>${headers}<th>Total</th></tr></thead><tbody>${ageQuarter}</tbody></table><div class="export-subhead">Age and gender identity — Year to Date</div><table class="export-table"><thead><tr><th>Age</th>${headers}<th>Total</th></tr></thead><tbody>${ageYtd}</tbody></table><div class="export-demographic-grid">${hsdExportSimpleTable('Race and ethnicity',race)}${hsdExportSimpleTable('Household language',language)}${hsdExportSimpleTable('LGBTQ+ identity',lgbtq)}${hsdExportSimpleTable('Transgender identity',trans)}${n(r.access.transgender.yes)>0||hsdTransgenderDetailTotal(r)>0?hsdExportSimpleTable('Participants who identify as transgender',detail):''}${hsdExportSimpleTable('Connection to West Hollywood',affiliation)}</div></div>`;
+  return`<div class="export-section page-break"><h2>Detailed Demographics</h2><div class="demo-block"><div class="export-subhead">Age and gender identity — Quarter</div><table class="export-table"><thead><tr><th>Age</th>${headers}<th>Total</th></tr></thead><tbody>${ageQuarter}</tbody></table></div><div class="demo-block"><div class="export-subhead">Age and gender identity — Year to Date</div><table class="export-table"><thead><tr><th>Age</th>${headers}<th>Total</th></tr></thead><tbody>${ageYtd}</tbody></table></div><div class="export-demographic-grid">${hsdExportSimpleTable('Race and ethnicity',race)}${hsdExportSimpleTable('Household language',language)}${hsdExportSimpleTable('LGBTQ+ identity',lgbtq)}${hsdExportSimpleTable('Transgender identity',trans)}${n(r.access.transgender.yes)>0||hsdTransgenderDetailTotal(r)>0?hsdExportSimpleTable('Participants who identify as transgender',detail):''}${hsdExportSimpleTable('Connection to West Hollywood',affiliation)}</div></div>`;
 }
 
 printReport=function(id){
