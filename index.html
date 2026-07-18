@@ -898,7 +898,10 @@ function localDateLabel(value){
 }
 function shortDateLabel(value){
   if(!value)return'';
-  return new Intl.DateTimeFormat('en-US',{timeZone:'America/Los_Angeles',month:'long',day:'numeric',year:'numeric'}).format(new Date(value+'T12:00:00'));
+  let hasTime=/T\d{2}:\d{2}/.test(String(value));
+  let d=hasTime?new Date(value):new Date(value+'T12:00:00');
+  if(Number.isNaN(d.getTime()))return'';
+  return new Intl.DateTimeFormat('en-US',{timeZone:'America/Los_Angeles',month:'long',day:'numeric',year:'numeric'}).format(d);
 }
 function deepMerge(target,source){
   if(!source||typeof source!=='object')return target;
