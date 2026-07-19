@@ -3436,6 +3436,60 @@ function hsdProgramConfigOpenTemplate(programId){let t=hsdProgramConfigLatestTem
 
 async function hsdRefreshProgramConfiguration(){let portalUser=await resolvePortalUser(state.authUser);if(!portalUser)throw new Error('Your portal access could not be refreshed.');await loadPortalData(portalUser);state.view='providers';renderShell();nav('providers',{fromHash:true})}
 
+// Cleanup for test/mistaken entries. Deactivating a provider or program
+// leaves its data in place (by design, for audit history) - these actions
+// instead permanently remove a program or provider and everything under
+// it, for cases like a test provider added while trying out the New
+// Program wizard. Blocked only if an approved report exists anywhere in
+// scope, since an approved report is the closest thing this system has to
+// a final signed-off record; draft/submitted/returned reports and their
+// data are fair game for cleanup. Admin-only. Requires the
+// program_cleanup_migration.sql upgrade (delete_program_cascade /
+// delete_provider_cascade RPCs) to be installed.
+function hsdProgramConfigCountsForProgram(programId){
+  let reports=(state.server?.reports||[]).filter(r=>r.program_id===programId);
+  let versions=(state.server?.program_template_versions||[]).filter(v=>v.program_id===programId);
+  return{reportCount:reports.length,approvedCount:reports.filter(r=>r.status==='approved').length,versionCount:versions.length};
+}
+function hsdProgramConfigCountsForProvider(organizationId){
+  let programs=(state.server?.programs||[]).filter(p=>p.organization_id===organizationId);
+  let programIds=new Set(programs.map(p=>p.id));
+  let reports=(state.server?.reports||[]).filter(r=>programIds.has(r.program_id));
+  let versions=(state.server?.program_template_versions||[]).filter(v=>programIds.has(v.program_id));
+  return{programCount:programs.length,reportCount:reports.length,approvedCount:reports.filter(r=>r.status==='approved').length,versionCount:versions.length};
+}
+function hsdOpenDeleteProgram(programId){
+  if(!isAdmin())return;
+  let program=programById(programId);if(!program)return;
+  let counts=hsdProgramConfigCountsForProgram(programId);
+  if(counts.approvedCount>0){toast(`This program has ${counts.approvedCount} approved report${counts.approvedCount===1?'':'s'} and cannot be deleted.`,'err');return}
+  confirmDialog(`Permanently delete "${program.name}"? This removes the program, ${counts.reportCount} report${counts.reportCount===1?'':'s'} (and all their entered data), and ${counts.versionCount} template version${counts.versionCount===1?'':'s'}. This cannot be undone.`,async()=>{
+    try{
+      let{data,error}=await supabaseClient.rpc('delete_program_cascade',{p_program_id:programId});
+      if(error)throw new Error(error.message.includes('Could not find the function')?'Install the program-cleanup SQL upgrade before deleting a program (see program_cleanup_migration.sql).':error.message);
+      await hsdRefreshProgramConfiguration();
+      toast(`"${data?.program_name||program.name}" deleted (${data?.reports_deleted||0} report${(data?.reports_deleted||0)===1?'':'s'}, ${data?.template_versions_deleted||0} template version${(data?.template_versions_deleted||0)===1?'':'s'}).`,'ok');
+    }catch(error){console.error(error);toast(error.message||'Unable to delete this program.','err')}
+  },{title:'Delete Program',confirmLabel:'Delete Permanently',danger:true});
+}
+function hsdOpenDeleteProvider(providerId){
+  if(!isAdmin())return;
+  let raw=hsdProgramConfigRawProvider(providerId);if(!raw)return;
+  let counts=hsdProgramConfigCountsForProvider(providerId);
+  if(counts.approvedCount>0){toast(`This provider has ${counts.approvedCount} approved report${counts.approvedCount===1?'':'s'} across its programs and cannot be deleted.`,'err');return}
+  let message=counts.programCount
+    ?`Permanently delete "${raw.name}"? This removes the provider, all ${counts.programCount} of its program${counts.programCount===1?'':'s'}, ${counts.reportCount} report${counts.reportCount===1?'':'s'} (and all their entered data), and ${counts.versionCount} template version${counts.versionCount===1?'':'s'}. This cannot be undone.`
+    :`Permanently delete "${raw.name}"? This provider has no programs. This cannot be undone.`;
+  confirmDialog(message,async()=>{
+    try{
+      let{data,error}=await supabaseClient.rpc('delete_provider_cascade',{p_organization_id:providerId});
+      if(error)throw new Error(error.message.includes('Could not find the function')?'Install the program-cleanup SQL upgrade before deleting a provider (see program_cleanup_migration.sql).':error.message);
+      await hsdRefreshProgramConfiguration();
+      toast(`"${data?.provider_name||raw.name}" deleted (${data?.programs_deleted||0} program${(data?.programs_deleted||0)===1?'':'s'}, ${data?.reports_deleted||0} report${(data?.reports_deleted||0)===1?'':'s'}).`,'ok');
+    }catch(error){console.error(error);toast(error.message||'Unable to delete this provider.','err')}
+  },{title:'Delete Provider',confirmLabel:'Delete Permanently',danger:true});
+}
+
 // A single place to see everything the fast-track wizard (or ordinary
 // setup) might have left half-finished: programs with nobody assigned to
 // review them, programs with no published template to report against, and
@@ -3461,8 +3515,8 @@ function renderProviders(){
   if(!isAdmin())return;
   let providers=(state.db.providers||[]).filter(p=>hsdProgramConfigRawProvider(p.id)?.organization_type!=='city').slice().sort((a,b)=>String(a.name).localeCompare(String(b.name))),programs=(state.db.programs||[]).slice().sort((a,b)=>providerName(a.providerId).localeCompare(providerName(b.providerId))||String(a.name).localeCompare(String(b.name)));
   let activePrograms=programs.filter(p=>p.active).length,unassigned=programs.filter(p=>!hsdProgramConfigAssignedMonitorIds(p.id).length).length,noTemplate=programs.filter(p=>!hsdProgramConfigLatestTemplate(p.id)).length;
-  let providerRows=providers.map(p=>{let raw=hsdProgramConfigRawProvider(p.id),count=programs.filter(x=>x.providerId===p.id).length;return`<tr><td><strong>${esc(p.name)}</strong><br><span class="program-config-code">${esc(raw?.code||'')}</span></td><td>${esc(String(raw?.organization_type||'contracted_provider').replaceAll('_',' '))}</td><td class="num">${count}</td><td><span class="status ${p.active?'approved':'draft'}">${p.active?'Active':'Inactive'}</span></td><td><div class="program-config-actions"><button class="btn secondary sm" onclick="hsdOpenEditProvider('${p.id}')">Edit</button></div></td></tr>`}).join('');
-  let programRows=programs.map(p=>{let raw=hsdProgramConfigRawProgram(p.id),template=hsdProgramConfigLatestTemplate(p.id),reports=hsdProgramConfigReportCount(p.id);return`<tr><td><strong>${esc(providerName(p.providerId))}</strong></td><td><div class="program-config-meta"><strong>${esc(p.name)}</strong><small class="program-config-code">${esc(raw?.code||'')}</small><small>${esc(p.contractYears||'Service year not set')}</small></div></td><td>${esc(p.primaryServiceCategory||'—')}</td><td>${template?`<strong>${esc(template.version)}</strong><br><span style="color:var(--muted);font-size:11px">${reports} report${reports===1?'':'s'}</span>`:`<span class="status check">Not configured</span>`}</td><td>${hsdProgramConfigMonitorSummary(p.id)}</td><td><span class="status ${p.active?'approved':'draft'}">${p.active?'Active':'Inactive'}</span></td><td><div class="program-config-actions"><button class="btn secondary sm" onclick="hsdOpenEditProgram('${p.id}')">Edit</button>${template?`<button class="btn subtle sm" onclick="hsdProgramConfigOpenTemplate('${p.id}')">Template</button>`:''}</div></td></tr>`}).join('');
+  let providerRows=providers.map(p=>{let raw=hsdProgramConfigRawProvider(p.id),count=programs.filter(x=>x.providerId===p.id).length;return`<tr><td><strong>${esc(p.name)}</strong><br><span class="program-config-code">${esc(raw?.code||'')}</span></td><td>${esc(String(raw?.organization_type||'contracted_provider').replaceAll('_',' '))}</td><td class="num">${count}</td><td><span class="status ${p.active?'approved':'draft'}">${p.active?'Active':'Inactive'}</span></td><td><div class="program-config-actions"><button class="btn secondary sm" onclick="hsdOpenEditProvider('${p.id}')">Edit</button><button class="btn danger sm" onclick="hsdOpenDeleteProvider('${p.id}')">Delete</button></div></td></tr>`}).join('');
+  let programRows=programs.map(p=>{let raw=hsdProgramConfigRawProgram(p.id),template=hsdProgramConfigLatestTemplate(p.id),reports=hsdProgramConfigReportCount(p.id);return`<tr><td><strong>${esc(providerName(p.providerId))}</strong></td><td><div class="program-config-meta"><strong>${esc(p.name)}</strong><small class="program-config-code">${esc(raw?.code||'')}</small><small>${esc(p.contractYears||'Service year not set')}</small></div></td><td>${esc(p.primaryServiceCategory||'—')}</td><td>${template?`<strong>${esc(template.version)}</strong><br><span style="color:var(--muted);font-size:11px">${reports} report${reports===1?'':'s'}</span>`:`<span class="status check">Not configured</span>`}</td><td>${hsdProgramConfigMonitorSummary(p.id)}</td><td><span class="status ${p.active?'approved':'draft'}">${p.active?'Active':'Inactive'}</span></td><td><div class="program-config-actions"><button class="btn secondary sm" onclick="hsdOpenEditProgram('${p.id}')">Edit</button>${template?`<button class="btn subtle sm" onclick="hsdProgramConfigOpenTemplate('${p.id}')">Template</button>`:''}<button class="btn danger sm" onclick="hsdOpenDeleteProgram('${p.id}')">Delete</button></div></td></tr>`}).join('');
   document.getElementById('view-providers').innerHTML=`<div class="page-head"><div><h1 class="page-title">Providers & Programs</h1><p class="page-sub">Manage provider records, program contracts, primary service categories, reporting setup, and Program Monitor assignments.</p></div><div class="page-actions"><button class="btn secondary" onclick="hsdOpenAddProvider()">Add Provider</button><button class="btn secondary" onclick="hsdOpenAddProgram()">Add Program</button><button class="btn gold" onclick="hsdOpenNewProgramWizard()">New Program from Scope of Services</button></div></div><div class="notice warning"><strong>Configuration changes are live.</strong> Existing report data and historical template assignments are preserved. Edit reporting requirements through versioned Reporting Templates rather than changing past reports.</div><div class="program-config-kpis"><div class="program-config-kpi"><div class="label">Providers</div><div class="value">${providers.length}</div><div class="sub">${providers.filter(p=>p.active).length} active</div></div><div class="program-config-kpi"><div class="label">Programs</div><div class="value">${programs.length}</div><div class="sub">${activePrograms} active</div></div><div class="program-config-kpi"><div class="label">Without monitor</div><div class="value">${unassigned}</div><div class="sub">Programs needing a City assignment</div></div><div class="program-config-kpi"><div class="label">Without published template</div><div class="value">${noTemplate}</div><div class="sub">Programs not ready for reporting</div></div></div>${hsdProgramConfigHealthCard(programs)}<div class="card program-config-section"><div class="card-head"><div><h2 class="card-title">Provider Organizations</h2><p class="portfolio-section-note">Organizations are retained for audit and historical reporting. Deactivate rather than delete records.</p></div></div><div class="card-body"><div class="table-wrap" style="box-shadow:none"><table><thead><tr><th>Provider</th><th>Type</th><th>Programs</th><th>Status</th><th></th></tr></thead><tbody>${providerRows||'<tr><td colspan="5" class="empty">No providers configured.</td></tr>'}</tbody></table></div></div></div><div class="card program-config-section"><div class="card-head"><div><h2 class="card-title">Programs and Contracts</h2><p class="portfolio-section-note">A new program copies a published template and creates reports for the selected service year. Later requirement changes use template versioning.</p></div></div><div class="card-body"><div class="table-wrap" style="box-shadow:none"><table><thead><tr><th>Provider</th><th>Program / Service Year</th><th>Primary Category</th><th>Reporting Setup</th><th>Program Monitor</th><th>Status</th><th></th></tr></thead><tbody>${programRows||'<tr><td colspan="7" class="empty">No programs configured.</td></tr>'}</tbody></table></div></div></div>`;
 }
 
