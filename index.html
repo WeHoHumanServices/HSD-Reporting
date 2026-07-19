@@ -648,7 +648,7 @@ const SUPABASE_URL='https://qsxnyuizbsahucoehrhm.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY='sb_publishable_-nRc8G8cEgbrZ_L8x5OXjQ_z90s6Otd';
 const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const STORE_KEY='weho_hs_contract_reporting_portal';
-const ROLE_LABELS={agency:'Agency User',monitor:'City Program Monitor',admin:'City Administrator'};
+const ROLE_LABELS={agency:'Agency User',monitor:'City Program Monitor',supervisor:'Supervisor',admin:'City Administrator'};
 const PORTAL_ACCESS={
   'fgomez@weho.org':{id:'admin-francisco',name:'Francisco Gomez',title:'Strategic Initiatives Program Administrator',email:'fgomez@weho.org',role:'admin',providerId:'city',programIds:['hia-program'],active:true},
   'mporter@healthcareinaction.org':{id:'agency-melody',name:'Melody Porter',title:'Healthcare in Action Program Staff',email:'mporter@healthcareinaction.org',role:'agency',providerId:'hia',programIds:['hia-program'],active:true},
@@ -709,7 +709,7 @@ function fmt(v){return new Intl.NumberFormat('en-US').format(n(v))}
 function pct(v){return Number.isFinite(Number(v))?Math.round(Number(v)*100)+'%':'0%'}
 function dateTime(v){return v?new Date(v).toLocaleString():'—'}
 function currentUser(){return state.db.users.find(u=>u.id===state.userId)}
-function isCity(){return ['monitor','admin'].includes(currentUser()?.role)}
+function isCity(){return ['monitor','supervisor','admin'].includes(currentUser()?.role)}
 function isAdmin(){return currentUser()?.role==='admin'}
 function isAgency(){return currentUser()?.role==='agency'}
 function manageableTemplates(){let u=currentUser();if(!u)return[];if(u.role==='admin')return state.db.templates;let ids=[...new Set(state.db.programs.filter(p=>(u.programIds||[]).includes(p.id)).map(p=>p.templateId))];return state.db.templates.filter(t=>ids.includes(t.id))}
@@ -996,8 +996,8 @@ function deepMerge(target,source){
   });
   return target;
 }
-function uiRole(roles){if(roles.includes('city_administrator'))return'admin';if(roles.includes('program_monitor'))return'monitor';return'agency'}
-function displayRole(role){return role==='city_administrator'?'City Administrator':role==='program_monitor'?'City Program Monitor':'Agency User'}
+function uiRole(roles){if(roles.includes('city_administrator'))return'admin';if(roles.includes('supervisor'))return'supervisor';if(roles.includes('program_monitor'))return'monitor';return'agency'}
+function displayRole(role){return role==='city_administrator'?'City Administrator':role==='supervisor'?'Supervisor':role==='program_monitor'?'City Program Monitor':'Agency User'}
 function mapOutcomeGuidance(code){
   if(code==='housing_placement_rate')return{
     name:'Transitional or permanent housing placement rate',
@@ -1428,6 +1428,7 @@ function portalRolesForUser(user){
   let rows=(state.server?.user_roles||[]).filter(x=>x.user_id===user.id).map(x=>x.role);
   if(rows.length)return rows;
   if(user.role==='admin')return['city_administrator'];
+  if(user.role==='supervisor')return['supervisor'];
   if(user.role==='monitor')return['program_monitor'];
   return['agency_user'];
 }
@@ -1486,8 +1487,9 @@ function userForm(user={}){
     ${isEdit?'':`<div class="field full"><label>Temporary password</label><input id="usr-temp-password" type="password" minlength="12" autocomplete="new-password" required><div class="help">At least 12 characters. The user will be required to replace it after signing in.</div></div>`}
     <div class="field full"><label>Portal roles</label><div class="checklist">
       <label class="checkbox-row"><input type="checkbox" class="usr-role" value="agency_user" ${roles.has('agency_user')?'checked':''}><span><strong>Agency User</strong><br>Enter and submit reports for assigned programs.</span></label>
-      <label class="checkbox-row"><input type="checkbox" class="usr-role" value="program_monitor" ${roles.has('program_monitor')?'checked':''}><span><strong>City Program Monitor</strong><br>Review reports and manage assigned program templates.</span></label>
-      <label class="checkbox-row"><input type="checkbox" class="usr-role" value="city_administrator" ${roles.has('city_administrator')?'checked':''}><span><strong>City Administrator</strong><br>Full portal administration and access to all programs.</span></label>
+      <label class="checkbox-row"><input type="checkbox" class="usr-role" value="program_monitor" ${roles.has('program_monitor')?'checked':''}><span><strong>City Program Monitor</strong><br>Review reports and draft reporting template changes for assigned programs. Template changes must be submitted for Supervisor review before publishing.</span></label>
+      <label class="checkbox-row"><input type="checkbox" class="usr-role" value="supervisor" ${roles.has('supervisor')?'checked':''}><span><strong>Supervisor</strong><br>Reviews and publishes (or returns) reporting template changes drafted by Program Monitors for assigned programs. Can also draft templates directly.</span></label>
+      <label class="checkbox-row"><input type="checkbox" class="usr-role" value="city_administrator" ${roles.has('city_administrator')?'checked':''}><span><strong>City Administrator</strong><br>Full portal administration and access to all programs. Can publish reporting templates directly without Supervisor review.</span></label>
     </div><div class="help">Agency User cannot be combined with a City role.</div></div>
     <div class="field full"><label>Assigned programs</label><div class="checklist">${programChecks||'<div class="help">No active programs are configured.</div>'}</div><div class="help">Program assignment is required for Agency Users and Program Monitors. City Administrators automatically have access to all programs.</div></div>
     <div class="field"><label>Status</label><select id="usr-active"><option value="true" ${user.active!==false?'selected':''}>Active</option><option value="false" ${user.active===false?'selected':''}>Inactive</option></select></div>
@@ -1500,7 +1502,7 @@ async function saveUser(event,id){
   let roles=selectedPortalRoles(),programIds=selectedPortalPrograms(),name=document.getElementById('usr-name').value.trim(),jobTitle=document.getElementById('usr-title').value.trim(),email=document.getElementById('usr-email').value.trim().toLowerCase(),active=document.getElementById('usr-active').value==='true';
   if(!roles.length){toast('Select at least one portal role.','err');return}
   if(roles.includes('agency_user')&&roles.some(r=>r!=='agency_user')){toast('Agency User cannot be combined with a City role.','err');return}
-  if((roles.includes('agency_user')||roles.includes('program_monitor'))&&!programIds.length){toast('Select at least one assigned program.','err');return}
+  if((roles.includes('agency_user')||roles.includes('program_monitor')||roles.includes('supervisor'))&&!programIds.length){toast('Select at least one assigned program.','err');return}
   let body={action:id?'update':'create',userId:id||undefined,email,name,jobTitle,roles,programIds,active};
   if(!id){let password=document.getElementById('usr-temp-password').value;let error=validateTemporaryPassword(password);if(error){toast(error,'err');return}body.temporaryPassword=password}
   let button=document.getElementById('usr-save');button.disabled=true;button.textContent=id?'Saving…':'Creating…';
@@ -2812,10 +2814,13 @@ function hsdTemplateMeasureRow(id){return(state.server?.templateMeasures||[]).fi
 function hsdTemplateMeasureFields(id){return(state.server?.templateFields||[]).filter(x=>x.template_measure_id===id).sort((a,b)=>a.display_order-b.display_order)}
 function hsdTemplateProgram(t){return t?programById(t.programId):null}
 function hsdTemplateProvider(t){let p=hsdTemplateProgram(t);return p?providerName(p.providerId):'—'}
+function hsdProfileName(id){if(!id)return'';let p=(state.server?.profiles||[]).find(x=>x.id===id);return p?.full_name||p?.email||'A portal user'}
 function hsdTemplateIsDraft(t){return Boolean(t&&t.status==='draft')}
+function hsdTemplateIsSubmitted(t){return Boolean(t&&t.status==='submitted_for_review')}
 function hsdTemplateIsPublished(t){return Boolean(t&&t.status==='published')}
 function hsdTemplateCanEdit(t){return Boolean(t&&hsdTemplateIsDraft(t)&&canManageTemplate(t.id))}
-function hsdTemplateStatusClass(status){return status==='published'?'approved':status==='draft'?'draft':'na'}
+function hsdTemplateStatusClass(status){return status==='published'?'approved':status==='draft'?'draft':status==='submitted_for_review'?'review':'na'}
+function hsdTemplateStatusLabel(status){return status==='submitted_for_review'?'Submitted for Review':status==='published'?'published':status==='draft'?'draft':(status||'draft')}
 function hsdTemplateConditionalFromRow(row){
   let rule=row?.conditional_rule||{};
   if(rule.type==='performance_variance'||rule.condition==='variance')return'variance';
@@ -2860,10 +2865,12 @@ function hsdTemplateButtonBusy(button,busy,label='Saving…'){
 function manageableTemplates(){
   let u=currentUser();if(!u)return[];
   if(u.role==='admin')return(state.db.templates||[]);
-  if(u.role==='monitor'){let ids=new Set(u.programIds||[]);return(state.db.templates||[]).filter(t=>ids.has(t.programId))}
+  if(u.role==='monitor'||u.role==='supervisor'){let ids=new Set(u.programIds||[]);return(state.db.templates||[]).filter(t=>ids.has(t.programId))}
   return[];
 }
-function canManageTemplate(id){let t=templateById(id),u=currentUser();if(!t||!u)return false;if(u.role==='admin')return true;return u.role==='monitor'&&(u.programIds||[]).includes(t.programId)}
+function canManageTemplate(id){let t=templateById(id),u=currentUser();if(!t||!u)return false;if(u.role==='admin')return true;return (u.role==='monitor'||u.role==='supervisor')&&(u.programIds||[]).includes(t.programId)}
+/* Reviewer authority: City Administrators everywhere, or a Supervisor assigned to this template's program. Program Monitors are never reviewers of their own drafts. */
+function canReviewTemplate(id){let t=templateById(id),u=currentUser();if(!t||!u)return false;if(u.role==='admin')return true;return u.role==='supervisor'&&(u.programIds||[]).includes(t.programId)}
 function selectedTemplate(){let list=manageableTemplates();if(!list.length)return null;if(!state.selectedTemplateId||!list.some(t=>t.id===state.selectedTemplateId))state.selectedTemplateId=list.slice().sort((a,b)=>String(a.name).localeCompare(String(b.name))||Number(b.versionNumber||0)-Number(a.versionNumber||0))[0].id;return templateById(state.selectedTemplateId)}
 function programsUsingTemplate(id){let t=templateById(id);if(!t)return[];return(state.db.programs||[]).filter(p=>p.id===t.programId||p.templateId===id)}
 
@@ -2884,7 +2891,7 @@ function buildTemplate(version,server){
     }
   });
   let narratives=server.templateNarratives.filter(x=>x.template_version_id===version.id&&x.active).sort((a,b)=>a.display_order-b.display_order).map(x=>({id:NARRATIVE_UI_IDS[x.code]||x.code,label:x.title,required:x.required,conditional:hsdTemplateConditionalFromRow(x),_promptId:x.id,_code:x.code,prompt:x.prompt,displayOrder:x.display_order||0,active:x.active!==false,conditionalRule:x.conditional_rule||{}}));
-  return{id:version.id,programId:version.program_id,name:`${program?.name||'Program'} Reporting Template`,version:version.version_name,versionNumber:version.version_number,status:version.status,active:version.status==='published',effectiveFrom:version.effective_from||'',effectiveQuarter:version.effective_quarter||'',changeSummary:version.change_summary||'',publishedAt:version.published_at||'',publishedBy:version.published_by||'',createdAt:version.created_at||'',threeYearGoal:Number(three?.target_value||0),threeYearGoalSource:'',bipocTarget:Number(bipoc?.target_value||0),bipocTargetSource:'',ageBands:clone(AGES),races:clone(RACES),affiliations:clone(AFFILIATIONS),languages:clone(LANGUAGES),serviceMetrics,outcomes,narratives};
+  return{id:version.id,programId:version.program_id,name:`${program?.name||'Program'} Reporting Template`,version:version.version_name,versionNumber:version.version_number,status:version.status,active:version.status==='published',effectiveFrom:version.effective_from||'',effectiveQuarter:version.effective_quarter||'',changeSummary:version.change_summary||'',publishedAt:version.published_at||'',publishedBy:version.published_by||'',submittedAt:version.submitted_at||'',submittedBy:version.submitted_by||'',returnedAt:version.returned_at||'',returnedBy:version.returned_by||'',reviewNotes:version.review_notes||'',createdAt:version.created_at||'',threeYearGoal:Number(three?.target_value||0),threeYearGoalSource:'',bipocTarget:Number(bipoc?.target_value||0),bipocTargetSource:'',ageBands:clone(AGES),races:clone(RACES),affiliations:clone(AFFILIATIONS),languages:clone(LANGUAGES),serviceMetrics,outcomes,narratives};
 }
 
 async function hsdRefreshTemplateEditor(selectedId){
@@ -2920,10 +2927,31 @@ function renderTemplates(){
   if(!isCity())return;
   let list=manageableTemplates().slice().sort((a,b)=>String(hsdTemplateProvider(a)).localeCompare(String(hsdTemplateProvider(b)))||String(hsdTemplateProgram(a)?.name||'').localeCompare(String(hsdTemplateProgram(b)?.name||''))||Number(b.versionNumber||0)-Number(a.versionNumber||0)),t=selectedTemplate();
   if(!t){document.getElementById('view-templates').innerHTML=`<div class="page-head"><div><h1 class="page-title">Reporting Templates</h1><p class="page-sub">No reporting templates are available for your assigned programs.</p></div></div>`;return}
-  let editable=hsdTemplateCanEdit(t),selector=`<div class="field template-selector"><label>Program and version</label><select onchange="selectReportingTemplate(this.value)">${list.map(x=>`<option value="${x.id}" ${x.id===t.id?'selected':''}>${esc(hsdTemplateProvider(x))} — ${esc(hsdTemplateProgram(x)?.name||'Program')} · v${esc(x.versionNumber)} · ${esc(x.status)}</option>`).join('')}</select></div>`;
-  let primaryAction=hsdTemplateIsPublished(t)?`<button class="btn" onclick="hsdOpenCloneTemplate('${t.id}')">Create Draft Version</button>`:editable?`<button class="btn gold" onclick="hsdPublishTemplate('${t.id}')">Publish Draft</button>`:'';
+  let editable=hsdTemplateCanEdit(t),isSubmitted=hsdTemplateIsSubmitted(t),isReviewer=canReviewTemplate(t.id),role=currentUser()?.role;
+  let selector=`<div class="field template-selector"><label>Program and version</label><select onchange="selectReportingTemplate(this.value)">${list.map(x=>`<option value="${x.id}" ${x.id===t.id?'selected':''}>${esc(hsdTemplateProvider(x))} — ${esc(hsdTemplateProgram(x)?.name||'Program')} · v${esc(x.versionNumber)} · ${esc(hsdTemplateStatusLabel(x.status))}</option>`).join('')}</select></div>`;
+  let primaryAction='';
+  if(hsdTemplateIsPublished(t)){
+    primaryAction=`<button class="btn" onclick="hsdOpenCloneTemplate('${t.id}')">Create Draft Version</button>`;
+  }else if(isSubmitted){
+    if(isReviewer){
+      primaryAction=`<button class="btn danger" onclick="hsdOpenReturnTemplate('${t.id}')">Return for Revision</button><button class="btn gold" onclick="hsdPublishTemplate('${t.id}')">Approve &amp; Publish</button>`;
+    }else if(canManageTemplate(t.id)){
+      primaryAction=`<button class="btn secondary" onclick="hsdWithdrawTemplateSubmission('${t.id}')">Withdraw Submission</button>`;
+    }
+  }else if(editable){
+    primaryAction=role==='admin'?`<button class="btn gold" onclick="hsdPublishTemplate('${t.id}')">Publish Draft</button>`:`<button class="btn gold" onclick="hsdSubmitTemplateForReview('${t.id}')">Submit for Supervisor Review</button>`;
+  }
   let deleteAction=editable?`<button class="btn danger" onclick="hsdDeleteDraftTemplate('${t.id}')">Delete Draft Version</button>`:(hsdTemplateIsPublished(t)&&isAdmin()?`<button class="btn danger" onclick="hsdDeletePublishedTemplate('${t.id}')">Delete Published Version</button>`:'');
-  let notice=hsdTemplateIsPublished(t)?`<div class="notice"><strong>Published versions are protected.</strong> Create a draft version to change reporting requirements. Existing reports remain tied to the version they were created with.</div>`:`<div class="notice warning"><strong>Draft editing is active.</strong> Changes save to the shared database but do not affect agency reports until this version is published. Publishing assigns it only to eligible reports that have not opened yet.</div>`;
+  let notice;
+  if(hsdTemplateIsPublished(t)){
+    notice=`<div class="notice"><strong>Published versions are protected.</strong> Create a draft version to change reporting requirements. Existing reports remain tied to the version they were created with.</div>`;
+  }else if(isSubmitted){
+    notice=`<div class="notice warning"><strong>Submitted for Supervisor review${t.submittedBy?` by ${esc(hsdProfileName(t.submittedBy))}`:''}${t.submittedAt?` on ${esc(dateTime(t.submittedAt))}`:''}.</strong> Measures, fields, and narrative prompts are locked until a Supervisor or City Administrator publishes or returns this version.</div>`;
+  }else if(t.returnedAt&&t.reviewNotes){
+    notice=`<div class="notice danger"><strong>Returned for revision${t.returnedBy?` by ${esc(hsdProfileName(t.returnedBy))}`:''}:</strong> ${esc(t.reviewNotes)}</div>`;
+  }else{
+    notice=`<div class="notice warning"><strong>Draft editing is active.</strong> Changes save to the shared database but do not affect agency reports until this version is published. ${role==='admin'?'Publishing assigns it only to eligible reports that have not opened yet.':'Submit for Supervisor review when ready — a Supervisor or City Administrator will publish or return it with feedback.'}</div>`;
+  }
   document.getElementById('view-templates').innerHTML=`<div class="page-head"><div><h1 class="page-title">Reporting Templates</h1><p class="page-sub">Create versioned program requirements without changing historical reports.</p></div><div class="page-actions">${selector}${editable?`<button class="btn gold" onclick="hsdOpenAiTemplateDesigner('${t.id}')">AI Draft from Scope of Services</button>`:''}${primaryAction}${deleteAction}</div></div>${notice}${hsdRenderTemplateSummary(t)}${hsdRenderTemplateMetadata(t,editable)}${hsdRenderTemplateMeasures(t,editable)}${hsdRenderTemplateOutcomes(t,editable)}${hsdRenderTemplateNarratives(t,editable)}`;
 }
 
@@ -2939,17 +2967,44 @@ async function hsdSaveTemplateDetails(event,id){
   event.preventDefault();let t=templateById(id),button=document.getElementById('tpl-save-details');if(!hsdTemplateCanEdit(t))return;hsdTemplateButtonBusy(button,true);
   try{let payload={version_name:hsdTemplateFieldValue('tpl-version-name').trim(),effective_from:hsdTemplateFieldValue('tpl-effective-from')||null,effective_quarter:hsdTemplateFieldValue('tpl-effective-quarter').trim(),change_summary:hsdTemplateFieldValue('tpl-change-summary').trim()};let{error}=await supabaseClient.from('program_template_versions').update(payload).eq('id',id);if(error)throw error;await hsdRefreshTemplateEditor(id);toast('Draft template details saved.','ok')}catch(error){console.error(error);toast(error.message||'Unable to save the draft template.','err');hsdTemplateButtonBusy(button,false)}
 }
-async function hsdPublishTemplate(id){
+async function hsdSubmitTemplateForReview(id){
   let t=templateById(id);if(!hsdTemplateCanEdit(t))return;
+  if(!t.effectiveFrom||!String(t.effectiveQuarter||'').trim()){toast('Save an effective date and effective quarter before submitting for review.','err');return}
+  if(!(t.serviceMetrics||[]).length&&(t.outcomes||[]).length===0){toast('Add at least one reporting measure before submitting for review.','err');return}
+  confirmDialog(`Submit ${t.version} for Supervisor review? You will not be able to make further changes unless it is returned or withdrawn.`,async()=>{
+    try{let{error}=await supabaseClient.rpc('submit_template_version_for_review',{p_template_version_id:id});if(error)throw error;
+      await hsdRefreshTemplateEditor(id);toast('Submitted for Supervisor review.','ok')
+    }catch(error){console.error(error);toast(error.message||'Unable to submit this template for review.','err')}
+  },{title:'Submit for Review',confirmLabel:'Submit for Review'})
+}
+async function hsdWithdrawTemplateSubmission(id){
+  let t=templateById(id);if(!hsdTemplateIsSubmitted(t)||!canManageTemplate(id))return;
+  confirmDialog(`Withdraw ${t.version} from review and return it to draft for more editing?`,async()=>{
+    try{let{error}=await supabaseClient.rpc('withdraw_template_version_submission',{p_template_version_id:id});if(error)throw error;
+      await hsdRefreshTemplateEditor(id);toast('Submission withdrawn. The version is a draft again.','ok')
+    }catch(error){console.error(error);toast(error.message||'Unable to withdraw this submission.','err')}
+  },{title:'Withdraw Submission',confirmLabel:'Withdraw'})
+}
+function hsdOpenReturnTemplate(id){
+  let t=templateById(id);if(!hsdTemplateIsSubmitted(t)||!canReviewTemplate(id))return;
+  promptDialog('Explain what needs to change before this template can be published:',async(reason)=>{
+    try{let{error}=await supabaseClient.rpc('return_template_version_for_revision',{p_template_version_id:id,p_reason:reason});if(error)throw error;
+      await hsdRefreshTemplateEditor(id);toast('Returned to the author for revision.','ok')
+    }catch(error){toast(error.message||'Unable to return this template.','err')}
+  },{title:'Return for Revision',confirmLabel:'Return for Revision',requiredMessage:'A reason is required so the author knows what to fix.'})
+}
+async function hsdPublishTemplate(id){
+  let t=templateById(id);if(!(hsdTemplateCanEdit(t)||(hsdTemplateIsSubmitted(t)&&canReviewTemplate(id))))return;
   if(!t.effectiveFrom||!String(t.effectiveQuarter||'').trim()){toast('Save an effective date and effective quarter before publishing.','err');return}
   if(!(t.serviceMetrics||[]).length&&(t.outcomes||[]).length===0){toast('Add at least one reporting measure before publishing.','err');return}
-  confirmDialog(`Publish ${t.version}? Published requirements cannot be edited. Eligible reports that have not opened will be assigned to this version.`,async()=>{
+  let verb=hsdTemplateIsSubmitted(t)?'Approve and publish':'Publish';
+  confirmDialog(`${verb} ${t.version}? Published requirements cannot be edited. Eligible reports that have not opened will be assigned to this version.`,async()=>{
     try{let{error}=await supabaseClient.rpc('publish_template_version',{p_template_version_id:id});if(error)throw error;
       let periodMap=Object.fromEntries((state.server?.reporting_periods||[]).map(p=>[p.id,p])),eligible=(state.server?.reports||[]).filter(r=>r.program_id===t.programId&&r.status==='not_open').filter(r=>String(periodMap[r.reporting_period_id]?.period_start||'')>=String(t.effectiveFrom)).map(r=>r.id);
       if(eligible.length){let{error:assignmentError}=await supabaseClient.from('reports').update({template_version_id:id}).in('id',eligible);if(assignmentError)throw new Error(`The template was published, but future report assignment failed: ${assignmentError.message}`)}
       await hsdRefreshTemplateEditor(id);toast(`Template published. ${eligible.length} future report${eligible.length===1?' was':'s were'} assigned to this version.`,'ok')
     }catch(error){console.error(error);toast(error.message||'Unable to publish the template.','err')}
-  },{title:'Publish Template Version',confirmLabel:'Publish'})
+  },{title:'Publish Template Version',confirmLabel:verb})
 }
 async function hsdDeleteDraftTemplate(id){
   let t=templateById(id);if(!hsdTemplateCanEdit(t))return;let references=(state.server?.reports||[]).filter(r=>r.template_version_id===id);
@@ -3427,7 +3482,7 @@ function hsdProgramConfigSelectedMonitors(){return[...document.querySelectorAll(
 function hsdProgramConfigCategoryOptions(selectedId=''){let categories=(state.server?.service_categories||[]).filter(c=>c.active).sort((a,b)=>Number(a.display_order||0)-Number(b.display_order||0)||String(a.name).localeCompare(String(b.name)));return`<option value="">No primary category selected</option>${categories.map(c=>`<option value="${c.id}" ${c.id===selectedId?'selected':''}>${esc(c.name)}</option>`).join('')}`}
 function hsdProgramConfigProviderOptions(selectedId=''){return(state.server?.organizations||[]).filter(o=>o.organization_type!=='city').sort((a,b)=>String(a.name).localeCompare(String(b.name))).map(o=>`<option value="${o.id}" ${o.id===selectedId?'selected':''}>${esc(o.name)}${o.active?'':' (inactive)'}</option>`).join('')}
 function hsdProgramConfigServiceYearOptions(selected=''){let labels=[...new Set((state.server?.reporting_periods||[]).map(p=>p.service_year_label).filter(Boolean))];labels.sort();return labels.map(label=>`<option value="${esc(label)}" ${label===selected?'selected':''}>${esc(label)}</option>`).join('')}
-function hsdProgramConfigTemplateOptions(){return hsdProgramConfigPublishedTemplates().map(t=>`<option value="${t.id}">${esc(programById(t.programId)?.name||'Program')} · ${esc(t.version)}</option>`).join('')}
+function hsdProgramConfigTemplateOptions(){let blank=hsdProgramConfigBlankSeedTemplate(),list=hsdProgramConfigPublishedTemplates().slice().sort((a,b)=>(a.id===blank?.id?-1:b.id===blank?.id?1:0));return list.map(t=>`<option value="${t.id}" ${blank&&t.id===blank.id?'selected':''}>${esc(programById(t.programId)?.name||'Program')} · ${esc(t.version)}${blank&&t.id===blank.id?' (blank starting structure — recommended)':''}</option>`).join('')}
 function hsdProgramConfigFieldValue(id){return document.getElementById(id)?.value??''}
 function hsdProgramConfigBusy(button,busy,label='Saving…'){if(!button)return;button.disabled=busy;if(!button.dataset.label)button.dataset.label=button.textContent;button.textContent=busy?label:button.dataset.label}
 function hsdProgramConfigDateRangeForYear(label){let periods=(state.server?.reporting_periods||[]).filter(p=>p.service_year_label===label).sort((a,b)=>String(a.period_start).localeCompare(String(b.period_start)));return{start:periods[0]?.period_start||'',end:periods.at(-1)?.period_end||''}}
