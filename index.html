@@ -164,6 +164,10 @@ input[inputmode="numeric"]{direction:ltr;text-align:left;font-variant-numeric:ta
 .field label .optional{font-weight:500;color:#8A95A2;text-transform:none}
 .field input,.field select,.field textarea{border:1px solid var(--line);border-radius:9px;padding:9px 11px;background:#fff;width:100%}
 .field textarea{min-height:105px;resize:vertical;line-height:1.5}
+.narrative-meta{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:6px}
+.narrative-meta .word-count{font-size:11px;color:var(--muted)}
+.narrative-meta .btn-link{font-size:12px;padding:2px}
+
 .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue)}
 .field input[readonly]{background:#F5F7F9;color:#566273}
 .field.error input,.field.error select,.field.error textarea{border-color:var(--red);box-shadow:0 0 0 2px rgba(178,58,50,.10)}
@@ -842,8 +846,49 @@ function narrativeVisible(item,r){if(item.required||!item.conditional)return tru
 function copyPriorNarratives(){let r=reportById(state.currentReportId),idx=PERIODS.findIndex(p=>p.id===r.periodId);if(idx<=0){toast('There is no prior quarter to copy.','err');return}let prior=reportsForProgram(r.programId).find(x=>x.periodId===PERIODS[idx-1].id);if(!prior){toast('Prior-quarter report not found.','err');return}confirmDialog(`Copy narrative text from ${PERIODS[idx-1].label}? Existing current-quarter text will be replaced.`,()=>{r.narratives=clone(prior.narratives);r.updatedAt=now();addActivity('Copied prior-quarter narratives',r,PERIODS[idx-1].label);saveDb();renderReport();toast('Prior-quarter narratives copied.','ok')},{title:'Copy prior-quarter narratives',confirmLabel:'Copy text'})}
 function renderNarratives(r){
   let disabled=!canEditReport(r);
-  let fields=narrativesForReport(r).filter(x=>narrativeVisible(x,r)).map(x=>{if(!(x.id in r.narratives.values))r.narratives.values[x.id]='';return`<div class="field full ${x.conditional?'conditional':''}"><label>${esc(x.label)} ${x.required||x.conditional?'<span class="required">*</span>':''}</label><textarea ${disabled?'disabled':''} oninput="updatePath('narratives.values.${x.id}',this.value)">${esc(r.narratives.values[x.id])}</textarea>${x.id==='success_story'?'<div class="help">Do not include names, exact birth dates, medical record numbers, identifiable photographs, detailed diagnoses, or other identifying health information.</div>':''}</div>`}).join('');
+  let fields=narrativesForReport(r).filter(x=>narrativeVisible(x,r)).map(x=>{if(!(x.id in r.narratives.values))r.narratives.values[x.id]='';let val=r.narratives.values[x.id],wc=hsdWordCount(val);return`<div class="field full ${x.conditional?'conditional':''}"><label>${esc(x.label)} ${x.required||x.conditional?'<span class="required">*</span>':''}</label><textarea id="narrative-ta-${x.id}" ${disabled?'disabled':''} oninput="updatePath('narratives.values.${x.id}',this.value);hsdUpdateNarrativeWordCount('${x.id}')">${esc(val)}</textarea><div class="narrative-meta"><span class="word-count" id="narrative-wc-${x.id}">${wc} word${wc===1?'':'s'}</span>${disabled?'':`<button type="button" class="btn-link" id="narrative-ai-btn-${x.id}" onclick="hsdNarrativeAiAssist('${x.id}')">${val.trim()?'✨ Improve with AI':'✨ Draft with AI'}</button>`}</div>${x.id==='success_story'?'<div class="help">Do not include names, exact birth dates, medical record numbers, identifiable photographs, detailed diagnoses, or other identifying health information.</div>':''}</div>`}).join('');
   return`<div class="section"><div class="section-title"><span>Program Narrative</span><small>Quarterly context and program results</small></div><div class="section-body"><div class="page-actions no-print" style="justify-content:flex-start;margin-bottom:14px"><button class="btn secondary sm" ${disabled?'disabled':''} onclick="copyPriorNarratives()">Copy narrative from prior quarter</button></div><div class="form-grid"><div class="field"><label>Staffing changes?</label><select ${disabled?'disabled':''} onchange="updatePath('narratives.flags.staffing',this.value);renderReport()"><option ${r.narratives.flags.staffing==='No'?'selected':''}>No</option><option ${r.narratives.flags.staffing==='Yes'?'selected':''}>Yes</option></select></div><div class="field"><label>Budget modification or reallocation?</label><select ${disabled?'disabled':''} onchange="updatePath('narratives.flags.budget',this.value);renderReport()"><option ${r.narratives.flags.budget==='No'?'selected':''}>No</option><option ${r.narratives.flags.budget==='Yes'?'selected':''}>Yes</option></select></div>${fields}</div>${reviewComment('narratives',r)}</div></div>`
+}
+function hsdWordCount(v){let s=String(v||'').trim();return s?s.split(/\s+/).length:0}
+function hsdUpdateNarrativeWordCount(promptId){let r=reportById(state.currentReportId);if(!r)return;let el=document.getElementById('narrative-wc-'+promptId);if(!el)return;let wc=hsdWordCount(r.narratives.values[promptId]);el.textContent=wc+' word'+(wc===1?'':'s')}
+function hsdNarrativeContextSummary(r){
+  let t=getTemplateForReport(r),parts=[];
+  (t?.serviceMetrics||[]).forEach(m=>{let x=r.services[m.id]||{};if(x.actual!=='')parts.push(`${m.name}: ${x.actual} this quarter (status: ${finalServiceStatus(r,m)})`)});
+  (t?.outcomes||[]).forEach(o=>{let x=r.outcomes[o.id]||{};if(x.denominator!=='')parts.push(`${o.name}: ${x.numerator||x.transitional&&(n(x.transitional)+n(x.permanent))||0} of ${x.denominator} this quarter (status: ${finalOutcomeStatus(r,o)})`)});
+  if(r.narratives.flags.staffing==='Yes')parts.push('Staffing changes occurred this quarter.');
+  if(r.narratives.flags.budget==='Yes')parts.push('A budget modification or reallocation occurred this quarter.');
+  return parts.join('; ')||'No quantitative data has been entered yet for this report.';
+}
+async function hsdNarrativeAiAssist(promptId){
+  let r=reportById(state.currentReportId);if(!r||!canEditReport(r))return;
+  let item=narrativesForReport(r).find(x=>x.id===promptId);if(!item)return;
+  let btn=document.getElementById('narrative-ai-btn-'+promptId),ta=document.getElementById('narrative-ta-'+promptId);
+  let originalLabel=btn?btn.textContent:'';
+  if(btn){btn.disabled=true;btn.textContent='Drafting…'}
+  try{
+    let body={
+      promptLabel:item.label,promptInstructions:item.prompt||item.label,
+      existingText:r.narratives.values[promptId]||'',
+      programName:programById(r.programId)?.name||'',periodLabel:periodById(r.periodId)?.label||'',
+      contextSummary:hsdNarrativeContextSummary(r)
+    };
+    let{data,error}=await supabaseClient.functions.invoke('draft-report-narrative',{body});
+    if(error){
+      let message=error.message||'The AI drafting request failed.';
+      try{if(error.context){let parsed=await error.context.json();message=parsed?.error||message}}catch(_ignore){}
+      throw new Error(message);
+    }
+    if(data?.error)throw new Error(data.error);
+    if(!data?.draft)throw new Error('The AI did not return a draft. Please try again.');
+    r.narratives.values[promptId]=data.draft.trim();
+    r.updatedAt=now();showAutosave();saveDb();
+    if(ta){ta.value=r.narratives.values[promptId];hsdAutoGrowTextarea(ta);hsdUpdateNarrativeWordCount(promptId)}
+    if(btn){btn.disabled=false;btn.textContent='✨ Improve with AI'}
+    toast('AI draft added — review and edit before saving.','ok');
+  }catch(error){
+    console.error(error);toast(error.message||'Unable to draft this narrative right now.','err');
+    if(btn){btn.disabled=false;btn.textContent=originalLabel}
+  }
 }
 function renderReviewBase(r){if(!isCity())return'<div class="notice danger">City access required.</div>';let comp=completeness(r);return`<div class="section"><div class="section-title"><span>City Review Workspace</span><small>Section comments and workflow actions</small></div><div class="section-body"><div class="grid2"><div><h3 class="card-title">Report readiness</h3><div class="checklist" style="margin-top:10px">${comp.checks.map(x=>`<div class="check-row ${x.ok?'ok':'check'}"><div class="check-mark">${x.ok?'✓':'!'}</div><div><strong>${esc(x.label)}</strong><span>${esc(x.detail)}</span></div></div>`).join('')}</div></div><div><h3 class="card-title">Section comments</h3><div class="table-wrap" style="box-shadow:none;margin-top:10px"><table><tbody>${['access','services','outcomes','narratives','certification'].map(k=>`<tr><th>${k[0].toUpperCase()+k.slice(1)}</th><td>${r.comments[k]?esc(r.comments[k]):'<span style="color:var(--muted)">No comment</span>'}</td><td><button class="btn secondary sm" onclick="setReportTab('${k}')">Open</button></td></tr>`).join('')}</tbody></table></div><div class="comment-box"><label>Overall City review comment</label><textarea oninput="updateComment('overall',this.value)" placeholder="Summary comment visible to the agency…">${esc(r.comments.overall)}</textarea></div><div class="aside-actions" style="margin-top:14px">${cityWorkflowButtons(r)}</div></div></div></div></div>`}
 function renderReportAsideBase(r){let comp=completeness(r);return`<div class="card"><div class="card-head"><h2 class="card-title">Report Completion</h2></div><div class="card-body"><div class="completeness">${comp.pct}%</div><div class="progress gold" style="margin:8px 0 12px"><span style="width:${comp.pct}%"></span></div><div class="checklist">${comp.checks.slice(0,8).map(x=>`<div class="check-row ${x.ok?'ok':'check'}"><div class="check-mark">${x.ok?'✓':'!'}</div><div><strong>${esc(x.label)}</strong><span>${x.ok?'Complete':esc(x.detail)}</span></div></div>`).join('')}</div>${comp.checks.length>8?`<button class="btn-link" onclick="openQualityModal('${r.id}')">View all ${comp.checks.length} checks</button>`:''}<div class="aside-actions">${agencyWorkflowButtons(r,comp)}${isCity()?cityWorkflowButtons(r):''}</div></div></div><div class="card" style="margin-top:14px"><div class="card-head"><h2 class="card-title">Activity Timeline</h2></div><div class="card-body"><div class="timeline">${r.history.slice().reverse().map(h=>`<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-copy"><strong>${esc(h.action)}</strong><span>${esc(h.actor)} · ${dateTime(h.at)}</span></div></div>`).join('')}</div></div></div>${r.comments.overall?`<div class="comment-readonly" style="margin-top:14px"><strong>Overall City comment:</strong><br>${esc(r.comments.overall)}</div>`:''}`}
@@ -3432,6 +3477,37 @@ async function hsdSaveNewProgram(event){event.preventDefault();let button=docume
 function hsdOpenEditProgram(programId){let raw=hsdProgramConfigRawProgram(programId),program=programById(programId);if(!raw||!program)return;let template=hsdProgramConfigLatestTemplate(programId),assigned=hsdProgramConfigAssignedMonitorIds(programId);openModal('Edit Program Configuration',`<form onsubmit="hsdSaveProgram(event,'${programId}')"><div class="form-grid"><div class="field"><label>Provider <span class="required">*</span></label><select id="pc-provider-id" required>${hsdProgramConfigProviderOptions(raw.organization_id)}</select></div><div class="field"><label>Program code <span class="required">*</span></label><input id="pc-program-code" value="${esc(raw.code)}" required oninput="this.value=hsdProgramConfigSafeCode(this.value)"></div><div class="field full"><label>Program name <span class="required">*</span></label><input id="pc-program-name" value="${esc(raw.name)}" required></div><div class="field full"><label>Description</label><textarea id="pc-description">${esc(raw.description||'')}</textarea></div><div class="field"><label>Primary service category</label><select id="pc-category">${hsdProgramConfigCategoryOptions(raw.primary_service_category_id||'')}</select></div><div class="field"><label>Service-year label</label><input id="pc-service-year" value="${esc(raw.service_year_label||'')}"><div class="help">Changing this label does not relink existing reports to different reporting periods.</div></div><div class="field"><label>Contract start</label><input id="pc-contract-start" type="date" value="${esc(raw.contract_start_date||'')}"></div><div class="field"><label>Contract end</label><input id="pc-contract-end" type="date" value="${esc(raw.contract_end_date||'')}"></div><div class="field"><label>Program status</label><select id="pc-program-active"><option value="true" ${raw.active?'selected':''}>Active</option><option value="false" ${!raw.active?'selected':''}>Inactive</option></select></div><div class="field full"><label>Assigned Program Monitor(s)</label>${hsdProgramConfigMonitorChecklist(assigned)}</div></div><div class="program-config-template" style="margin-top:14px"><strong>Published reporting template:</strong> ${template?`${esc(template.version)} · ${hsdProgramConfigReportCount(programId)} existing report${hsdProgramConfigReportCount(programId)===1?'':'s'}`:'No published template is currently available.'}<br>Use Reporting Templates to change requirements. Existing reports retain their original template version.</div><div class="modal-actions"><button class="btn secondary" type="button" onclick="closeModal()">Cancel</button>${template?`<button class="btn subtle" type="button" onclick="closeModal();hsdProgramConfigOpenTemplate('${programId}')">Open Template</button>`:''}<button class="btn" id="pc-program-save" type="submit">Save Program</button></div></form>`)}
 async function hsdSaveProgram(event,programId){event.preventDefault();let button=document.getElementById('pc-program-save');hsdProgramConfigBusy(button,true);try{let start=hsdProgramConfigFieldValue('pc-contract-start')||null,end=hsdProgramConfigFieldValue('pc-contract-end')||null;if(start&&end&&end<start)throw new Error('Contract end date must be on or after the start date.');let params={p_program_id:programId,p_organization_id:hsdProgramConfigFieldValue('pc-provider-id'),p_code:hsdProgramConfigSafeCode(hsdProgramConfigFieldValue('pc-program-code')),p_name:hsdProgramConfigFieldValue('pc-program-name').trim(),p_description:hsdProgramConfigFieldValue('pc-description').trim()||null,p_primary_service_category_id:hsdProgramConfigFieldValue('pc-category')||null,p_contract_start_date:start,p_contract_end_date:end,p_service_year_label:hsdProgramConfigFieldValue('pc-service-year').trim()||null,p_active:hsdProgramConfigFieldValue('pc-program-active')==='true',p_monitor_user_ids:hsdProgramConfigSelectedMonitors()};if(!params.p_code)throw new Error('Enter a valid program code.');let{error}=await supabaseClient.rpc('update_program_configuration',params);if(error)throw new Error(error.message.includes('Could not find the function')?'Install the program-configuration SQL upgrade before editing a program.':error.message);closeModal();await hsdRefreshProgramConfiguration();toast('Program configuration updated.','ok')}catch(error){console.error(error);toast(error.message||'Unable to update the program.','err');hsdProgramConfigBusy(button,false)}}
 
+
+function hsdAutoGrowTextarea(el){
+  if(!el||el.dataset.noAutogrow)return;
+  el.style.height='auto';
+  let max=460,h=Math.min(el.scrollHeight,max);
+  el.style.height=h+'px';
+  el.style.overflowY=el.scrollHeight>max?'auto':'hidden';
+}
+function hsdBindEnhancedTextareas(root){
+  (root||document).querySelectorAll('textarea:not([data-enhanced])').forEach(el=>{
+    el.dataset.enhanced='1';
+    el.setAttribute('spellcheck','true');
+    if(!el.hasAttribute('lang'))el.setAttribute('lang','en');
+    el.addEventListener('input',()=>hsdAutoGrowTextarea(el));
+    hsdAutoGrowTextarea(el);
+  });
+}
+(function(){
+  let scheduled=false;
+  let observer=new MutationObserver(muts=>{
+    if(scheduled)return;
+    for(let m of muts){
+      if(m.addedNodes&&m.addedNodes.length){scheduled=true;break}
+    }
+    if(scheduled)requestAnimationFrame(()=>{hsdBindEnhancedTextareas();scheduled=false});
+  });
+  document.addEventListener('DOMContentLoaded',()=>{
+    observer.observe(document.body,{childList:true,subtree:true});
+    hsdBindEnhancedTextareas();
+  });
+})();
 
 initializeAuth();
 </script>
