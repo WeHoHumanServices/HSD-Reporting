@@ -552,7 +552,7 @@ input[inputmode="numeric"]{direction:ltr;text-align:left;font-variant-numeric:ta
 
 /* Database-backed provider and program configuration */
 .program-config-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}
-.program-config-kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:15px 16px;box-shadow:var(--shadow)}
+.program-config-kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:15px 16px;box-shadow:var(--shadow)}.program-config-health-group{margin-bottom:14px}.program-config-health-group:last-child{margin-bottom:0}.program-config-health-group>strong{display:block;margin-bottom:8px;font-size:13px}.program-config-health-group .check-row{margin-bottom:6px;justify-content:space-between}.program-config-health-group .check-row:last-child{margin-bottom:0}
 .program-config-kpi .label{font-size:10px;text-transform:uppercase;letter-spacing:.055em;color:var(--muted);font-weight:800}
 .program-config-kpi .value{font-size:25px;font-weight:800;color:var(--navy);margin-top:5px;font-variant-numeric:tabular-nums}
 .program-config-kpi .sub{font-size:11px;color:var(--muted);line-height:1.4;margin-top:3px}
@@ -2877,7 +2877,7 @@ function renderTemplates(){
   if(!t){document.getElementById('view-templates').innerHTML=`<div class="page-head"><div><h1 class="page-title">Reporting Templates</h1><p class="page-sub">No reporting templates are available for your assigned programs.</p></div></div>`;return}
   let editable=hsdTemplateCanEdit(t),selector=`<div class="field template-selector"><label>Program and version</label><select onchange="selectReportingTemplate(this.value)">${list.map(x=>`<option value="${x.id}" ${x.id===t.id?'selected':''}>${esc(hsdTemplateProvider(x))} — ${esc(hsdTemplateProgram(x)?.name||'Program')} · v${esc(x.versionNumber)} · ${esc(x.status)}</option>`).join('')}</select></div>`;
   let primaryAction=hsdTemplateIsPublished(t)?`<button class="btn" onclick="hsdOpenCloneTemplate('${t.id}')">Create Draft Version</button>`:editable?`<button class="btn gold" onclick="hsdPublishTemplate('${t.id}')">Publish Draft</button>`:'';
-  let deleteAction=editable?`<button class="btn danger" onclick="hsdDeleteDraftTemplate('${t.id}')">Delete Draft</button>`:'';
+  let deleteAction=editable?`<button class="btn danger" onclick="hsdDeleteDraftTemplate('${t.id}')">Delete Draft Version</button>`:(hsdTemplateIsPublished(t)&&isAdmin()?`<button class="btn danger" onclick="hsdDeletePublishedTemplate('${t.id}')">Delete Published Version</button>`:'');
   let notice=hsdTemplateIsPublished(t)?`<div class="notice"><strong>Published versions are protected.</strong> Create a draft version to change reporting requirements. Existing reports remain tied to the version they were created with.</div>`:`<div class="notice warning"><strong>Draft editing is active.</strong> Changes save to the shared database but do not affect agency reports until this version is published. Publishing assigns it only to eligible reports that have not opened yet.</div>`;
   document.getElementById('view-templates').innerHTML=`<div class="page-head"><div><h1 class="page-title">Reporting Templates</h1><p class="page-sub">Create versioned program requirements without changing historical reports.</p></div><div class="page-actions">${selector}${editable?`<button class="btn gold" onclick="hsdOpenAiTemplateDesigner('${t.id}')">AI Draft from Scope of Services</button>`:''}${primaryAction}${deleteAction}</div></div>${notice}${hsdRenderTemplateSummary(t)}${hsdRenderTemplateMetadata(t,editable)}${hsdRenderTemplateMeasures(t,editable)}${hsdRenderTemplateOutcomes(t,editable)}${hsdRenderTemplateNarratives(t,editable)}`;
 }
@@ -2909,7 +2909,23 @@ async function hsdPublishTemplate(id){
 async function hsdDeleteDraftTemplate(id){
   let t=templateById(id);if(!hsdTemplateCanEdit(t))return;let references=(state.server?.reports||[]).filter(r=>r.template_version_id===id);
   if(references.length){toast('This draft is already referenced by a report and cannot be deleted.','err');return}
-  confirmDialog(`Delete ${t.version}? This permanently removes the draft and its measures and prompts.`,async()=>{try{let{error}=await supabaseClient.from('program_template_versions').delete().eq('id',id);if(error)throw error;state.selectedTemplateId='';await hsdRefreshTemplateEditor();toast('Draft template deleted.','ok')}catch(error){console.error(error);toast(error.message||'Unable to delete the draft.','err')}},{title:'Delete Draft Template',confirmLabel:'Delete Draft',danger:true})
+  confirmDialog(`Delete ${t.version}? This permanently removes the draft and its measures and prompts.`,async()=>{try{let{error}=await supabaseClient.from('program_template_versions').delete().eq('id',id);if(error)throw error;state.selectedTemplateId='';await hsdRefreshTemplateEditor();toast('Draft template deleted.','ok')}catch(error){console.error(error);toast(error.message||'Unable to delete the draft.','err')}},{title:'Delete Draft Version',confirmLabel:'Delete Draft',danger:true})
+}
+
+// Deleting a PUBLISHED version is admin-only and blocked entirely if any
+// report references it, per city policy: no report should ever lose the
+// template version it was actually created and evaluated against. Retire
+// an unwanted published version by publishing a replacement draft instead
+// - this delete path only exists for cleaning up versions that were
+// published by mistake or superseded before any report ever used them.
+async function hsdDeletePublishedTemplate(id){
+  let t=templateById(id);if(!t||!hsdTemplateIsPublished(t)||!isAdmin())return;
+  let references=(state.server?.reports||[]).filter(r=>r.template_version_id===id);
+  if(references.length){toast(`This published version is referenced by ${references.length} report${references.length===1?'':'s'} and cannot be deleted. Publish a replacement draft to retire it instead.`,'err');return}
+  confirmDialog(`Permanently delete ${t.version}? No reports reference this published version, so only the version record and its measures/prompts are removed. This cannot be undone.`,async()=>{
+    try{let{error}=await supabaseClient.from('program_template_versions').delete().eq('id',id);if(error)throw error;state.selectedTemplateId='';await hsdRefreshTemplateEditor();toast('Published template version deleted.','ok')}
+    catch(error){console.error(error);toast(error.message||'Unable to delete this version. It may still be referenced elsewhere.','err')}
+  },{title:'Delete Published Version',confirmLabel:'Delete Permanently',danger:true})
 }
 
 function hsdOpenEditServiceMeasure(templateId,index){
@@ -2989,32 +3005,121 @@ async function hsdCreateProgramMeasure(event,templateId,type){
 /* ---------- AI Template Designer ---------- */
 function hsdOpenAiTemplateDesigner(templateId){
   let t=templateById(templateId);if(!hsdTemplateCanEdit(t))return;
-  state.aiDraft={templateId,fileName:'',services:[],outcomes:[],status:'idle',error:''};
+  if(aiDraftPollTimer){clearTimeout(aiDraftPollTimer);aiDraftPollTimer=null}
+  state.aiDraft={templateId,wizardMode:'template',fileName:'',notes:'',services:[],outcomes:[],status:'idle',error:'',jobId:null,pollStartedAt:0,notesForReviewer:''};
   openModal('AI Template Designer',hsdAiTemplateDesignerBody());
+}
+// Combined intake: uploading one scope-of-services PDF drafts a new
+// provider (optional), a new program, AND its custom reporting template in
+// one pass, instead of the previous three separate manual steps (Add
+// Provider -> Add Program -> Reporting Templates -> AI Draft -> Publish).
+// Program creation still requires an existing published template to seed
+// from (a database constraint of create_program_from_template) - this seed
+// is only a brief starting structure. Right after the program is created,
+// this wizard immediately clones a fresh draft version, strips out the
+// seed's inherited measures, and inserts the AI-drafted ones instead, so
+// the seed template's actual content is never left in place. Nothing is
+// published automatically - the admin reviews and publishes the resulting
+// draft themselves, same as any other template change.
+function hsdOpenNewProgramWizard(){
+  if(!isAdmin())return;
+  let seedTemplates=hsdProgramConfigPublishedTemplates();
+  if(!seedTemplates.length){toast('At least one published reporting template must exist before using this wizard (it is used as a brief starting structure only - your uploaded scope replaces its measures).','err');return}
+  let years=[...new Set((state.server?.reporting_periods||[]).map(p=>p.service_year_label).filter(Boolean))].sort();
+  if(!years.length){toast('Reporting periods must be configured before creating a program.','err');return}
+  if(aiDraftPollTimer){clearTimeout(aiDraftPollTimer);aiDraftPollTimer=null}
+  let blankSeed=hsdProgramConfigBlankSeedTemplate();
+  state.aiDraft={templateId:null,wizardMode:'new_program',fileName:'',notes:'',services:[],outcomes:[],status:'idle',error:'',jobId:null,pollStartedAt:0,notesForReviewer:'',
+    seedTemplateId:blankSeed?blankSeed.id:seedTemplates[0].id,showSeedPicker:!blankSeed,monitorIds:[],
+    program:{isNewProvider:true,providerId:'',providerName:'',providerCode:'',programName:'',programCode:'',primaryServiceCategoryId:'',serviceYearLabel:years[0],contractStart:'',contractEnd:''}};
+  openModal('New Program from Scope of Services',hsdAiTemplateDesignerBody());
 }
 function hsdRefreshAiModal(){let body=document.getElementById('modal-body');if(body)body.innerHTML=hsdAiTemplateDesignerBody()}
 function hsdAiTemplateDesignerBody(){
   let d=state.aiDraft;if(!d)return'';
   if(d.status==='idle'){
-    return`<p class="section-intro">Upload a program's scope-of-services document (PDF). Claude reads it and drafts program-specific service and outcome measures for you to review. Demographics and narrative prompts are not affected — those stay standard across every program.</p>
-      <div class="field full"><label>Scope of services (PDF) <span class="required">*</span></label><input id="ai-scope-file" type="file" accept="application/pdf"></div>
-      <div class="field full"><label>Anything else Claude should know? (optional)</label><textarea id="ai-scope-notes" placeholder="Example: focus only on the Behavioral Health section, pages 4-6."></textarea></div>
+    return`<p class="section-intro">Upload a program's scope-of-services document (PDF). AI reads it and drafts program-specific service and outcome measures for you to review. Demographics and narrative prompts are not affected — those stay standard across every program.</p>
+      <div class="field full"><label>Scope of services (PDF) <span class="required">*</span></label><input id="ai-scope-file" type="file" accept="application/pdf"><div class="help">For reliable processing, keep documents to roughly 15 pages or fewer. If a scope includes multiple bundled exhibits, trim the upload to just the section that defines services and outcomes - large combined PDFs are more likely to time out.</div></div>
+      <div class="field full"><label>Anything else the AI should know? (optional)</label><textarea id="ai-scope-notes" placeholder="Example: focus only on the Behavioral Health section, pages 4-6."></textarea></div>
       <div class="modal-actions"><button class="btn secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn gold" id="ai-generate-btn" onclick="hsdAiTemplateGenerate()">Generate Draft</button></div>`;
   }
   if(d.status==='loading'){
-    return`<div class="ai-draft-loading"><span class="spinner"></span> Reading ${esc(d.fileName)} and drafting measures… this can take up to a minute for longer documents.</div>`;
+    let elapsed=d.pollStartedAt?Math.floor((Date.now()-d.pollStartedAt)/1000):0;
+    let waitMsg=elapsed>60?'This is a longer document — the AI is still reading it. Large scope-of-services packets can take a few minutes; feel free to leave this open and check back.':('Reading '+esc(d.fileName)+' and drafting measures… this can take up to a minute for longer documents.');
+    return`<div class="ai-draft-loading"><span class="spinner"></span> ${waitMsg}</div>`;
   }
   if(d.status==='error'){
     return`<div class="notice danger"><strong>Could not draft a template from this document.</strong> ${esc(d.error)}</div><div class="modal-actions"><button class="btn secondary" type="button" onclick="closeModal()">Close</button><button class="btn" onclick="state.aiDraft.status='idle';hsdRefreshAiModal()">Try Again</button></div>`;
   }
-  let serviceRows=d.services.map((m,i)=>hsdAiDraftRow(m,i,'service')).join('')||'<div class="empty">Claude did not propose any service measures. You can still add them manually after closing this window.</div>';
-  let outcomeRows=d.outcomes.map((m,i)=>hsdAiDraftRow(m,i,'outcome')).join('')||'<div class="empty">Claude did not propose any outcome measures. You can still add them manually after closing this window.</div>';
+  let serviceRows=d.services.map((m,i)=>hsdAiDraftRow(m,i,'service')).join('')||'<div class="empty">The AI did not propose any service measures. Use "Add service measure" below to add one manually.</div>';
+  let outcomeRows=d.outcomes.map((m,i)=>hsdAiDraftRow(m,i,'outcome')).join('')||'<div class="empty">The AI did not propose any outcome measures. Use "Add outcome measure" below to add one manually.</div>';
   let selectedCount=d.services.filter(x=>x.selected).length+d.outcomes.filter(x=>x.selected).length;
-  return`<p class="section-intro">Review each proposed measure before adding it. Uncheck anything that doesn't apply, and edit names, goals, or targets as needed. Nothing is saved until you click "Add to Draft Template."</p>
-    <div class="ai-draft-section"><h3 class="card-title">Proposed service measures</h3>${serviceRows}</div>
-    <div class="ai-draft-section" style="margin-top:16px"><h3 class="card-title">Proposed outcome measures</h3>${outcomeRows}</div>
-    <div class="modal-actions"><button class="btn secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn gold" id="ai-commit-btn" onclick="hsdAiTemplateCommit()" ${selectedCount?'':'disabled'}>Add ${selectedCount} Selected to Draft Template</button></div>`;
+  let isWizard=d.wizardMode==='new_program';
+  let programFields=isWizard?hsdNewProgramFieldsBlock():'';
+  let commitButton=isWizard
+    ?`<button class="btn gold" id="ai-commit-btn" onclick="hsdNewProgramCommit()" ${selectedCount?'':'disabled'}>Create Program and Draft Template</button>`
+    :`<button class="btn gold" id="ai-commit-btn" onclick="hsdAiTemplateCommit()" ${selectedCount?'':'disabled'}>Add ${selectedCount} Selected to Draft Template</button>`;
+  let reviewerNote=d.notesForReviewer?`<div class="notice warning"><strong>Flagged for your review:</strong> ${esc(d.notesForReviewer)}</div>`:'';
+  return`<p class="section-intro">Review everything the AI proposed before creating anything. Uncheck measures that don't apply, and edit names, goals, or targets as needed.${isWizard?' Nothing is created until you click "Create Program and Draft Template."':' Nothing is saved until you click "Add to Draft Template."'}</p>
+    ${reviewerNote}
+    ${programFields}
+    <div class="ai-draft-section"><div style="display:flex;justify-content:space-between;align-items:center"><h3 class="card-title">Proposed service measures</h3><button class="btn secondary sm" type="button" onclick="hsdAiDraftAddBlank('service')">+ Add service measure</button></div>${serviceRows}</div>
+    <div class="ai-draft-section" style="margin-top:16px"><div style="display:flex;justify-content:space-between;align-items:center"><h3 class="card-title">Proposed outcome measures</h3><button class="btn secondary sm" type="button" onclick="hsdAiDraftAddBlank('outcome')">+ Add outcome measure</button></div>${outcomeRows}</div>
+    <div class="modal-actions"><button class="btn secondary" type="button" onclick="closeModal()">Cancel</button>${commitButton}</div>`;
 }
+// Lets a reviewer add a manually-authored measure directly into the
+// in-progress review list (services or outcomes), without closing this
+// modal and losing everything else already reviewed. Works the same in
+// both AI Template Designer and the New Program wizard, since both just
+// commit whatever is selected in state.aiDraft at the end.
+function hsdAiDraftAddBlank(type){
+  let blank=type==='outcome'
+    ?{selected:true,name:'',unit:'percent',target:'',definition:'',denominatorQuestion:'',numeratorQuestion:'',sourceQuote:''}
+    :{selected:true,name:'',unit:'',target:'',definition:'',actualQuestion:'',sourceQuote:''};
+  state.aiDraft[type+'s'].push(blank);
+  hsdRefreshAiModal();
+}
+// Editable provider/program fields shown above the measure review list
+// when this modal is running as the New Program wizard. Kept inside
+// state.aiDraft.program so edits survive re-renders triggered by toggling
+// individual measures.
+// When a blank starting-structure template exists (see
+// hsdProgramConfigBlankSeedTemplate), use it automatically and hide the
+// picker - there's no real choice to make in the common case. Falls back
+// to a normal dropdown if no blank template exists yet, or if the admin
+// explicitly asks to pick a different one.
+function hsdNewProgramSeedField(seedOptions){
+  let blankSeed=hsdProgramConfigBlankSeedTemplate();
+  if(blankSeed&&!state.aiDraft.showSeedPicker){
+    return`<div class="field full"><label>Starting structure</label><div class="help" style="margin-top:2px">Using <strong>${esc(blankSeed.version)}</strong> automatically - a genuinely empty template, so nothing from another program's content carries over. <a href="#" onclick="event.preventDefault();state.aiDraft.showSeedPicker=true;hsdRefreshAiModal()">Use a different one</a></div></div>`;
+  }
+  return`<div class="field full"><label>Starting structure <span class="required">*</span></label><select id="np-seed-template" onchange="state.aiDraft.seedTemplateId=this.value">${seedOptions}</select><div class="help">Used only as a brief starting point - a draft copy is created immediately and its inherited measures are replaced with the ones you approve below, before anything is published.</div></div>`;
+}
+function hsdNewProgramFieldsBlock(){
+  let p=state.aiDraft.program,seedOptions=hsdProgramConfigPublishedTemplates().map(t=>`<option value="${t.id}" ${t.id===state.aiDraft.seedTemplateId?'selected':''}>${esc(programById(t.programId)?.name||'Program')} · ${esc(t.version)}</option>`).join('');
+  let providerBlock=p.isNewProvider
+    ?`<div class="field"><label>New provider name <span class="required">*</span></label><input id="np-provider-name" value="${esc(p.providerName)}" oninput="hsdNewProgramUpdate('providerName',this.value);if(!document.getElementById('np-provider-code').dataset.edited)document.getElementById('np-provider-code').value=hsdProgramConfigSafeCode(this.value)"></div><div class="field"><label>New provider code <span class="required">*</span></label><input id="np-provider-code" value="${esc(p.providerCode)}" oninput="this.dataset.edited='true';let v=hsdProgramConfigSafeCode(this.value);this.value=v;hsdNewProgramUpdate('providerCode',v)"></div>`
+    :`<div class="field full"><label>Existing provider <span class="required">*</span></label><select id="np-provider-id" onchange="hsdNewProgramUpdate('providerId',this.value)">${hsdProgramConfigProviderOptions(p.providerId)}</select></div>`;
+  return`<div class="ai-draft-section program-config-section" style="margin-bottom:16px">
+    <h3 class="card-title">Provider and program</h3>
+    <div class="field full"><label class="checkbox-row"><input type="checkbox" ${p.isNewProvider?'checked':''} onchange="hsdNewProgramToggleProvider(this.checked)"><span><strong>This is a new provider</strong><br>Uncheck to attach this program to a provider that's already in the system.</span></label></div>
+    <div class="form-grid">
+      ${providerBlock}
+      <div class="field"><label>Program name <span class="required">*</span></label><input id="np-program-name" value="${esc(p.programName)}" oninput="hsdNewProgramUpdate('programName',this.value);if(!document.getElementById('np-program-code').dataset.edited)document.getElementById('np-program-code').value=hsdProgramConfigSafeCode(this.value)"></div>
+      <div class="field"><label>Program code <span class="required">*</span></label><input id="np-program-code" value="${esc(p.programCode)}" oninput="this.dataset.edited='true';let v=hsdProgramConfigSafeCode(this.value);this.value=v;hsdNewProgramUpdate('programCode',v)"></div>
+      <div class="field"><label>Primary service category</label><select id="np-category" onchange="hsdNewProgramUpdate('primaryServiceCategoryId',this.value)">${hsdProgramConfigCategoryOptions(p.primaryServiceCategoryId)}</select></div>
+      <div class="field"><label>Service year <span class="required">*</span></label><select id="np-service-year" onchange="hsdNewProgramUpdate('serviceYearLabel',this.value);hsdNewProgramApplyServiceYear()">${hsdProgramConfigServiceYearOptions(p.serviceYearLabel)}</select></div>
+      <div class="field"><label>Contract start</label><input id="np-contract-start" type="date" value="${esc(p.contractStart)}" oninput="hsdNewProgramUpdate('contractStart',this.value)"></div>
+      <div class="field"><label>Contract end</label><input id="np-contract-end" type="date" value="${esc(p.contractEnd)}" oninput="hsdNewProgramUpdate('contractEnd',this.value)"></div>
+      ${hsdNewProgramSeedField(seedOptions)}
+      <div class="field full" onchange="hsdNewProgramSyncMonitors()"><label>Assigned Program Monitor(s)</label>${hsdProgramConfigMonitorChecklist(state.aiDraft.monitorIds)}<div class="help">Optional here, but a program with no monitor assigned will not show up in anyone's review queue. You can also assign this later from Providers &amp; Programs.</div></div>
+    </div>
+  </div>`;
+}
+function hsdNewProgramSyncMonitors(){state.aiDraft.monitorIds=hsdProgramConfigSelectedMonitors()}
+function hsdNewProgramUpdate(key,value){state.aiDraft.program[key]=value}
+function hsdNewProgramToggleProvider(checked){state.aiDraft.program.isNewProvider=checked;hsdRefreshAiModal()}
+function hsdNewProgramApplyServiceYear(){let range=hsdProgramConfigDateRangeForYear(state.aiDraft.program.serviceYearLabel);if(!state.aiDraft.program.contractStart){state.aiDraft.program.contractStart=range.start;let el=document.getElementById('np-contract-start');if(el)el.value=range.start}if(!state.aiDraft.program.contractEnd){state.aiDraft.program.contractEnd=range.end;let el=document.getElementById('np-contract-end');if(el)el.value=range.end}}
 function hsdAiDraftRow(m,i,type){
   let prefix=`ai-${type}-${i}`;
   let targetField=type==='outcome'
@@ -3042,16 +3147,18 @@ function hsdFileToBase64(file){
     reader.readAsDataURL(file);
   });
 }
+let aiDraftPollTimer=null;
 async function hsdAiTemplateGenerate(){
   let fileInput=document.getElementById('ai-scope-file'),file=fileInput?.files?.[0];
   if(!file){toast('Choose a PDF scope-of-services document first.','err');return}
   if(file.type&&file.type!=='application/pdf'){toast('Please choose a PDF file.','err');return}
   let notes=hsdTemplateFieldValue('ai-scope-notes');
-  state.aiDraft.fileName=file.name;state.aiDraft.status='loading';hsdRefreshAiModal();
+  state.aiDraft.fileName=file.name;state.aiDraft.status='loading';state.aiDraft.pollStartedAt=Date.now();hsdRefreshAiModal();
   try{
     let base64=await hsdFileToBase64(file);
     let{data,error}=await supabaseClient.functions.invoke('generate-program-template',{body:{
-      pdfBase64:base64,fileName:file.name,notes,
+      pdfBase64:base64,fileName:file.name,notes,templateId:state.aiDraft.templateId,
+      mode:state.aiDraft.wizardMode==='new_program'?'full_program':'measures_only',
       existingMeasures:(state.server?.measureLibrary||[]).filter(x=>x.active!==false).map(x=>({code:x.code,name:x.name,description:x.description,kind:x.measure_kind})).slice(0,150)
     }});
     if(error){
@@ -3060,14 +3167,49 @@ async function hsdAiTemplateGenerate(){
       throw new Error(message);
     }
     if(data?.error)throw new Error(data.error);
-    let result=data?.result||data||{};
-    state.aiDraft.services=(result.serviceMetrics||[]).map(x=>({selected:true,name:x.name||'',unit:x.unit||'',target:x.goal??x.annualGoal??'',definition:x.definition||'',actualQuestion:x.quarterQuestion||x.actualQuestion||'',sourceQuote:x.sourceQuote||''}));
-    state.aiDraft.outcomes=(result.outcomes||[]).map(x=>({selected:true,name:x.name||'',unit:'percent',target:x.target!=null?Math.round(x.target*1000)/10:'',definition:x.definition||'',denominatorQuestion:x.denominatorQuestion||'',numeratorQuestion:x.numeratorQuestion||'',sourceQuote:x.sourceQuote||''}));
-    state.aiDraft.status='review';
+    if(!data?.jobId)throw new Error('The AI drafting service did not return a job to track. Please try again.');
+    state.aiDraft.jobId=data.jobId;
+    hsdAiDraftPoll(data.jobId);
   }catch(error){
     console.error(error);state.aiDraft.status='error';state.aiDraft.error=error.message||'Something went wrong reading this document.';
+    hsdRefreshAiModal();
   }
-  hsdRefreshAiModal();
+}
+function hsdApplyAiDraftResult(result){
+  state.aiDraft.services=(result.serviceMetrics||[]).map(x=>({selected:true,name:x.name||'',unit:x.unit||'',target:x.goal??x.annualGoal??'',definition:x.definition||'',actualQuestion:x.quarterQuestion||x.actualQuestion||'',sourceQuote:x.sourceQuote||''}));
+  state.aiDraft.outcomes=(result.outcomes||[]).map(x=>({selected:true,name:x.name||'',unit:'percent',target:x.target!=null?Math.round(x.target*1000)/10:'',definition:x.definition||'',denominatorQuestion:x.denominatorQuestion||'',numeratorQuestion:x.numeratorQuestion||'',sourceQuote:x.sourceQuote||''}));
+  if(state.aiDraft.wizardMode==='new_program'&&result.program){
+    let rp=result.program,p=state.aiDraft.program;
+    if(rp.providerName)p.providerName=rp.providerName;
+    if(rp.providerCode)p.providerCode=hsdProgramConfigSafeCode(rp.providerCode);
+    if(rp.programName)p.programName=rp.programName;
+    if(rp.programCode)p.programCode=hsdProgramConfigSafeCode(rp.programCode);
+    if(rp.serviceYearLabel&&(state.server?.reporting_periods||[]).some(x=>x.service_year_label===rp.serviceYearLabel))p.serviceYearLabel=rp.serviceYearLabel;
+    if(rp.primaryServiceCategory){let match=(state.server?.service_categories||[]).find(c=>String(c.name).toLowerCase()===String(rp.primaryServiceCategory).toLowerCase());if(match)p.primaryServiceCategoryId=match.id}
+  }
+  state.aiDraft.notesForReviewer=result.notesForReviewer||'';
+  state.aiDraft.status='review';
+}
+async function hsdAiDraftPoll(jobId){
+  if(aiDraftPollTimer){clearTimeout(aiDraftPollTimer);aiDraftPollTimer=null}
+  if(!state.aiDraft||state.aiDraft.jobId!==jobId)return;
+  try{
+    let{data:job,error}=await supabaseClient.from('ai_template_jobs').select('status,result,error_message').eq('id',jobId).single();
+    if(!state.aiDraft||state.aiDraft.jobId!==jobId)return;
+    if(error)throw error;
+    if(!job){aiDraftPollTimer=setTimeout(()=>hsdAiDraftPoll(jobId),3000);return}
+    if(job.status==='completed'){
+      hsdApplyAiDraftResult(job.result||{});hsdRefreshAiModal();return;
+    }
+    if(job.status==='failed'){
+      state.aiDraft.status='error';state.aiDraft.error=job.error_message||'Something went wrong reading this document.';hsdRefreshAiModal();return;
+    }
+    aiDraftPollTimer=setTimeout(()=>hsdAiDraftPoll(jobId),3000);
+    if(state.aiDraft.status==='loading')hsdRefreshAiModal();
+  }catch(error){
+    console.error('AI draft poll error:',error);
+    aiDraftPollTimer=setTimeout(()=>hsdAiDraftPoll(jobId),5000);
+  }
 }
 async function hsdAiTemplateCommit(){
   let d=state.aiDraft,t=templateById(d.templateId);if(!hsdTemplateCanEdit(t))return;
@@ -3090,6 +3232,96 @@ async function hsdAiTemplateCommit(){
   closeModal();await hsdRefreshTemplateEditor(d.templateId);state.aiDraft=null;
   if(failures.length)toast(`Added ${toAdd.length-failures.length} of ${toAdd.length} measures. Failed: ${failures.join(', ')}`,'err');
   else toast(`Added ${toAdd.length} AI-drafted measure${toAdd.length===1?'':'s'} to the draft template. Review each one carefully before publishing.`,'ok');
+}
+
+// Combined-flow commit: creates the provider (if new), the program (seeded
+// from an existing published template - a database requirement), then
+// immediately clones a fresh draft from that seed copy, strips the
+// inherited seed measures out of it, and inserts the reviewer-approved
+// AI-drafted measures instead. Ends on the new draft in Reporting
+// Templates for final review; nothing is published automatically.
+async function hsdNewProgramCommit(){
+  let d=state.aiDraft;if(!d||d.wizardMode!=='new_program'||!isAdmin())return;
+  let p=d.program;
+  if(p.isNewProvider){
+    if(!String(p.providerName||'').trim()||!String(p.providerCode||'').trim()){toast('Enter a name and code for the new provider.','err');return}
+  }else if(!p.providerId){
+    toast('Select an existing provider, or check "This is a new provider."','err');return;
+  }
+  if(!String(p.programName||'').trim()||!String(p.programCode||'').trim()){toast('Enter a program name and code.','err');return}
+  if(!p.serviceYearLabel){toast('Select a service year.','err');return}
+  if(!d.seedTemplateId){toast('Select a starting structure template.','err');return}
+  let toAdd=[...d.services.filter(x=>x.selected).map(x=>({...x,type:'service'})),...d.outcomes.filter(x=>x.selected).map(x=>({...x,type:'outcome'}))];
+  if(!toAdd.length){toast('Select at least one measure to include.','err');return}
+
+  let button=document.getElementById('ai-commit-btn');hsdTemplateButtonBusy(button,true,'Creating…');
+  try{
+    let providerId=p.providerId;
+    if(p.isNewProvider){
+      let{data:org,error:orgError}=await supabaseClient.from('organizations').insert({
+        name:p.providerName.trim(),code:hsdProgramConfigSafeCode(p.providerCode),organization_type:'contracted_provider',active:true
+      }).select('id').single();
+      if(orgError)throw new Error(`Could not create the provider organization: ${orgError.message}`);
+      providerId=org.id;
+    }
+
+    let{error:programError}=await supabaseClient.rpc('create_program_from_template',{
+      p_organization_id:providerId,p_code:hsdProgramConfigSafeCode(p.programCode),p_name:p.programName.trim(),
+      p_description:null,p_primary_service_category_id:p.primaryServiceCategoryId||null,
+      p_contract_start_date:p.contractStart||null,p_contract_end_date:p.contractEnd||null,
+      p_service_year_label:p.serviceYearLabel,p_active:true,p_source_template_version_id:d.seedTemplateId,p_monitor_user_ids:d.monitorIds||[]
+    });
+    if(programError)throw new Error(programError.message.includes('Could not find the function')?'Install the program-configuration SQL upgrade before using this wizard.':`Could not create the program: ${programError.message}`);
+
+    let portalUser=await resolvePortalUser(state.authUser);if(!portalUser)throw new Error('Your portal access could not be refreshed.');
+    await loadPortalData(portalUser);
+    let newProgramCode=hsdProgramConfigSafeCode(p.programCode);
+    let newProgram=(state.server?.programs||[]).find(x=>x.organization_id===providerId&&x.code===newProgramCode);
+    if(!newProgram)throw new Error('The program was created, but could not be found again to attach the custom template. Check Providers & Programs and finish setup manually from there.');
+    let seedCopy=(state.server?.program_template_versions||[]).filter(v=>v.program_id===newProgram.id).sort((a,b)=>b.version_number-a.version_number)[0];
+    if(!seedCopy)throw new Error('The program was created, but its starter template copy could not be found. Finish setup manually from Reporting Templates.');
+
+    let nextPeriod=hsdTemplateNextPeriod(newProgram.id);
+    let{data:cloneData,error:cloneError}=await supabaseClient.rpc('clone_template_version',{
+      p_source_template_version_id:seedCopy.id,
+      p_effective_from:nextPeriod?.period_start||p.contractStart||new Date().toISOString().slice(0,10),
+      p_effective_quarter:nextPeriod?`Q${nextPeriod.quarter_number} ${nextPeriod.service_year_label||''}`.trim():p.serviceYearLabel,
+      p_version_name:'Initial custom draft',
+      p_change_summary:`AI-drafted from ${d.fileName||'uploaded scope of services'}; replaces the starter measures copied at program creation.`
+    });
+    if(cloneError)throw new Error(`The program was created, but the custom draft template could not be built: ${cloneError.message}. Finish setup manually from Reporting Templates.`);
+    let draftId=typeof cloneData==='string'?cloneData:cloneData?.id;
+    if(!draftId)throw new Error('The program was created, but the draft template id was not returned. Check Reporting Templates.');
+
+    await loadPortalData(portalUser);
+    let inherited=(state.server?.template_measures||[]).filter(m=>m.template_version_id===draftId);
+    for(let m of inherited){
+      let{error:removeError}=await supabaseClient.from('template_measures').delete().eq('id',m.id);
+      if(removeError)console.error('Could not remove an inherited seed measure:',removeError);
+    }
+
+    let draftStub={id:draftId,programId:newProgram.id};
+    let nextServiceOrder=10,nextOutcomeOrder=10,failures=[];
+    for(let m of toAdd){
+      try{
+        let order=m.type==='outcome'?nextOutcomeOrder:nextServiceOrder;
+        if(m.type==='outcome')nextOutcomeOrder+=10;else nextServiceOrder+=10;
+        await hsdInsertProgramMeasure(draftStub,m.type,{
+          name:m.name,unit:m.unit||(m.type==='outcome'?'percent':'units'),target:m.target,category:'',order,duplicated:false,
+          definition:m.definition,targetSource:d.fileName?`AI-drafted from ${d.fileName}; confirm against the source scope of work before relying on this citation.`:'',
+          denominatorQuestion:m.denominatorQuestion,numeratorQuestion:m.numeratorQuestion,actualQuestion:m.actualQuestion,
+          instructions:m.type==='outcome'?'YTD rate equals the combined outcome count divided by the combined reporting population. Quarterly percentages are not averaged.':''
+        });
+      }catch(error){console.error(error);failures.push(m.name||'Untitled measure')}
+    }
+
+    closeModal();state.aiDraft=null;
+    await hsdRefreshTemplateEditor(draftId);
+    if(failures.length)toast(`Program created. Added ${toAdd.length-failures.length} of ${toAdd.length} measures to its draft template - failed: ${failures.join(', ')}. Review the draft before publishing.`,'err');
+    else toast('Program created and its custom draft template is ready below. Review it, then publish when ready to make it live.','ok');
+  }catch(error){
+    console.error(error);toast(error.message||'Unable to complete setup.','err');hsdTemplateButtonBusy(button,false);
+  }
 }
 async function hsdRemoveTemplateMeasure(templateId,templateMeasureId,label){
   let t=templateById(templateId);if(!hsdTemplateCanEdit(t))return;confirmDialog(`Remove “${label}” from this draft template? The measure remains available in the measure library.`,async()=>{try{let{error}=await supabaseClient.from('template_measures').delete().eq('id',templateMeasureId);if(error)throw error;await hsdRefreshTemplateEditor(templateId);toast('Measure removed from the draft template.','ok')}catch(error){console.error(error);toast(error.message||'Unable to remove the measure.','err')}},{title:'Remove Measure',confirmLabel:'Remove',danger:true})
@@ -3135,6 +3367,9 @@ function hsdProgramConfigRawProgram(programId){return (state.server?.programs||[
 function hsdProgramConfigRawProvider(providerId){return (state.server?.organizations||[]).find(p=>p.id===providerId)||null}
 function hsdProgramConfigSafeCode(value){return String(value||'').trim().toLowerCase().replace(/&/g,' and ').replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'').slice(0,80)}
 function hsdProgramConfigPublishedTemplates(){return (state.db.templates||[]).filter(t=>t.status==='published').sort((a,b)=>String(a.name).localeCompare(String(b.name))||Number(b.versionNumber||0)-Number(a.versionNumber||0))}
+// Finds a template purpose-built as a blank seed (see hsdOpenNewProgramWizard) by
+// name, so the wizard can default to it instead of a real program's template.
+function hsdProgramConfigBlankSeedTemplate(){return hsdProgramConfigPublishedTemplates().find(t=>/\bblank\b/i.test(t.version||'')||/\bblank\b/i.test(t.name||''))||null}
 function hsdProgramConfigLatestTemplate(programId){return (state.db.templates||[]).filter(t=>t.programId===programId&&t.status==='published').sort((a,b)=>Number(b.versionNumber||0)-Number(a.versionNumber||0))[0]||null}
 function hsdProgramConfigReportCount(programId){return (state.db.reports||[]).filter(r=>r.programId===programId).length}
 function hsdProgramConfigMonitorUserIds(){let ids=new Set((state.server?.user_roles||[]).filter(r=>r.role==='program_monitor').map(r=>r.user_id));return ids}
@@ -3156,13 +3391,34 @@ function hsdProgramConfigOpenTemplate(programId){let t=hsdProgramConfigLatestTem
 
 async function hsdRefreshProgramConfiguration(){let portalUser=await resolvePortalUser(state.authUser);if(!portalUser)throw new Error('Your portal access could not be refreshed.');await loadPortalData(portalUser);state.view='providers';renderShell();nav('providers',{fromHash:true})}
 
+// A single place to see everything the fast-track wizard (or ordinary
+// setup) might have left half-finished: programs with nobody assigned to
+// review them, programs with no published template to report against, and
+// draft templates sitting unpublished. Nothing here is destructive - each
+// row just links to the place that fixes it.
+function hsdProgramConfigHealthCard(programs){
+  let daysSince=v=>{if(!v)return null;let ms=Date.now()-new Date(v).getTime();return Number.isFinite(ms)?Math.max(0,Math.floor(ms/86400000)):null};
+  let missingMonitor=programs.filter(p=>!hsdProgramConfigAssignedMonitorIds(p.id).length);
+  let missingTemplate=programs.filter(p=>!hsdProgramConfigLatestTemplate(p.id));
+  let pendingDrafts=(state.db.templates||[]).filter(t=>t.status==='draft').sort((a,b)=>String(a.createdAt||'').localeCompare(String(b.createdAt||'')));
+  let total=missingMonitor.length+missingTemplate.length+pendingDrafts.length;
+  if(!total)return`<div class="card program-config-section"><div class="card-head"><div><h2 class="card-title">Setup Health</h2><p class="portfolio-section-note">Nothing needs attention right now.</p></div></div></div>`;
+  let monitorRows=missingMonitor.map(p=>`<div class="check-row"><div>${esc(providerName(p.providerId))} — ${esc(p.name)}</div><button class="btn secondary sm" onclick="hsdOpenEditProgram('${p.id}')">Assign monitor</button></div>`).join('');
+  let templateRows=missingTemplate.map(p=>`<div class="check-row"><div>${esc(providerName(p.providerId))} — ${esc(p.name)}</div><button class="btn secondary sm" onclick="hsdOpenEditProgram('${p.id}')">Configure template</button></div>`).join('');
+  let draftRows=pendingDrafts.map(t=>{let days=daysSince(t.createdAt),program=programById(t.programId);return`<div class="check-row"><div>${esc(program?.name||'Program')} — ${esc(t.version)}${days!=null?` <span style="color:var(--muted);font-size:11px">· drafted ${days} day${days===1?'':'s'} ago</span>`:''}</div><button class="btn secondary sm" onclick="state.selectedTemplateId='${t.id}';nav('templates')">Review draft</button></div>`}).join('');
+  return`<div class="card program-config-section"><div class="card-head"><div><h2 class="card-title">Setup Health</h2><p class="portfolio-section-note">${total} item${total===1?'':'s'} may need a follow-up.</p></div></div><div class="card-body">
+    ${missingMonitor.length?`<div class="program-config-health-group"><strong>Without a Program Monitor (${missingMonitor.length})</strong>${monitorRows}</div>`:''}
+    ${missingTemplate.length?`<div class="program-config-health-group"><strong>Without a published template (${missingTemplate.length})</strong>${templateRows}</div>`:''}
+    ${pendingDrafts.length?`<div class="program-config-health-group"><strong>Draft templates pending publish (${pendingDrafts.length})</strong>${draftRows}</div>`:''}
+  </div></div>`;
+}
 function renderProviders(){
   if(!isAdmin())return;
   let providers=(state.db.providers||[]).filter(p=>hsdProgramConfigRawProvider(p.id)?.organization_type!=='city').slice().sort((a,b)=>String(a.name).localeCompare(String(b.name))),programs=(state.db.programs||[]).slice().sort((a,b)=>providerName(a.providerId).localeCompare(providerName(b.providerId))||String(a.name).localeCompare(String(b.name)));
   let activePrograms=programs.filter(p=>p.active).length,unassigned=programs.filter(p=>!hsdProgramConfigAssignedMonitorIds(p.id).length).length,noTemplate=programs.filter(p=>!hsdProgramConfigLatestTemplate(p.id)).length;
   let providerRows=providers.map(p=>{let raw=hsdProgramConfigRawProvider(p.id),count=programs.filter(x=>x.providerId===p.id).length;return`<tr><td><strong>${esc(p.name)}</strong><br><span class="program-config-code">${esc(raw?.code||'')}</span></td><td>${esc(String(raw?.organization_type||'contracted_provider').replaceAll('_',' '))}</td><td class="num">${count}</td><td><span class="status ${p.active?'approved':'draft'}">${p.active?'Active':'Inactive'}</span></td><td><div class="program-config-actions"><button class="btn secondary sm" onclick="hsdOpenEditProvider('${p.id}')">Edit</button></div></td></tr>`}).join('');
   let programRows=programs.map(p=>{let raw=hsdProgramConfigRawProgram(p.id),template=hsdProgramConfigLatestTemplate(p.id),reports=hsdProgramConfigReportCount(p.id);return`<tr><td><strong>${esc(providerName(p.providerId))}</strong></td><td><div class="program-config-meta"><strong>${esc(p.name)}</strong><small class="program-config-code">${esc(raw?.code||'')}</small><small>${esc(p.contractYears||'Service year not set')}</small></div></td><td>${esc(p.primaryServiceCategory||'—')}</td><td>${template?`<strong>${esc(template.version)}</strong><br><span style="color:var(--muted);font-size:11px">${reports} report${reports===1?'':'s'}</span>`:`<span class="status check">Not configured</span>`}</td><td>${hsdProgramConfigMonitorSummary(p.id)}</td><td><span class="status ${p.active?'approved':'draft'}">${p.active?'Active':'Inactive'}</span></td><td><div class="program-config-actions"><button class="btn secondary sm" onclick="hsdOpenEditProgram('${p.id}')">Edit</button>${template?`<button class="btn subtle sm" onclick="hsdProgramConfigOpenTemplate('${p.id}')">Template</button>`:''}</div></td></tr>`}).join('');
-  document.getElementById('view-providers').innerHTML=`<div class="page-head"><div><h1 class="page-title">Providers & Programs</h1><p class="page-sub">Manage provider records, program contracts, primary service categories, reporting setup, and Program Monitor assignments.</p></div><div class="page-actions"><button class="btn secondary" onclick="hsdOpenAddProvider()">Add Provider</button><button class="btn" onclick="hsdOpenAddProgram()">Add Program</button></div></div><div class="notice warning"><strong>Configuration changes are live.</strong> Existing report data and historical template assignments are preserved. Edit reporting requirements through versioned Reporting Templates rather than changing past reports.</div><div class="program-config-kpis"><div class="program-config-kpi"><div class="label">Providers</div><div class="value">${providers.length}</div><div class="sub">${providers.filter(p=>p.active).length} active</div></div><div class="program-config-kpi"><div class="label">Programs</div><div class="value">${programs.length}</div><div class="sub">${activePrograms} active</div></div><div class="program-config-kpi"><div class="label">Without monitor</div><div class="value">${unassigned}</div><div class="sub">Programs needing a City assignment</div></div><div class="program-config-kpi"><div class="label">Without published template</div><div class="value">${noTemplate}</div><div class="sub">Programs not ready for reporting</div></div></div><div class="card program-config-section"><div class="card-head"><div><h2 class="card-title">Provider Organizations</h2><p class="portfolio-section-note">Organizations are retained for audit and historical reporting. Deactivate rather than delete records.</p></div></div><div class="card-body"><div class="table-wrap" style="box-shadow:none"><table><thead><tr><th>Provider</th><th>Type</th><th>Programs</th><th>Status</th><th></th></tr></thead><tbody>${providerRows||'<tr><td colspan="5" class="empty">No providers configured.</td></tr>'}</tbody></table></div></div></div><div class="card program-config-section"><div class="card-head"><div><h2 class="card-title">Programs and Contracts</h2><p class="portfolio-section-note">A new program copies a published template and creates reports for the selected service year. Later requirement changes use template versioning.</p></div></div><div class="card-body"><div class="table-wrap" style="box-shadow:none"><table><thead><tr><th>Provider</th><th>Program / Service Year</th><th>Primary Category</th><th>Reporting Setup</th><th>Program Monitor</th><th>Status</th><th></th></tr></thead><tbody>${programRows||'<tr><td colspan="7" class="empty">No programs configured.</td></tr>'}</tbody></table></div></div></div>`;
+  document.getElementById('view-providers').innerHTML=`<div class="page-head"><div><h1 class="page-title">Providers & Programs</h1><p class="page-sub">Manage provider records, program contracts, primary service categories, reporting setup, and Program Monitor assignments.</p></div><div class="page-actions"><button class="btn secondary" onclick="hsdOpenAddProvider()">Add Provider</button><button class="btn secondary" onclick="hsdOpenAddProgram()">Add Program</button><button class="btn gold" onclick="hsdOpenNewProgramWizard()">New Program from Scope of Services</button></div></div><div class="notice warning"><strong>Configuration changes are live.</strong> Existing report data and historical template assignments are preserved. Edit reporting requirements through versioned Reporting Templates rather than changing past reports.</div><div class="program-config-kpis"><div class="program-config-kpi"><div class="label">Providers</div><div class="value">${providers.length}</div><div class="sub">${providers.filter(p=>p.active).length} active</div></div><div class="program-config-kpi"><div class="label">Programs</div><div class="value">${programs.length}</div><div class="sub">${activePrograms} active</div></div><div class="program-config-kpi"><div class="label">Without monitor</div><div class="value">${unassigned}</div><div class="sub">Programs needing a City assignment</div></div><div class="program-config-kpi"><div class="label">Without published template</div><div class="value">${noTemplate}</div><div class="sub">Programs not ready for reporting</div></div></div>${hsdProgramConfigHealthCard(programs)}<div class="card program-config-section"><div class="card-head"><div><h2 class="card-title">Provider Organizations</h2><p class="portfolio-section-note">Organizations are retained for audit and historical reporting. Deactivate rather than delete records.</p></div></div><div class="card-body"><div class="table-wrap" style="box-shadow:none"><table><thead><tr><th>Provider</th><th>Type</th><th>Programs</th><th>Status</th><th></th></tr></thead><tbody>${providerRows||'<tr><td colspan="5" class="empty">No providers configured.</td></tr>'}</tbody></table></div></div></div><div class="card program-config-section"><div class="card-head"><div><h2 class="card-title">Programs and Contracts</h2><p class="portfolio-section-note">A new program copies a published template and creates reports for the selected service year. Later requirement changes use template versioning.</p></div></div><div class="card-body"><div class="table-wrap" style="box-shadow:none"><table><thead><tr><th>Provider</th><th>Program / Service Year</th><th>Primary Category</th><th>Reporting Setup</th><th>Program Monitor</th><th>Status</th><th></th></tr></thead><tbody>${programRows||'<tr><td colspan="7" class="empty">No programs configured.</td></tr>'}</tbody></table></div></div></div>`;
 }
 
 function hsdOpenAddProvider(){openModal('Add Provider Organization',`<form onsubmit="hsdSaveNewProvider(event)"><div class="form-grid"><div class="field"><label>Provider name <span class="required">*</span></label><input id="pc-provider-name" required oninput="if(!document.getElementById('pc-provider-code').dataset.edited)document.getElementById('pc-provider-code').value=hsdProgramConfigSafeCode(this.value)"></div><div class="field"><label>Provider code <span class="required">*</span></label><input id="pc-provider-code" required oninput="this.dataset.edited='true';this.value=hsdProgramConfigSafeCode(this.value)"><div class="help">Stable database identifier using lowercase letters, numbers, and underscores.</div></div><div class="field"><label>Organization type</label><select id="pc-provider-type"><option value="contracted_provider">Contracted provider</option><option value="other">Other</option></select></div><div class="field"><label>Status</label><select id="pc-provider-active"><option value="true">Active</option><option value="false">Inactive</option></select></div></div><div class="modal-actions"><button class="btn secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn" id="pc-provider-save" type="submit">Add Provider</button></div></form>`)}
