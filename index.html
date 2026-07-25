@@ -328,19 +328,13 @@ input[inputmode="numeric"]{direction:ltr;text-align:left;font-variant-numeric:ta
   .config-row.header{display:none}
 }
 @media print{
-  @page{size:letter;margin:.5in}
+  @page{size:letter;margin:.6in .6in .8in .6in}
   body{background:#fff;font-size:10px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .topbar,.side,.no-print,.toast,.modal{display:none!important}
   .shell{display:block}
   .main{padding:0;max-width:none}
   .view{display:none!important}
   #print-view{display:block!important}
-  .export-page{border:0;border-radius:0;padding:0;max-width:none}
-  .export-section,.export-table,.export-note{break-inside:avoid}
-  .export-section.page-break{break-before:page}
-  .signature-grid{break-inside:avoid}
-  .demo-block{break-inside:avoid;page-break-inside:avoid}
-  .export-subhead{break-after:avoid;page-break-after:avoid}
 }
 
 /* ==========================================================================
@@ -357,7 +351,8 @@ input[inputmode="numeric"]{direction:ltr;text-align:left;font-variant-numeric:ta
 .pr-draft-chip{display:inline-block;background:var(--amber-bg);color:var(--amber);border:1px solid #E8C976;border-radius:999px;padding:1px 8px;font-size:9px;font-weight:800;letter-spacing:.05em;vertical-align:middle}
 .pr-program-desc{font-size:12px;color:var(--muted);line-height:1.6;margin:4px 0 18px;max-width:80ch}
 
-.pr-cards{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:14px 0 8px}
+.pr-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-flow:row dense;gap:10px;margin:14px 0 8px}
+.pr-card--wide{grid-column:span 2}
 .pr-card{border:1px solid var(--line);border-top:3px solid var(--gold);border-radius:10px;padding:12px 12px 10px;background:#fff;break-inside:avoid}
 .pr-card-value{font-size:17px;font-weight:800;color:var(--navy);line-height:1.2;overflow-wrap:break-word}
 .pr-card-label{font-size:10px;color:var(--text);margin-top:4px;font-weight:600;line-height:1.35}
@@ -368,9 +363,11 @@ input[inputmode="numeric"]{direction:ltr;text-align:left;font-variant-numeric:ta
 .pr-section-intro{font-size:11px;color:var(--muted);margin:0 0 10px;line-height:1.55;max-width:85ch}
 .pr-subsection{margin-top:14px}
 .pr-subsection h3{font-size:11.5px;color:var(--navy);margin:0 0 6px;font-weight:700}
-.pr-narrative-item{margin-bottom:10px}
-.pr-narrative-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+.pr-narrative-item{margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.pr-narrative-item:last-child{border-bottom:0;padding-bottom:0;margin-bottom:0}
+.pr-narrative-label{font-size:11px;font-weight:700;color:var(--navy);letter-spacing:.01em;margin-bottom:4px}
 .pr-narrative-item p{margin:0;font-size:11.5px;line-height:1.65}
+.pr-keep-together{break-inside:avoid;page-break-inside:avoid}
 
 .pr-table{width:100%;border-collapse:collapse;font-size:11px;margin-top:4px}
 .pr-table th,.pr-table td{border:1px solid #D9DEE5;padding:7px 8px;vertical-align:top;text-align:left}
@@ -415,10 +412,8 @@ input[inputmode="numeric"]{direction:ltr;text-align:left;font-variant-numeric:ta
 .pr-impact-card{border:1px solid var(--line);border-left:4px solid var(--navy);border-radius:0 10px 10px 0;background:var(--soft);padding:14px 16px;margin-bottom:10px;break-inside:avoid;page-break-inside:avoid}
 .pr-impact-card p{margin:0;font-size:12px;line-height:1.65;color:var(--text)}
 
-.pr-cert-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--soft);margin-bottom:12px}
+.pr-cert-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px 16px;padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--soft);margin-bottom:12px}
 .pr-glossary{font-size:9.5px;color:var(--muted);line-height:1.65;border-top:1px solid var(--line);padding-top:10px}
-
-.pr-print-footer{display:none}
 
 @media(max-width:900px){
   .pr-cards{grid-template-columns:repeat(2,1fr)}
@@ -427,17 +422,20 @@ input[inputmode="numeric"]{direction:ltr;text-align:left;font-variant-numeric:ta
 }
 
 @media print{
-  @page{size:letter;margin:.55in .55in .8in .55in}
+  @page{size:letter;margin:.6in .6in .8in .6in}
   #print-view .pr-page{max-width:none;padding:0;font-size:10.5px}
   #print-view .pr-page h1{font-size:19px}
-  #print-view .pr-cards{grid-template-columns:repeat(5,1fr);gap:8px}
-  #print-view .pr-card,#print-view .pr-demo-block,#print-view .pr-impact-card,#print-view .pr-cert-grid{break-inside:avoid;page-break-inside:avoid}
+  #print-view .pr-cards{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+  #print-view .pr-card,#print-view .pr-demo-block,#print-view .pr-impact-card,#print-view .pr-cert-grid,#print-view .pr-keep-together{break-inside:avoid;page-break-inside:avoid}
   #print-view .pr-table thead{display:table-header-group}
+  #print-view .pr-table tfoot{display:table-footer-group}
   #print-view .pr-table tbody tr{break-inside:avoid;page-break-inside:avoid}
-  #print-view .pr-section h2,#print-view .pr-subsection h3{break-after:avoid;page-break-after:avoid}
+  #print-view .pr-section h2,#print-view .pr-subsection h3,#print-view .pr-narrative-label{break-after:avoid;page-break-after:avoid}
+  #print-view .pr-section{break-inside:auto}
+  #print-view .pr-narrative-item{break-inside:avoid;page-break-inside:avoid}
   #print-view .pr-impact-section{break-before:page;page-break-before:always}
-  #print-view .pr-print-footer{display:block;position:fixed;left:.55in;right:.55in;bottom:.25in;font-size:8.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:5px;text-align:center}
   #print-view .pr-badge{border-width:1.6px}
+  #print-view .pr-page::after{content:none!important}
 }
 
 .guidance-box{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;margin:0 0 14px;border:1px solid #C9D7E7;border-radius:10px;background:#F5F9FD;color:#33445A;line-height:1.5}
@@ -629,7 +627,7 @@ input[inputmode="numeric"]{direction:ltr;text-align:left;font-variant-numeric:ta
 @media(min-width:1450px){.age-gender-panels{grid-template-columns:1fr 1fr}}
 @media(max-width:1100px){.report-period-bar{width:100%;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr) minmax(0,.7fr)}.report-header .page-actions{max-width:none}}
 @media(max-width:760px){.report-period-bar{grid-template-columns:1fr}.report-period-compact{border-right:0;border-bottom:1px solid var(--line)}.report-period-compact:last-child{border-bottom:0}.export-demographic-grid{grid-template-columns:1fr}}
-@media print{.export-demographic-grid{grid-template-columns:1fr 1fr;gap:10px}.activity-details{display:none!important}}
+@media print{.activity-details{display:none!important}}
 
 
 
@@ -943,7 +941,52 @@ function ytdAccess(r,path){return priorReports(r).reduce((s,x)=>{let v=x.access;
 function serviceSuggestedStatus(r,m){let p=periodById(r.periodId),expected=n(m.goal)*p.pace,ytd=ytdService(r,m.id);if(r.services[m.id]?.actual===''&&ytd===0)return'Not Reported';if(!expected)return'Not Reported';let ratio=ytd/expected;if(ratio>1.10)return'Exceeds Pace';if(ratio>=.90)return'On Track';if(ratio>=.75)return'Watch';return'Off Track'}
 function finalServiceStatus(r,m){return r.services[m.id]?.override||serviceSuggestedStatus(r,m)}
 function outcomeQuarterNumerator(r,o){if(o.id==='housing')return n(r.outcomes[o.id]?.transitional)+n(r.outcomes[o.id]?.permanent);return n(r.outcomes[o.id]?.numerator)}
-function outcomeSuggestedStatus(r,o){let num=o.id==='housing'?priorReports(r).reduce((s,x)=>s+outcomeQuarterNumerator(x,o),0):ytdOutcome(r,o.id,'numerator');let den=ytdOutcome(r,o.id,'denominator');if(r.outcomes[o.id]?.denominator===''&&den===0)return'Not Reported';if(!den)return'Not Reported';let rate=num/den,ratio=rate/o.target;if(ratio>1.10)return'Exceeds Pace';if(ratio>=.90)return'On Track';if(ratio>=.75)return'Watch';return'Off Track'}
+/* Single source of truth for an outcome's status in ONE quarter. Distinguishes
+   "not reported" (blank denominator) from "confirmed zero eligible" (denominator
+   entered as 0) from "not yet due" (denominator known, result not yet in). */
+function outcomeQuarterState(r,o){
+  let x=r.outcomes[o.id]||{},denRaw=x.denominator;
+  if(denRaw===''||denRaw===undefined||denRaw===null){
+    return o.required===false
+      ?{state:'not_applicable',text:'Not applicable this quarter',note:'This measure is not expected to be reported every quarter for this program.'}
+      :{state:'no_data',text:'Data not reported',note:'The agency did not provide sufficient information to calculate this measure this quarter.'};
+  }
+  let den=n(denRaw);
+  if(den===0)return{state:'no_eligible',text:'No eligible participants',note:'No participants entered the denominator this quarter.'};
+  let numBlank=o.id==='housing'?(x.transitional===''&&x.permanent===''):(x.numerator===''||x.numerator===undefined);
+  if(numBlank)return{state:'not_yet_due',text:'Not yet due for follow-up',note:'No participants had reached the required follow-up period, or a result has not yet been recorded.'};
+  let num=outcomeQuarterNumerator(r,o);
+  return{state:'result',num,den};
+}
+/* Year-to-date status, built by aggregating each contributing quarter's state
+   rather than blindly summing numbers — this is what keeps the KPI summary
+   card and the detailed outcomes table from ever showing different states for
+   the same measure. */
+function outcomeYtdStatus(r,o){
+  let qStates=priorReports(r).map(rep=>outcomeQuarterState(rep,o));
+  let relevant=qStates.filter(s=>s.state!=='not_applicable');
+  if(!relevant.length)return{state:'not_applicable',text:'Not applicable this quarter',note:'This measure is not expected to be reported every quarter for this program.'};
+  let missing=relevant.filter(s=>s.state==='no_data'),reported=relevant.filter(s=>s.state==='result'||s.state==='no_eligible'),pending=relevant.filter(s=>s.state==='not_yet_due');
+  if(missing.length===relevant.length)return{state:'no_data',text:'Data not reported',note:'The agency has not yet provided data for this measure this contract year.'};
+  if(missing.length>0)return{state:'insufficient',text:'Insufficient data',note:'One or more quarters this contract year have not yet reported data for this measure, so a complete year-to-date result cannot be calculated.'};
+  let den=reported.reduce((s,st)=>s+(st.state==='result'?st.den:0),0),num=reported.reduce((s,st)=>s+(st.state==='result'?st.num:0),0);
+  if(den===0){
+    return pending.length
+      ?{state:'not_yet_due',text:'Not yet due for follow-up',note:'Participants are eligible, but none have yet reached the required follow-up period this contract year.'}
+      :{state:'no_eligible',text:'No eligible participants',note:'No participants have entered the denominator so far this contract year.'};
+  }
+  return{state:'result',num,den};
+}
+function outcomeSuggestedStatus(r,o){
+  let st=outcomeYtdStatus(r,o);
+  if(st.state==='not_applicable')return'Not Applicable';
+  if(st.state!=='result')return'Not Reported';
+  let rate=st.den?st.num/st.den:0,ratio=rate/o.target;
+  if(ratio>1.10)return'Exceeds Pace';
+  if(ratio>=.90)return'On Track';
+  if(ratio>=.75)return'Watch';
+  return'Off Track';
+}
 function finalOutcomeStatus(r,o){return r.outcomes[o.id]?.override||outcomeSuggestedStatus(r,o)}
 function statusClass(label){return label==='Exceeds Pace'?'exceeds':label==='On Track'?'on-track':label==='Watch'?'watch':label==='Off Track'?'off-track':label==='Not Applicable'?'na':'not-reported'}
 function statusLabel(label){return`<span class="status ${statusClass(label)}">${esc(label)}</span>`}
@@ -952,7 +995,7 @@ function finalBipoc(r){return Math.max(0,calculatedBipoc(r)+n(r.access.bipocCorr
 function sumObject(o){return Object.values(o||{}).reduce((s,v)=>s+n(v),0)}
 function ageGenderTotal(r){return Object.values(r.access.ageGender).reduce((s,row)=>s+sumObject(row),0)}
 function varianceExists(r){let t=getTemplateForReport(r);return t.serviceMetrics.some(m=>FINAL_VARIANCE_STATUSES.includes(finalServiceStatus(r,m)))||t.outcomes.some(o=>FINAL_VARIANCE_STATUSES.includes(finalOutcomeStatus(r,o)))}
-function completeness(r){let c=qualityChecks(r),passed=c.filter(x=>x.ok).length;return{passed,total:c.length,pct:c.length?Math.round(passed/c.length*100):0,checks:c,ready:passed===c.length}}
+function completeness(r){let c=qualityChecks(r),passed=c.filter(x=>x.ok).length,required=c.filter(x=>!x.advisory);return{passed,total:c.length,pct:c.length?Math.round(passed/c.length*100):0,checks:c,ready:required.every(x=>x.ok)}}
 function canComment(){return isCity()}
 function renderReports(){let reports=roleScopeReports(),providerFilter=isCity()?state.filters.provider:'all',programFilter=state.filters.program,statusFilter=state.filters.status,yearFilter=state.filters.year||'all';let rows=reports.filter(r=>providerFilter==='all'||programById(r.programId)?.providerId===providerFilter).filter(r=>programFilter==='all'||r.programId===programFilter).filter(r=>statusFilter==='all'||r.status===statusFilter).filter(r=>yearFilter==='all'||serviceYearForReport(r)===yearFilter);let providerOpts=state.db.providers.map(p=>`<option value="${p.id}" ${providerFilter===p.id?'selected':''}>${esc(p.name)}</option>`).join('');let programOpts=state.db.programs.map(p=>`<option value="${p.id}" ${programFilter===p.id?'selected':''}>${esc(p.name)}</option>`).join('');let yearLabels=[...new Set((state.server?.reporting_periods||[]).map(p=>p.service_year_label).filter(Boolean))].sort();let yearOpts=yearLabels.map(label=>`<option value="${esc(label)}" ${yearFilter===label?'selected':''}>${esc(label)}</option>`).join('');
   let providerGroups=new Map();
@@ -1023,11 +1066,11 @@ async function hsdNarrativeAiAssist(promptId){
     if(btn){btn.disabled=false;btn.textContent=originalLabel}
   }
 }
-function renderReviewBase(r){if(!isCity())return'<div class="notice danger">City access required.</div>';let comp=completeness(r);return`<div class="section"><div class="section-title"><span>City Review Workspace</span><small>Section comments and workflow actions</small></div><div class="section-body"><div class="grid2"><div><h3 class="card-title">Report readiness</h3><div class="checklist" style="margin-top:10px">${comp.checks.map(x=>`<div class="check-row ${x.ok?'ok':'check'}"><div class="check-mark">${x.ok?'✓':'!'}</div><div><strong>${esc(x.label)}</strong><span>${esc(x.detail)}</span></div></div>`).join('')}</div></div><div><h3 class="card-title">Section comments</h3><div class="table-wrap" style="box-shadow:none;margin-top:10px"><table><tbody>${['access','services','outcomes','narratives','certification'].map(k=>`<tr><th>${k[0].toUpperCase()+k.slice(1)}</th><td>${r.comments[k]?esc(r.comments[k]):'<span style="color:var(--muted)">No comment</span>'}</td><td><button class="btn secondary sm" onclick="setReportTab('${k}')">Open</button></td></tr>`).join('')}</tbody></table></div><div class="comment-box"><label>Overall City review comment</label><textarea oninput="updateComment('overall',this.value)" placeholder="Summary comment visible to the agency…">${esc(r.comments.overall)}</textarea></div><div class="aside-actions" style="margin-top:14px">${cityWorkflowButtons(r)}</div></div></div></div></div>`}
+function renderReviewBase(r){if(!isCity())return'<div class="notice danger">City access required.</div>';let comp=completeness(r);return`<div class="section"><div class="section-title"><span>City Review Workspace</span><small>Section comments and workflow actions</small></div><div class="section-body"><div class="grid2"><div><h3 class="card-title">Report readiness</h3><div class="checklist" style="margin-top:10px">${comp.checks.map(x=>`<div class="check-row ${x.ok?'ok':(x.advisory?'warn':'check')}"><div class="check-mark">${x.ok?'✓':(x.advisory?'△':'!')}</div><div><strong>${esc(x.label)}${!x.ok&&x.advisory?' <span style="font-weight:400;color:var(--muted);font-size:11px">(advisory — does not block submission)</span>':''}</strong><span>${esc(x.detail)}</span></div></div>`).join('')}</div></div><div><h3 class="card-title">Section comments</h3><div class="table-wrap" style="box-shadow:none;margin-top:10px"><table><tbody>${['access','services','outcomes','narratives','certification'].map(k=>`<tr><th>${k[0].toUpperCase()+k.slice(1)}</th><td>${r.comments[k]?esc(r.comments[k]):'<span style="color:var(--muted)">No comment</span>'}</td><td><button class="btn secondary sm" onclick="setReportTab('${k}')">Open</button></td></tr>`).join('')}</tbody></table></div><div class="comment-box"><label>Overall City review comment</label><textarea oninput="updateComment('overall',this.value)" placeholder="Summary comment visible to the agency…">${esc(r.comments.overall)}</textarea></div><div class="aside-actions" style="margin-top:14px">${cityWorkflowButtons(r)}</div></div></div></div></div>`}
 function renderReportAsideBase(r){let comp=completeness(r);return`<div class="card"><div class="card-head"><h2 class="card-title">Report Completion</h2></div><div class="card-body"><div class="completeness">${comp.pct}%</div><div class="progress gold" style="margin:8px 0 12px"><span style="width:${comp.pct}%"></span></div><div class="checklist">${comp.checks.slice(0,8).map(x=>`<div class="check-row ${x.ok?'ok':'check'}"><div class="check-mark">${x.ok?'✓':'!'}</div><div><strong>${esc(x.label)}</strong><span>${x.ok?'Complete':esc(x.detail)}</span></div></div>`).join('')}</div>${comp.checks.length>8?`<button class="btn-link" onclick="openQualityModal('${r.id}')">View all ${comp.checks.length} checks</button>`:''}<div class="aside-actions">${agencyWorkflowButtons(r,comp)}${isCity()?cityWorkflowButtons(r):''}</div></div></div><div class="card" style="margin-top:14px"><div class="card-head"><h2 class="card-title">Activity Timeline</h2></div><div class="card-body"><div class="timeline">${r.history.slice().reverse().map(h=>`<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-copy"><strong>${esc(h.action)}</strong><span>${esc(h.actor)} · ${dateTime(h.at)}</span></div></div>`).join('')}</div></div></div>${r.comments.overall?`<div class="comment-readonly" style="margin-top:14px"><strong>Overall City comment:</strong><br>${esc(r.comments.overall)}</div>`:''}`}
 function renderAsideOnly(){let r=reportById(state.currentReportId),el=document.getElementById('report-aside');if(el)el.innerHTML=renderReportAside(r)}
 function agencyWorkflowButtons(r,comp){if(!isAgency())return'';let p=periodById(r.periodId);if(p.type==='upcoming')return'<button class="btn" disabled>Reporting period not open</button>';if(r.status==='approved')return'<button class="btn" disabled>Report approved</button>';if(isLocked(r))return'<button class="btn" disabled>Report submitted and locked</button>';let label=r.status==='returned'?'Resubmit Report':'Submit Report';return`<button class="btn gold" ${comp.ready?'':'disabled'} onclick="submitReport('${r.id}')">${label}</button>${!comp.ready?'<div class="help">Complete all required report items before submission.</div>':''}`}
-function openQualityModal(id){let r=reportById(id),comp=completeness(r);openModal('Report Checks',`<div class="checklist">${comp.checks.map(x=>`<div class="check-row ${x.ok?'ok':'check'}"><div class="check-mark">${x.ok?'✓':'!'}</div><div><strong>${esc(x.label)}</strong><span>${esc(x.detail)}</span></div></div>`).join('')}</div>`)}
+function openQualityModal(id){let r=reportById(id),comp=completeness(r);openModal('Report Checks',`<div class="checklist">${comp.checks.map(x=>`<div class="check-row ${x.ok?'ok':(x.advisory?'warn':'check')}"><div class="check-mark">${x.ok?'✓':(x.advisory?'△':'!')}</div><div><strong>${esc(x.label)}${!x.ok&&x.advisory?' <span style="font-weight:400;color:var(--muted);font-size:11px">(advisory — does not block submission)</span>':''}</strong><span>${esc(x.detail)}</span></div></div>`).join('')}</div>`)}
 function pushHistory(r,action,status){r.history.push({at:now(),actor:currentUser().name,action,status});r.updatedAt=now()}
 function destroyCharts(){Object.values(state.charts).forEach(c=>{try{c.destroy()}catch(e){}});state.charts={}}
 function addProvider(){openModal('Add Provider',`<form onsubmit="saveNewProvider(event)"><div class="field"><label>Provider name</label><input id="new-provider-name" required></div><div class="modal-actions"><button class="btn secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn" type="submit">Add Provider</button></div></form>`)}
@@ -1973,7 +2016,7 @@ function renderCertification(r){
 }
 
 function qualityChecks(r){
-  let e=n(r.access.enrollment),t=getTemplateForReport(r),checks=[],add=(id,label,ok,detail)=>checks.push({id,label,ok,detail});
+  let e=n(r.access.enrollment),t=getTemplateForReport(r),checks=[],add=(id,label,ok,detail,advisory)=>checks.push({id,label,ok,detail,advisory:!!advisory});
   add('enrollment','New unduplicated enrollment entered',r.access.enrollment!=='','Enter the number of people enrolled for the first time during this quarter, including zero when applicable.');
   add('age','Age and gender matrix equals enrollment',ageGenderTotal(r)===e,`Current subtotal: ${ageGenderTotal(r)}; enrollment: ${e}.`);
   add('race','Race/ethnicity responses equal enrollment',sumObject(r.access.race)===e,`Current subtotal: ${sumObject(r.access.race)}; enrollment: ${e}.`);
@@ -2030,8 +2073,19 @@ const PRINT_STATUS_META={
   'Not Reported':{label:'Data Not Reported',glyph:'!',cls:'nodata'},
   'Not Applicable':{label:'Not Applicable',glyph:'–',cls:'na'}
 };
+const PRINT_OVERALL_META={
+  strong:{label:'Strong Performance',glyph:'✓',cls:'ahead'},
+  on_track:{label:'Generally On Track',glyph:'●',cls:'ontrack'},
+  watch:{label:'Watch',glyph:'▲',cls:'watch'},
+  below:{label:'Below Target',glyph:'▼',cls:'below'},
+  insufficient:{label:'Insufficient Data',glyph:'!',cls:'nodata'}
+};
 function printBadge(label){
   let meta=PRINT_STATUS_META[label]||PRINT_STATUS_META['Not Applicable'];
+  return`<span class="pr-badge pr-badge-${meta.cls}"><span class="pr-badge-icon" aria-hidden="true">${meta.glyph}</span>${esc(meta.label)}</span>`;
+}
+function printOverallBadge(level){
+  let meta=PRINT_OVERALL_META[level]||PRINT_OVERALL_META.insufficient;
   return`<span class="pr-badge pr-badge-${meta.cls}"><span class="pr-badge-icon" aria-hidden="true">${meta.glyph}</span>${esc(meta.label)}</span>`;
 }
 function printExpectedFraction(entity,period){
@@ -2041,29 +2095,28 @@ function printExpectedFraction(entity,period){
 }
 function printIsQ1(period){return Number(period.quarterNumber)===1}
 
-function printOutcomeQuarterState(r,o){
-  let x=r.outcomes[o.id]||{},denRaw=x.denominator;
-  if(denRaw===''||denRaw===undefined||denRaw===null){
-    return o.required===false
-      ?{state:'not_applicable',text:'Not applicable this quarter',note:'This measure is not expected to be reported every quarter for this program.'}
-      :{state:'no_data',text:'Data not reported',note:'The agency did not provide sufficient information to calculate this measure this quarter.'};
-  }
-  let den=n(denRaw);
-  if(den===0)return{state:'no_eligible',text:'No eligible participants',note:'No participants entered the denominator this quarter.'};
-  let numBlank=o.id==='housing'?(x.transitional===''&&x.permanent===''):(x.numerator===''||x.numerator===undefined);
-  if(numBlank)return{state:'not_measurable',text:'Not yet measurable',note:'No participants had reached the required follow-up period, or a result has not yet been recorded.'};
-  let num=outcomeQuarterNumerator(r,o);
-  return{state:'result',num,den};
-}
-function printOutcomeYtdState(r,o){
-  let den=ytdOutcome(r,o.id,'denominator');
-  if(den===0)return{state:'no_eligible',text:'No eligible participants',note:'No participants have entered the denominator so far this contract year.'};
-  let num=o.id==='housing'?priorReports(r).reduce((s,x)=>s+outcomeQuarterNumerator(x,o),0):ytdOutcome(r,o.id,'numerator');
-  return{state:'result',num,den};
-}
+/* Single source of truth for outcome status, used identically by the badge/pace
+   calculation (outcomeSuggestedStatus, defined earlier in this file), the KPI
+   summary cards, and the detailed outcomes table below. */
+function printOutcomeQuarterState(r,o){return outcomeQuarterState(r,o)}
+function printOutcomeYtdState(r,o){return outcomeYtdStatus(r,o)}
 function printOutcomeCell(st){
   if(st.state==='result')return`<div class="pr-oc-result"><strong>${fmt(st.num)} of ${fmt(st.den)}</strong><span class="pr-oc-rate">${pct(st.den?st.num/st.den:0)}</span></div>`;
   return`<div class="pr-oc-empty"><span>${esc(st.text)}</span>${st.note?`<div class="pr-cell-note">${esc(st.note)}</div>`:''}</div>`;
+}
+
+function printOverallPerformance(scored,attentionNames){
+  let total=scored.length;
+  if(!total)return{level:'insufficient',sub:'Not enough measures have usable results yet this quarter to summarize overall performance.'};
+  let exceeds=scored.filter(s=>s==='Exceeds Pace').length,onTrack=scored.filter(s=>s==='On Track').length,below=scored.filter(s=>s==='Off Track').length;
+  let goodOrBetter=exceeds+onTrack,ratioGood=goodOrBetter/total,ratioBelow=below/total,level;
+  if(ratioBelow>=.34)level='below';
+  else if(exceeds/total>=.6&&below===0)level='strong';
+  else if(ratioGood>=.7)level='on_track';
+  else level='watch';
+  let sub=`${fmt(goodOrBetter)} of ${fmt(total)} measures on pace or better.`;
+  if(attentionNames.length)sub+=` ${attentionNames.length===1?'One measure requires':fmt(attentionNames.length)+' measures require'} attention: ${attentionNames.join(', ')}.`;
+  return{level,sub};
 }
 
 function printSummaryCards(r,t,p,program){
@@ -2088,14 +2141,18 @@ function printSummaryCards(r,t,p,program){
     let value=st.state==='result'?pct(st.den?st.num/st.den:0):st.text;
     cards.push({order:(chosenOutcome.summaryCard&&chosenOutcome.summaryCard.order)||4,value,label:chosenOutcome.name,sub:st.state==='result'?`${fmt(st.num)} of ${fmt(st.den)} — target ≥${pct(chosenOutcome.target)}`:`Target: ≥${pct(chosenOutcome.target)}`,kind:'outcome'});
   }
-  let statuses=[...services.map(m=>finalServiceStatus(r,m)),...outcomes.map(o=>finalOutcomeStatus(r,o))].filter(s=>s&&!['Not Applicable'].includes(s));
+  let attentionNames=[...services.filter(m=>['Watch','Off Track'].includes(finalServiceStatus(r,m))).map(m=>m.name),...outcomes.filter(o=>['Watch','Off Track'].includes(finalOutcomeStatus(r,o))).map(o=>o.name)];
+  let statuses=[...services.map(m=>finalServiceStatus(r,m)),...outcomes.map(o=>finalOutcomeStatus(r,o))].filter(s=>s&&s!=='Not Applicable');
   let scored=statuses.filter(s=>s!=='Not Reported');
-  let overall=scored.length===0?'Not Reported':scored.every(s=>s==='Exceeds Pace')?'Exceeds Pace':scored.some(s=>s==='Off Track')?'Watch':scored.some(s=>s==='Watch')?'Watch':'On Track';
-  cards.push({order:5,value:printBadge(overall),label:'Overall contract performance',sub:scored.length?`${fmt(scored.filter(s=>['Exceeds Pace','On Track'].includes(s)).length)} of ${fmt(scored.length)} tracked measures on pace or better`:'Not enough data reported yet this quarter',kind:'status',isBadge:true});
+  let overall=printOverallPerformance(scored,attentionNames);
+  cards.push({order:5,value:printOverallBadge(overall.level),label:'Overall contract performance',sub:overall.sub,kind:'status',isBadge:true,wide:true});
   return cards.sort((a,b)=>a.order-b.order).slice(0,5);
 }
 function printSummaryCardsHtml(cards){
-  return`<div class="pr-cards">${cards.map(c=>`<div class="pr-card"><div class="pr-card-value">${c.isBadge?c.value:esc(c.value)}</div><div class="pr-card-label">${esc(c.label)}</div>${c.sub?`<div class="pr-card-sub">${esc(c.sub)}</div>`:''}</div>`).join('')}</div>`;
+  return`<div class="pr-cards">${cards.map(c=>{
+    let wide=c.wide||(c.label.length+(c.sub||'').length)>34;
+    return`<div class="pr-card${wide?' pr-card--wide':''}"><div class="pr-card-value">${c.isBadge?c.value:esc(c.value)}</div><div class="pr-card-label">${esc(c.label)}</div>${c.sub?`<div class="pr-card-sub">${esc(c.sub)}</div>`:''}</div>`;
+  }).join('')}</div>`;
 }
 
 function printDemoBlock(title,rows,total,unitLabel){
@@ -2119,16 +2176,48 @@ function printFilename(program,p,r,ext){
   let cyLabel=cyStart?(cyEnd&&cyEnd!==cyStart?`CY${cyStart}-${cyEnd}`:`CY${cyStart}`):'';
   let revisedSuffix=(r.status==='resubmitted'||r.returnedAt)?`_Revised-${new Date().toISOString().slice(0,10)}`:'';
   let base=[program.name,cyLabel,p.label,'Program-Report'].filter(Boolean).join('_')+revisedSuffix;
-  base=base.replace(/[\\/:*?"<>|]/g,'').replace(/\s+/g,'-').replace(/-{2,}/g,'-');
+  base=base.replace(/[\u2012-\u2015\u2212]/g,'-').replace(/[\\/:*?"<>|]/g,'').replace(/\s+/g,'-').replace(/-{2,}/g,'-');
   return`${base}.${ext}`;
 }
+function cyShortLabel(program){
+  let cyMatch=(program.contractYears||'').match(/\d{4}/g)||[];
+  let cyStart=cyMatch[0]||(program.contractStartDate?program.contractStartDate.slice(0,4):'');
+  let cyEnd=cyMatch.length?cyMatch[cyMatch.length-1]:(program.contractEndDate?program.contractEndDate.slice(0,4):'');
+  if(!cyStart)return'';
+  if(!cyEnd||cyEnd===cyStart)return`CY ${cyStart}`;
+  return`CY ${cyStart}–${cyEnd.length===4?cyEnd.slice(2):cyEnd}`;
+}
+function longDate(v){
+  if(!v)return'—';
+  let m=/^(\d{4})-(\d{2})-(\d{2})/.exec(String(v));
+  let d=m?new Date(Number(m[1]),Number(m[2])-1,Number(m[3])):new Date(v);
+  if(isNaN(d))return String(v);
+  return d.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+}
+function cleanDisplayName(name){
+  if(!name)return name;
+  return String(name).replace(/\s*,\s*/g,' ').replace(/\s+/g,' ').trim();
+}
+function cssStringEscape(s){return String(s).replace(/\\/g,'\\\\').replace(/"/g,'\\"')}
 
 const PRINT_STATUS_DISPLAY={draft:'Draft',submitted:'Submitted',under_review:'Under Review',returned:'Returned for Revision',resubmitted:'Resubmitted',approved:'Approved'};
+
+const SERVICE_UNIT_LABELS={'service requests':'Requests','contacts':'Contacts','assessments':'Assessments','screenings':'Screenings','screenings and procedures':'Screenings and procedures','medication services':'Medication services','evaluations':'Evaluations','visits':'Visits','encounters':'Contacts','referrals':'Referrals'};
+function printServiceUnitLabel(m){
+  let unit=(m.unit||'').trim();
+  if(!unit)return'Count';
+  let known=SERVICE_UNIT_LABELS[unit.toLowerCase()];
+  if(known)return known;
+  let short=unit.length<=28?unit:unit.slice(0,25)+'…';
+  return short.charAt(0).toUpperCase()+short.slice(1);
+}
 
 function printReport(id){
   let r=reportById(id),p=periodById(r.periodId),program=programById(r.programId),t=getTemplateForReport(r);
   let isQ1=printIsQ1(p),isDraft=['draft','returned'].includes(r.status);
   let statusText=PRINT_STATUS_DISPLAY[r.status]||DB_STATUS_LABELS[r.status]||r.status;
+
+  alert('Your report is about to open in the print dialog.\n\nFor the cleanest PDF, open "More settings" and turn OFF "Headers and footers." This report already includes its own footer with the program name, contract year, quarter, and page numbers — the browser’s built-in header/footer would just duplicate that information.');
 
   let cards=printSummaryCardsHtml(printSummaryCards(r,t,p,program));
   let programSummary=`<div class="pr-section" id="pr-summary"><div class="pr-eyebrow">City of West Hollywood Human Services Division</div>
@@ -2160,8 +2249,16 @@ function printReport(id){
     if(langTotal)demoBlocks.push(printDemoBlock('Household Language',LANGUAGES.map(k=>[k,r.access.language[k]]),langTotal));
     if(lgbtqTotal)demoBlocks.push(printDemoBlock('LGBTQ+ Identity',[['Yes',r.access.lgbtq.yes],['No',r.access.lgbtq.no],['Unknown/Declined',r.access.lgbtq.unknown]],lgbtqTotal));
     let ageTotal=ageGenderTotal(r);
-    let charSection=demoBlocks.length||ageTotal?`<div class="pr-section"><h2>Participant Characteristics</h2><p class="pr-section-intro">Demographic categories reflect the same newly enrolled participants counted in People Served.</p>${ageTotal?`<table class="pr-table"><thead><tr><th>Age</th>${GENDERS.map(g=>`<th>${esc(g)}</th>`).join('')}<th>Total</th></tr></thead><tbody>${AGES.filter(a=>GENDERS.some(g=>n(r.access.ageGender[a][g])>0)).map(a=>`<tr><td>${esc(a)}</td>${GENDERS.map(g=>`<td class="num">${fmt(r.access.ageGender[a][g])}</td>`).join('')}<td class="num"><strong>${fmt(sumObject(r.access.ageGender[a]))}</strong></td></tr>`).join('')}</tbody></table>`:''}<div class="pr-demo-grid">${demoBlocks.join('')}</div></div>`:'';
-    peopleSection+=charSection;
+    if(demoBlocks.length||ageTotal){
+      let denomTotals=[ageTotal,raceTotal,langTotal,lgbtqTotal].filter(Boolean);
+      let allMatch=denomTotals.every(v=>v===qEnroll);
+      let introText=allMatch
+        ?'Demographic categories reflect the same newly enrolled participants counted in People Served.'
+        :`Demographic response totals are shown individually below because one or more categories do not exactly match the ${fmt(qEnroll)} newly enrolled participants reported in People Served. This can happen when a demographic question was left blank for some participants.`;
+      let ageTable=ageTotal?`<table class="pr-table"><thead><tr><th>Age</th>${GENDERS.map(g=>`<th>${esc(g)}</th>`).join('')}<th>Total</th></tr></thead><tbody>${AGES.filter(a=>GENDERS.some(g=>n(r.access.ageGender[a][g])>0)).map(a=>`<tr><td>${esc(a)}</td>${GENDERS.map(g=>`<td class="num">${fmt(r.access.ageGender[a][g])}</td>`).join('')}<td class="num"><strong>${fmt(sumObject(r.access.ageGender[a]))}</strong></td></tr>`).join('')}</tbody></table>${ageTotal!==qEnroll?`<div class="pr-note">Age and gender responses total ${fmt(ageTotal)}, reporting against ${fmt(qEnroll)} newly enrolled participants.</div>`:''}`:'';
+      let charSection=`<div class="pr-section"><div class="pr-keep-together"><h2>Participant Characteristics</h2><p class="pr-section-intro">${introText}</p>${ageTable}</div><div class="pr-demo-grid">${demoBlocks.join('')}</div></div>`;
+      peopleSection+=charSection;
+    }
   }
 
   let servicesSection='';
@@ -2169,9 +2266,11 @@ function printReport(id){
     let rows=t.serviceMetrics.map(m=>{
       let ytd=ytdService(r,m.id),expectedFrac=printExpectedFraction(m,p),status=finalServiceStatus(r,m),progressPct=n(m.goal)?ytd/n(m.goal):0;
       let qCell=isQ1?'':`<td class="num">${fmt(r.services[m.id]?.actual)}</td>`;
-      return`<tr><td><div class="pr-measure-name">${esc(m.name)}</div><div class="pr-measure-unit">${esc(m.unit||'')}${m.duplicatedCount?' · may include repeat contacts with the same participant':''}</div></td><td class="num">${fmt(m.goal)}</td>${qCell}<td class="num">${fmt(ytd)}</td><td><div class="pr-progress-track"><div class="pr-progress-fill" style="width:${Math.min(100,Math.round(progressPct*100))}%"></div></div><div class="pr-progress-text">${pct(progressPct)} complete; ${pct(expectedFrac)} expected by ${esc(p.label)}</div></td><td>${printBadge(status)}</td></tr>`;
+      let unitLabel=printServiceUnitLabel(m);
+      let extraNote=m.uniqueNote?`<div class="pr-measure-unit">${esc(m.uniqueNote)}</div>`:'';
+      return`<tr><td><div class="pr-measure-name">${esc(m.name)}</div><div class="pr-measure-unit">${esc(unitLabel)}</div>${extraNote}</td><td class="num">${fmt(m.goal)}</td>${qCell}<td class="num">${fmt(ytd)}</td><td><div class="pr-progress-track"><div class="pr-progress-fill" style="width:${Math.min(100,Math.round(progressPct*100))}%"></div></div><div class="pr-progress-text">${pct(progressPct)} complete; ${pct(expectedFrac)} expected by ${esc(p.label)}</div></td><td>${printBadge(status)}</td></tr>`;
     }).join('');
-    servicesSection=`<div class="pr-section"><h2>Services Delivered</h2><p class="pr-section-intro">Service totals count activities and contacts, which may include more than one interaction with the same participant. This is different from the unique-participant counts in People Served.</p>
+    servicesSection=`<div class="pr-section"><h2>Services Delivered</h2><p class="pr-section-intro">Service totals count activities and contacts and may include more than one interaction with the same participant. This is different from the unique-participant counts in People Served.</p>
       <table class="pr-table pr-services-table"><thead><tr><th>Measure</th><th>Annual Goal</th>${isQ1?'':'<th>Quarter</th>'}<th>${isQ1?'Quarter and YTD':'Year to Date'}</th><th>Progress</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>
       ${isQ1?'<div class="pr-note">Because this is the first quarter of the contract year, quarterly and year-to-date totals are the same.</div>':''}
     </div>`;
@@ -2191,31 +2290,33 @@ function printReport(id){
   }
 
   let narrValues=r.narratives?.values||{};
-  let bucketOf=x=>{
+  let sectionOf=x=>{
     let key=(x._code||x.id||'').toLowerCase();
     if(/success|story|impact/.test(key))return'impact';
-    if(/challenge/.test(key))return'challenges';
-    if(/correct/.test(key))return'actions';
-    if(/collab/.test(key))return'collaboration';
-    if(/staffing|budget|factor/.test(key))return'changed';
+    if(/challenge|barrier/.test(key))return'challenges';
     return'operations';
   };
-  let byBucket={changed:[],operations:[],actions:[],collaboration:[],challenges:[],impact:[]};
-  (t.narratives||[]).forEach(x=>{let v=narrValues[x.id];if(v&&String(v).trim())byBucket[bucketOf(x)].push({label:x.label,value:v})});
-  let narrBlock=(heading,items)=>items.length?`<div class="pr-subsection"><h3>${esc(heading)}</h3>${items.map(it=>`<div class="pr-narrative-item">${items.length>1?`<div class="pr-narrative-label">${esc(it.label)}</div>`:''}<p>${esc(it.value).replace(/\n/g,'<br>')}</p></div>`).join('')}</div>`:'';
-  let opsSection=(byBucket.changed.length||byBucket.operations.length||byBucket.actions.length||byBucket.collaboration.length)
-    ?`<div class="pr-section"><h2>Program Operations</h2>${narrBlock('What Changed This Quarter',byBucket.changed)}${narrBlock('Community Collaboration',byBucket.collaboration)}${narrBlock('Actions Taken',byBucket.actions)}${narrBlock('Program Notes',byBucket.operations)}</div>`:'';
-  let challengesSection=byBucket.challenges.length?`<div class="pr-section"><h2>Challenges and Corrective Actions</h2>${narrBlock('Primary Challenges',byBucket.challenges)}</div>`:'';
-  let impactSection=byBucket.impact.length?`<div class="pr-section pr-impact-section"><h2>Participant Impact</h2>${byBucket.impact.map(it=>`<div class="pr-impact-card"><p>${esc(it.value).replace(/\n/g,'<br>')}</p></div>`).join('')}<div class="pr-note">Identifying details are removed to protect participant privacy.</div></div>`:'';
+  let bySection={operations:[],challenges:[],impact:[]};
+  (t.narratives||[]).forEach(x=>{let v=narrValues[x.id];if(v&&String(v).trim())bySection[sectionOf(x)].push({label:x.label,value:v})});
+  let narrativeBlocks=items=>items.map(it=>`<div class="pr-narrative-item"><div class="pr-narrative-label">${esc(it.label)}</div><p>${esc(it.value).replace(/\n/g,'<br>')}</p></div>`).join('');
+  let opsSection=bySection.operations.length?`<div class="pr-section"><h2>Program Operations</h2>${narrativeBlocks(bySection.operations)}</div>`:'';
+  let challengesSection=bySection.challenges.length?`<div class="pr-section"><h2>Challenges and Corrective Actions</h2>${narrativeBlocks(bySection.challenges)}</div>`:'';
+  let impactSection=bySection.impact.length?`<div class="pr-section pr-impact-section"><h2>Participant Impact</h2>${bySection.impact.map(it=>`<div class="pr-impact-card"><div class="pr-narrative-label">${esc(it.label)}</div><p>${esc(it.value).replace(/\n/g,'<br>')}</p></div>`).join('')}<div class="pr-note">Identifying details are removed to protect participant privacy.</div></div>`:'';
 
   let c=r.certification||{};
   let certSection=`<div class="pr-section"><h2>Certification and Data Notes</h2>
-    ${c.name?`<div class="pr-cert-grid"><div><span class="pr-meta-label">Certifying Representative</span><span class="pr-meta-value">${esc(c.name)}${c.title?', '+esc(c.title):''}</span></div><div><span class="pr-meta-label">Agency</span><span class="pr-meta-value">${esc(providerName(program.providerId))}</span></div><div><span class="pr-meta-label">Certification Date</span><span class="pr-meta-value">${esc(c.date||'—')}</span></div></div>`
+    <div class="pr-keep-together">
+    ${c.name?`<div class="pr-cert-grid"><div><span class="pr-meta-label">Certifying Representative</span><span class="pr-meta-value">${esc(cleanDisplayName(c.name))}</span></div>${c.title?`<div><span class="pr-meta-label">Title</span><span class="pr-meta-value">${esc(c.title)}</span></div>`:''}<div><span class="pr-meta-label">Agency</span><span class="pr-meta-value">${esc(providerName(program.providerId))}</span></div><div><span class="pr-meta-label">Certification Date</span><span class="pr-meta-value">${esc(longDate(c.date))}</span></div></div>`
       :`<p class="pr-muted">This report has not yet been certified by the agency.</p>`}
     <div class="pr-glossary"><strong>Data notes:</strong> YTD = year to date, the cumulative total since the start of this contract year. BIPOC = Black, Indigenous, and People of Color. LGBTQ+ = lesbian, gay, bisexual, transgender, queer, and related identities. Rates show a numerator (participants who achieved the result) over a denominator (participants eligible to be measured). This report reflects aggregate, de-identified data only.</div>
+    </div>
   </div>`;
 
-  let footerMeta=`${esc(program.name)} · Contract Year ${esc(program.contractYears||'—')} · ${esc(p.label)}`;
+  let footerText=`${program.name} · ${cyShortLabel(program)||('Contract Year '+(program.contractYears||'—'))} · ${p.label}`;
+  let footerCss=`@page{size:letter;margin:.6in .6in .8in .6in;@bottom-center{content:"${cssStringEscape(footerText)} · Page " counter(page) " of " counter(pages);font-size:8pt;color:#5B6472;font-family:Arial,Helvetica,sans-serif}}`;
+  let styleEl=document.getElementById('pr-dynamic-print-style');
+  if(!styleEl){styleEl=document.createElement('style');styleEl.id='pr-dynamic-print-style';document.head.appendChild(styleEl);}
+  styleEl.textContent=footerCss;
 
   document.getElementById('print-view').innerHTML=`<div class="pr-page">
     ${programSummary}
@@ -2226,7 +2327,7 @@ function printReport(id){
     ${challengesSection}
     ${impactSection}
     ${certSection}
-    <div class="pr-print-footer no-screen">${footerMeta}</div>
+    <!--pr-append-point-->
   </div>`;
 
   document.querySelectorAll('.view').forEach(v=>v.classList.add('hidden'));
@@ -2240,6 +2341,8 @@ function printReport(id){
     document.getElementById('view-report').classList.remove('hidden');
   },100);
 }
+
+
 
 
 
@@ -2499,7 +2602,7 @@ function renderReview(r){
   if(!isCity())return'<div class="notice danger">City access required.</div>';
   let comp=completeness(r),comments=(r.reviewComments||[]).slice().reverse(),commentRows=comments.map(c=>`<tr><td>${esc(REPORT_SECTION_LABELS[c.section_code]||c.section_code)}</td><td>${esc(c.comment_text)}</td><td>${esc(c.createdByName||'City reviewer')}<br><span class="help">${dateTime(c.created_at)}</span></td><td><span class="status ${c.status==='resolved'?'approved':'review'}">${c.status}</span></td><td>${c.status==='open'?`<button class="btn secondary sm" onclick="resolveReviewComment('${c.id}')">Resolve</button>`:'—'}</td></tr>`).join('')||'<tr><td colspan="5" class="empty">No City review comments have been added.</td></tr>';
   let correction=state.cityCorrection?.reportId===r.id;
-  return`<div class="section"><div class="section-title"><span>City Review Workspace</span><small>Comments, corrections, and workflow actions</small></div><div class="section-body">${correction?`<div class="correction-banner"><div><strong>City correction mode is active.</strong><br>Changes are saved with this audit reason: ${esc(state.cityCorrection.reason)}</div><button class="btn secondary sm" onclick="endCityCorrection()">Finish Corrections</button></div>`:''}<div class="grid2"><div><h3 class="card-title">Report readiness</h3><div class="checklist" style="margin-top:10px">${comp.checks.map(x=>`<div class="check-row ${x.ok?'ok':'check'}"><div class="check-mark">${x.ok?'✓':'!'}</div><div><strong>${esc(x.label)}</strong><span>${esc(x.detail)}</span></div></div>`).join('')}</div></div><div><h3 class="card-title">Review actions</h3><p class="section-intro">Add section comments for the agency. City corrections require a reason and are recorded in the audit history.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn secondary" onclick="addReviewComment('overall')">Add Overall Comment</button>${!correction&&r.status!=='approved'?`<button class="btn" onclick="enableCityCorrection('${r.id}')">Correct Reported Data</button>`:''}${correction?'<button class="btn secondary" onclick="endCityCorrection()">Finish Corrections</button>':''}</div><div class="aside-actions" style="margin-top:14px">${cityWorkflowButtons(r)}</div></div></div><div style="margin-top:18px"><h3 class="card-title">Comment history</h3><div class="table-wrap" style="box-shadow:none;margin-top:10px"><table><thead><tr><th>Section</th><th>Comment</th><th>Reviewer</th><th>Status</th><th>Action</th></tr></thead><tbody>${commentRows}</tbody></table></div></div></div></div>`;
+  return`<div class="section"><div class="section-title"><span>City Review Workspace</span><small>Comments, corrections, and workflow actions</small></div><div class="section-body">${correction?`<div class="correction-banner"><div><strong>City correction mode is active.</strong><br>Changes are saved with this audit reason: ${esc(state.cityCorrection.reason)}</div><button class="btn secondary sm" onclick="endCityCorrection()">Finish Corrections</button></div>`:''}<div class="grid2"><div><h3 class="card-title">Report readiness</h3><div class="checklist" style="margin-top:10px">${comp.checks.map(x=>`<div class="check-row ${x.ok?'ok':(x.advisory?'warn':'check')}"><div class="check-mark">${x.ok?'✓':(x.advisory?'△':'!')}</div><div><strong>${esc(x.label)}${!x.ok&&x.advisory?' <span style="font-weight:400;color:var(--muted);font-size:11px">(advisory — does not block submission)</span>':''}</strong><span>${esc(x.detail)}</span></div></div>`).join('')}</div></div><div><h3 class="card-title">Review actions</h3><p class="section-intro">Add section comments for the agency. City corrections require a reason and are recorded in the audit history.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn secondary" onclick="addReviewComment('overall')">Add Overall Comment</button>${!correction&&r.status!=='approved'?`<button class="btn" onclick="enableCityCorrection('${r.id}')">Correct Reported Data</button>`:''}${correction?'<button class="btn secondary" onclick="endCityCorrection()">Finish Corrections</button>':''}</div><div class="aside-actions" style="margin-top:14px">${cityWorkflowButtons(r)}</div></div></div><div style="margin-top:18px"><h3 class="card-title">Comment history</h3><div class="table-wrap" style="box-shadow:none;margin-top:10px"><table><thead><tr><th>Section</th><th>Comment</th><th>Reviewer</th><th>Status</th><th>Action</th></tr></thead><tbody>${commentRows}</tbody></table></div></div></div></div>`;
 }
 function renderReportAside(r){
   let html=renderReportAsideBase(r),overall=renderCommentList(r,'overall');
@@ -2534,7 +2637,7 @@ function updateBipocCount(value){
 function resetBipocCount(){let r=reportById(state.currentReportId);if(!r||!canEditReport(r))return;r.access.bipocCorrection=0;r.access.bipocCorrectionExplanation='';state.bipocAdjustmentReportId=null;r.updatedAt=now();showAutosave();saveDb();refreshCurrentReportTabLive('access.bipocFinal')}
 function validCertificationEmail(value){return/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value||'').trim())}
 function qualityChecks(r){
-  let e=n(r.access.enrollment),t=getTemplateForReport(r),checks=[],add=(id,label,ok,detail)=>checks.push({id,label,ok,detail});
+  let e=n(r.access.enrollment),t=getTemplateForReport(r),checks=[],add=(id,label,ok,detail,advisory)=>checks.push({id,label,ok,detail,advisory:!!advisory});
   add('enrollment','New unduplicated enrollment entered',r.access.enrollment!=='','Enter the number of people enrolled for the first time during this quarter, including zero when applicable.');
   add('age','Age and gender matrix equals enrollment',ageGenderTotal(r)===e,`Current subtotal: ${ageGenderTotal(r)}; enrollment: ${e}.`);
   add('race','Race/ethnicity responses equal enrollment',sumObject(r.access.race)===e,`Current subtotal: ${sumObject(r.access.race)}; enrollment: ${e}.`);
@@ -2551,7 +2654,20 @@ function qualityChecks(r){
   let reportNarratives=narrativesForReport(r);reportNarratives.filter(x=>x.required).forEach(x=>add('narrative_'+x.id,x.label+' completed',Boolean(r.narratives.values[x.id]?.trim()),'Required narrative section.'));
   if(varianceExists(r)){add('narrative_factors','Factors affecting performance completed',Boolean(r.narratives.values.factors?.trim()),'Required because one or more measures vary from pace.');add('narrative_corrective','Corrective strategies completed',Boolean(r.narratives.values.corrective?.trim()),'Required because one or more measures vary from pace.');}
   ['staffing','budget'].forEach(flag=>{if(r.narratives.flags[flag]==='Yes')add('conditional_'+flag,(reportNarratives.find(x=>x.id===flag)?.label||flag)+' completed',Boolean(r.narratives.values[flag]?.trim()),'Required because Yes was selected.')});
-  let c=r.certification;add('certs','Agency certifications acknowledged',c.recordsAvailable&&c.noPhi&&c.accuracy,'All three certifications are required.');add('signer','Certification completed',Boolean(c.name&&c.title&&validCertificationEmail(c.email)&&c.date),'Name, title, a valid email address, and date are required.');return checks;
+  let c=r.certification;add('certs','Agency certifications acknowledged',c.recordsAvailable&&c.noPhi&&c.accuracy,'All three certifications are required.');add('signer','Certification completed',Boolean(c.name&&c.title&&validCertificationEmail(c.email)&&c.date),'Name, title, a valid email address, and date are required.');let priorReportsExclCurrent=priorReports(r).filter(x=>x.id!==r.id).sort((a,b)=>(periodById(b.periodId)?.quarterNumber||0)-(periodById(a.periodId)?.quarterNumber||0)),priorReport=priorReportsExclCurrent[0],priorLabel=priorReport?(periodById(priorReport.periodId)?.label||'the prior quarter'):null;
+  t.serviceMetrics.forEach(m=>{
+    let ytd=ytdService(r,m.id),actual=n(r.services[m.id]?.actual);
+    add('service_recon_floor_'+m.id,`${m.name}: quarter total does not exceed the year-to-date total`,actual<=ytd,`Quarter: ${fmt(actual)}; year to date: ${fmt(ytd)}.`,true);
+    if(priorReport){let priorYtd=ytdService(priorReport,m.id);add('service_recon_trend_'+m.id,`${m.name}: year-to-date total has not decreased since ${priorLabel}`,ytd>=priorYtd,`${priorLabel} year to date: ${fmt(priorYtd)}; this quarter's year to date: ${fmt(ytd)}.`,true);}
+  });
+  if(priorReport){t.outcomes.forEach(o=>{
+    let st=outcomeYtdStatus(r,o),priorSt=outcomeYtdStatus(priorReport,o);
+    if(st.state==='result'&&priorSt.state==='result')add('outcome_recon_trend_'+o.id,`${o.name}: year-to-date reporting population has not decreased since ${priorLabel}`,st.den>=priorSt.den,`${priorLabel} year to date: ${fmt(priorSt.den)}; this quarter's year to date: ${fmt(st.den)}.`,true);
+  });}
+  let compressedDatePattern=/\b[A-Za-z]{3,9}\.?\s?\d{2}\s?[-\u2013]\s?[A-Za-z]{3,9}\.?\s?\d{2}\b/;
+  let flaggedNarratives=(t.narratives||[]).filter(x=>compressedDatePattern.test(String(r.narratives.values[x.id]||'')));
+  add('narrative_date_format','Narrative text does not contain compressed date ranges (for example, "Oct25-Dec25")',flaggedNarratives.length===0,flaggedNarratives.length?`Consider spelling out the date range for readability in: ${flaggedNarratives.map(x=>x.label).join(', ')}.`:'',true);
+  return checks;
 }
 
 function renderReport(){
@@ -3044,7 +3160,7 @@ function housingAdjustmentPanel(ownerReport){
   return`<div class="housing-adjustment-panel"><div class="housing-adjustment-head"><div><h3>Prior-quarter housing outcome updates</h3><p>Record later housing developments for clients already assigned to an earlier housing-navigation cohort. The prior approved report remains unchanged; the update is carried forward through an auditable adjustment record.</p></div>${canAdd?'<button class="btn gold" type="button" onclick="openHousingAdjustmentModal()">Record prior-quarter update</button>':''}</div><div class="housing-adjustment-note"><strong>How totals work:</strong> Working dashboards reflect saved updates immediately. Approved dashboards include an update only after the report in which it was recorded is approved.</div>${rows?`<div class="table-wrap" style="box-shadow:none"><table class="housing-adjustment-table"><thead><tr><th>Original cohort</th><th>Update</th><th>Participants / effect</th><th>Reason</th><th>Recorded by</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`:`<div class="housing-adjustment-empty">No prior-quarter housing outcome updates have been recorded in this report.${ownerQ===1?' Updates can first be recorded beginning in Q2.':''}</div>`}${housingAdjustmentCohortSummary(ownerReport)}</div>`;
 }
 function housingAdjustmentExportHtml(r){
-  let rows=ensureHousingAdjustmentShape(r);if(!rows.length)return'';return`<div class="export-section"><h2>Prior-Quarter Housing Outcome Updates</h2><table class="export-table"><thead><tr><th>Original cohort</th><th>Update</th><th>Participants</th><th>Effect</th><th>Reason</th><th>Recorded by</th></tr></thead><tbody>${rows.map(adj=>{let source=reportById(adj.sourceReportId),p=source?periodById(source.periodId):null;return`<tr><td>${esc(p?.label||'Prior quarter')}</td><td>${esc(housingAdjustmentTypeLabel(adj.type))}</td><td class="num">${fmt(adj.quantity)}</td><td>${esc(adjustmentDeltaLabel(adj))}</td><td>${esc(adj.reason||'')}</td><td>${esc(adj.createdBy||'—')}<br>${adj.createdAt?dateTime(adj.createdAt):'—'}</td></tr>`}).join('')}</tbody></table></div>`;
+  let rows=ensureHousingAdjustmentShape(r);if(!rows.length)return'';return`<div class="pr-section"><h2>Prior-Quarter Housing Outcome Updates</h2><table class="pr-table"><thead><tr><th>Original cohort</th><th>Update</th><th>Participants</th><th>Effect</th><th>Reason</th><th>Recorded by</th></tr></thead><tbody>${rows.map(adj=>{let source=reportById(adj.sourceReportId),p=source?periodById(source.periodId):null;return`<tr><td>${esc(p?.label||'Prior quarter')}</td><td>${esc(housingAdjustmentTypeLabel(adj.type))}</td><td class="num">${fmt(adj.quantity)}</td><td>${esc(adjustmentDeltaLabel(adj))}</td><td>${esc(adj.reason||'')}</td><td>${esc(adj.createdBy||'—')}<br>${adj.createdAt?dateTime(adj.createdAt):'—'}</td></tr>`}).join('')}</tbody></table></div>`;
 }
 function housingAdjustmentChecks(r){
   let adjustments=ensureHousingAdjustmentShape(r);if(!adjustments.length)return[];
@@ -3065,7 +3181,7 @@ qualityChecks=function(r){return hsdQualityChecksBase(r).concat(housingAdjustmen
 const hsdFlattenReportBase=flattenReport;
 flattenReport=function(r){let rows=hsdFlattenReportBase(r);ensureHousingAdjustmentShape(r).forEach(adj=>{let source=reportById(adj.sourceReportId),p=source?periodById(source.periodId):null;rows.push(['Prior-Quarter Housing Update',`${p?.label||'Prior quarter'} · ${housingAdjustmentTypeLabel(adj.type)}`,adj.quantity,'',`${adjustmentDeltaLabel(adj)}; ${adj.reason||''}; recorded by ${adj.createdBy||'—'} ${adj.createdAt?dateTime(adj.createdAt):''}`])});return rows};
 const hsdPrintReportBase=printReport;
-printReport=function(id){hsdPrintReportBase(id);let r=reportById(id),extra=housingAdjustmentExportHtml(r),view=document.getElementById('print-view');if(extra&&view){let marker='<div class="page-break">',idx=view.innerHTML.indexOf(marker);view.innerHTML=idx>=0?view.innerHTML.slice(0,idx)+extra+view.innerHTML.slice(idx):view.innerHTML+extra}};
+printReport=function(id){hsdPrintReportBase(id);let r=reportById(id),extra=housingAdjustmentExportHtml(r),view=document.getElementById('print-view');if(extra&&view){let marker='<!--pr-append-point-->',idx=view.innerHTML.indexOf(marker);view.innerHTML=idx>=0?view.innerHTML.slice(0,idx)+extra+view.innerHTML.slice(idx):view.innerHTML+extra}};
 
 
 /* ========================================================================== 
