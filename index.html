@@ -836,10 +836,10 @@ function currentUser(){return state.db.users.find(u=>u.id===state.userId)}
 function isCity(){return ['monitor','supervisor','admin'].includes(currentUser()?.role)}
 function isAdmin(){return currentUser()?.role==='admin'}
 function isAgency(){return currentUser()?.role==='agency'}
-function manageableTemplates(){let u=currentUser();if(!u)return[];if(u.role==='admin')return state.db.templates;let ids=[...new Set(state.db.programs.filter(p=>(u.programIds||[]).includes(p.id)).map(p=>p.templateId))];return state.db.templates.filter(t=>ids.includes(t.id))}
-function canManageTemplate(id){return manageableTemplates().some(t=>t.id===id)}
-function selectedTemplate(){let list=manageableTemplates();if(!list.length)return null;if(!state.selectedTemplateId||!list.some(t=>t.id===state.selectedTemplateId))state.selectedTemplateId=list[0].id;return templateById(state.selectedTemplateId)}
-function programsUsingTemplate(id){return state.db.programs.filter(p=>p.templateId===id)}
+
+
+
+
 function narrativesForReport(r){return getTemplateForReport(r)?.narratives||NARRATIVES}
 function providerName(id){return state.db.providers.find(x=>x.id===id)?.name||id||'—'}
 function programById(id){return state.db.programs.find(x=>x.id===id)}
@@ -931,10 +931,10 @@ function renderShell(){let u=currentUser();document.getElementById('user-agency'
   ${admin?navButton('users','User Management','<circle cx="9" cy="7" r="4"/><path d="M3 21v-2a6 6 0 0 1 6-6h1"/><circle cx="17" cy="17" r="3"/><path d="M17 12v2M17 20v2M12 17h2M20 17h2"/>'):''}
   ${city?navButton('activity','Activity History','<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'):''}`;
 }
-function navButton(view,label,icon){return`<button class="navbtn ${state.view===view?'active':''}" data-view="${view}" onclick="nav('${view}')"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">${icon}</svg><span>${label}</span></button>`}
+
 function nav(view,opts={}){state.view=view;document.querySelectorAll('.view').forEach(v=>v.classList.add('hidden'));let el=document.getElementById('view-'+view);if(!el)return;el.classList.remove('hidden');document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('active',b.dataset.view===view));if(view==='home')renderHome();if(view==='portfolio')renderPortfolio();if(view==='dashboard')renderDashboard();if(view==='reports')renderReports();if(view==='notifications')renderNotifications();if(view==='providers')renderProviders();if(view==='templates')renderTemplates();if(view==='users')renderUsers();if(view==='activity')renderActivity();if(!opts.fromHash)setRouteHash('#/'+view,false)}
 function reportHasAnyData(r){return n(r.access.enrollment)>0||Object.values(r.services).some(x=>x.actual!=='')||Object.values(r.narratives.values).some(Boolean)}
-function priorIncompleteWarning(r){let idx=PERIODS.findIndex(p=>p.id===r.periodId);if(idx<=0)return'';let earlier=reportsForProgram(r.programId).filter(x=>PERIODS.findIndex(p=>p.id===x.periodId)<idx);let missing=earlier.filter(x=>!reportHasAnyData(x)).map(x=>periodById(x.periodId).label);return missing.length?`Year-to-date totals may be incomplete because ${missing.join(' and ')} ${missing.length===1?'has':'have'} not been entered.`:''}
+
 function ytdService(r,metricId){return priorReports(r).reduce((s,x)=>s+n(x.services[metricId]?.actual),0)}
 function ytdOutcome(r,outcomeId,key){return priorReports(r).reduce((s,x)=>s+n(x.outcomes[outcomeId]?.[key]),0)}
 function ytdAccess(r,path){return priorReports(r).reduce((s,x)=>{let v=x.access;for(let k of path)v=v?.[k];return s+n(v)},0)}
@@ -1017,7 +1017,7 @@ window.addEventListener("hashchange",()=>{if(state.authUser)applyRoute()});
 
 function reportTabButton(id,label,ok){return`<button class="tabbtn ${state.reportTab===id?'active':''}" onclick="setReportTab('${id}')"><span class="tab-dot ${ok?'ok':'check'}"></span>${label}</button>`}
 function renderReportTabBase(r){if(state.reportTab==='access')return renderAccess(r);if(state.reportTab==='services')return renderServices(r);if(state.reportTab==='outcomes')return renderOutcomes(r);if(state.reportTab==='narratives')return renderNarratives(r);if(state.reportTab==='certification')return renderCertification(r);if(state.reportTab==='review')return renderReview(r);return''}
-function reviewComment(section,r){if(canComment())return`<div class="comment-box"><label>City review comment · ${esc(section)}</label><textarea oninput="updateComment('${section}',this.value)" placeholder="Add a section-level comment for the agency…">${esc(r.comments[section])}</textarea></div>`;if(r.comments[section])return`<div class="comment-readonly"><strong>City review comment:</strong><br>${esc(r.comments[section])}</div>`;return''}
+
 function narrativeVisible(item,r){if(item.required||!item.conditional)return true;if(item.conditional==='variance')return varianceExists(r);return r.narratives.flags[item.conditional]==='Yes'}
 function copyPriorNarratives(){let r=reportById(state.currentReportId),idx=PERIODS.findIndex(p=>p.id===r.periodId);if(idx<=0){toast('There is no prior quarter to copy.','err');return}let prior=reportsForProgram(r.programId).find(x=>x.periodId===PERIODS[idx-1].id);if(!prior){toast('Prior-quarter report not found.','err');return}confirmDialog(`Copy narrative text from ${PERIODS[idx-1].label}? Existing current-quarter text will be replaced.`,()=>{r.narratives=clone(prior.narratives);r.updatedAt=now();addActivity('Copied prior-quarter narratives',r,PERIODS[idx-1].label);saveDb();renderReport();toast('Prior-quarter narratives copied.','ok')},{title:'Copy prior-quarter narratives',confirmLabel:'Copy text'})}
 function renderNarratives(r){
@@ -1079,7 +1079,7 @@ function addProgram(){let providerOpts=state.db.providers.map(p=>`<option value=
 function saveNewProgram(e){e.preventDefault();let program={id:uid('program'),providerId:document.getElementById('np-provider').value,name:document.getElementById('np-name').value.trim(),contractYears:document.getElementById('np-years').value.trim(),templateId:document.getElementById('np-template').value,monitorName:document.getElementById('np-monitor').value.trim(),monitorEmail:document.getElementById('np-email').value.trim(),active:true};state.db.programs.push(program);PERIODS.forEach(p=>state.db.reports.push(blankReport(program.id,p.id)));addActivity('Added program',null,program.name);saveDb();closeModal();renderProviders();toast('Program and reporting periods added.','ok')}
 function editProgram(id){let p=programById(id),templateOpts=state.db.templates.map(t=>`<option value="${t.id}" ${p.templateId===t.id?'selected':''}>${esc(t.name)} · ${esc(t.version)}</option>`).join('');openModal('Edit Program',`<form onsubmit="saveProgram(event,'${p.id}')"><div class="form-grid"><div class="field full"><label>Program name</label><input id="ep-name" value="${esc(p.name)}" required></div><div class="field"><label>Contract years</label><input id="ep-years" value="${esc(p.contractYears)}"></div><div class="field"><label>Status</label><select id="ep-active"><option value="true" ${p.active?'selected':''}>Active</option><option value="false" ${!p.active?'selected':''}>Inactive</option></select></div><div class="field full"><label>Reporting template</label><select id="ep-template">${templateOpts}</select></div><div class="field"><label>Program monitor</label><input id="ep-monitor" value="${esc(p.monitorName)}"></div><div class="field"><label>Monitor email</label><input id="ep-email" type="email" value="${esc(p.monitorEmail)}"></div></div><div class="modal-actions"><button class="btn secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn" type="submit">Save Program</button></div></form>`)}
 function saveProgram(e,id){e.preventDefault();let p=programById(id);p.name=document.getElementById('ep-name').value.trim();p.contractYears=document.getElementById('ep-years').value.trim();p.active=document.getElementById('ep-active').value==='true';p.templateId=document.getElementById('ep-template').value;p.monitorName=document.getElementById('ep-monitor').value.trim();p.monitorEmail=document.getElementById('ep-email').value.trim();addActivity('Updated program',null,p.name);saveDb();closeModal();renderProviders();toast('Program updated.','ok')}
-function selectReportingTemplate(id){if(!canManageTemplate(id))return;state.selectedTemplateId=id;renderTemplates()}
+
 function templateConfigField(label,key,value,type='text',help=''){return`<div class="field"><label>${esc(label)}</label><input type="${type}" value="${esc(value)}" onchange="updateTemplateSetting('${key}',this.value)">${help?`<div class="help">${esc(help)}</div>`:''}</div>`}
 function updateTemplateSetting(key,value){let t=selectedTemplate();if(!t||!canManageTemplate(t.id))return;t[key]=['threeYearGoal','bipocTarget'].includes(key)?Number(value):value;addActivity('Updated reporting template',null,t.name+' · '+key);saveDb();toast('Template setting saved.','ok')}
 function updateTemplateMetric(i,key,value){let t=selectedTemplate();if(!t||!canManageTemplate(t.id)||!t.serviceMetrics[i])return;t.serviceMetrics[i][key]=key==='goal'?Number(value):value;saveDb();addActivity('Updated service measure',null,t.serviceMetrics[i].name);toast('Measure updated.','ok')}
@@ -1093,7 +1093,7 @@ function addTemplateNarrative(){let t=selectedTemplate();if(!t||!canManageTempla
 function removeTemplateNarrative(i){let t=selectedTemplate();if(!t||!canManageTemplate(t.id)||!t.narratives[i])return;confirmDialog('Remove this narrative prompt from the assigned template?',()=>{let label=t.narratives[i].label;t.narratives.splice(i,1);addActivity('Removed narrative prompt',null,label);saveDb();renderTemplates()},{title:'Remove narrative prompt',confirmLabel:'Remove',danger:true})}
 function duplicateTemplate(id){if(!isAdmin())return;let src=templateById(id);if(!src)return;let copy=clone(src);copy.id=uid('template');copy.version=src.version+' copy';copy.active=false;state.db.templates.push(copy);state.selectedTemplateId=copy.id;addActivity('Created template version',null,copy.version);saveDb();toast('New template version created. Assign it to a program when ready.','ok');renderTemplates()}
 function renderActivity(){if(!isCity())return;let rows=state.db.activity.map(a=>`<tr><td>${dateTime(a.at)}</td><td><strong>${esc(a.actor)}</strong><br><span style="color:var(--muted);font-size:11px">${esc(a.email)}</span></td><td>${esc(a.action)}</td><td>${a.periodId?esc(periodById(a.periodId)?.label||a.periodId):'—'}</td><td>${esc(a.detail||'—')}</td></tr>`).join('')||'<tr><td colspan="5" class="empty">No activity has been recorded.</td></tr>';document.getElementById('view-activity').innerHTML=`<div class="page-head"><div><h1 class="page-title">Activity History</h1><p class="page-sub">Administrative audit history for report submissions, reviews, approvals, and configuration changes.</p></div></div><div class="table-wrap"><table><thead><tr><th>Date</th><th>User</th><th>Action</th><th>Period</th><th>Detail</th></tr></thead><tbody>${rows}</tbody></table></div>`}
-function openModal(title,body){document.getElementById('modal-title').textContent=title;document.getElementById('modal-body').innerHTML=body;document.getElementById('modal').classList.add('open')}function closeModal(){document.getElementById('modal').classList.remove('open')}
+
 function confirmDialog(message,onConfirm,opts={}){openModal(opts.title||'Please confirm',`<p style="margin:0 0 18px;line-height:1.55;color:#425064">${esc(message)}</p><div class="modal-actions"><button class="btn secondary" onclick="closeModal()">Cancel</button><button class="btn ${opts.danger?'danger':''}" id="modal-confirm-btn">${esc(opts.confirmLabel||'Confirm')}</button></div>`);document.getElementById('modal-confirm-btn').onclick=()=>{closeModal();onConfirm()}}
 function promptDialog(message,onSubmit,opts={}){openModal(opts.title||'Please provide details',`<p style="margin:0 0 12px;line-height:1.55;color:#425064">${esc(message)}</p><textarea id="modal-prompt-input" style="width:100%;min-height:90px;border:1px solid var(--line);border-radius:9px;padding:9px 11px">${esc(opts.defaultValue||'')}</textarea><div class="modal-actions"><button class="btn secondary" onclick="closeModal()">Cancel</button><button class="btn" id="modal-prompt-btn">${esc(opts.confirmLabel||'Submit')}</button></div>`);let ta=document.getElementById('modal-prompt-input');ta.focus();ta.setSelectionRange(0,ta.value.length);document.getElementById('modal-prompt-btn').onclick=()=>{let val=document.getElementById('modal-prompt-input').value;if(!val.trim()){toast(opts.requiredMessage||'This field is required.','err');return}closeModal();onSubmit(val.trim())}}
 function downloadReportExcel(id){let r=reportById(id);if(typeof XLSX==='undefined'){toast('Excel export library did not load.','err');return}let wb=XLSX.utils.book_new(),rows=flattenReport(r),ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[{wch:24},{wch:55},{wch:24},{wch:24},{wch:70}];XLSX.utils.book_append_sheet(wb,ws,'Program Report');let quality=XLSX.utils.json_to_sheet(completeness(r).checks.map(x=>({Check:x.label,Status:x.ok?'Complete':'Review needed',Detail:x.detail})));XLSX.utils.book_append_sheet(wb,quality,'Report Checks');XLSX.writeFile(wb,`HIA_${periodById(r.periodId).label}_Program_Report.xlsx`);addActivity('Exported report Excel',r)}
@@ -1140,16 +1140,16 @@ const DB_STATUS_CODES={
 };
 
 function loadDb(){return{providers:[],programs:[],templates:[],users:[],reports:[],periods:[],notifications:[],activity:[],settings:{backfillDeadline:'August 15, 2026',fiscalModule:false,emailNotifications:false}}}
-function saveDb(){if(state.currentReportId)scheduleReportSave(state.currentReportId)}
+
 function periodById(id){return(state.db.periods||[]).find(p=>p.id===id)||PERIODS.find(p=>p.id===id)}
-function reportsForProgram(programId){return state.db.reports.filter(r=>r.programId===programId).sort((a,b)=>(periodById(a.periodId)?.quarterNumber||0)-(periodById(b.periodId)?.quarterNumber||0))}
-function priorReports(r){let q=periodById(r.periodId)?.quarterNumber||0;return reportsForProgram(r.programId).filter(x=>(periodById(x.periodId)?.quarterNumber||0)<=q)}
+
+
 function getTemplateForReport(report){return templateById(report.templateId)||templateById(programById(report.programId)?.templateId)||state.db.templates[0]}
-function roleScopeReports(){let u=currentUser();if(!u)return[];if(u.role==='admin')return state.db.reports;if(['monitor','agency'].includes(u.role))return state.db.reports.filter(r=>(u.programIds||[]).includes(r.programId));return[]}
+
 function statusBadge(status){return`<span class="status ${DB_STATUS_CLASSES[status]||'draft'}">${esc(DB_STATUS_LABELS[status]||status)}</span>`}
 function periodBadge(p){if(!p)return'';if(p.type==='backfill')return'<span class="status backfill">Historical Backfill</span>';if(p.type==='upcoming')return'<span class="status upcoming">Upcoming</span>';return'<span class="status approved">Open</span>'}
 function isLocked(r){return['submitted','under_review','resubmitted','approved'].includes(r.status)}
-function canEditReport(r){return isAgency()&&!isLocked(r)&&r.status!=='not_open'&&periodById(r.periodId)?.type!=='upcoming'}
+
 
 function localDateLabel(value){
   if(!value)return'—';
@@ -1223,24 +1223,7 @@ async function resolvePortalUser(authUser){
   return{id:profile.id,name:profile.full_name,title:profile.job_title||'',email:profile.email,role:uiRole(roles.map(x=>x.role)),providerId:'city',programIds:(assignments||[]).map(x=>x.program_id),active:profile.active,mustChangePassword:profile.must_change_password};
 }
 
-function buildTemplate(version,server){
-  let program=server.programs.find(p=>p.id===version.program_id),targets=server.programTargets.filter(t=>t.program_id===version.program_id&&t.active),three=targets.find(t=>t.code==='three_year_unduplicated_enrollment'),bipoc=targets.find(t=>t.code==='bipoc_participation');
-  let tMeasures=server.templateMeasures.filter(x=>x.template_version_id===version.id&&x.active).sort((a,b)=>a.display_order-b.display_order);
-  let serviceMetrics=[],outcomes=[];
-  tMeasures.forEach(tm=>{
-    let ml=server.measureLibrary.find(x=>x.id===tm.measure_id);if(!ml)return;
-    let fields=server.templateFields.filter(f=>f.template_measure_id===tm.id).sort((a,b)=>a.display_order-b.display_order),fieldIds=Object.fromEntries(fields.map(f=>[f.code,f.id]));
-    let area=server.serviceCategories.find(x=>x.id===tm.reporting_service_category_id)?.name||'';let outcomeDomain=(server.outcomeDomains||[]).find(x=>x.id===ml.outcome_domain_id)?.name||'';
-    if(tm.entry_mode==='count'){
-      serviceMetrics.push({id:SERVICE_UI_IDS[ml.code]||ml.code,name:tm.display_name||ml.name,goal:Number(tm.annual_goal||0),unit:ml.unit_label,area,outcomeDomain,targetSource:'',countingRule:ml.duplicated_count?'Count all qualifying activities delivered during this quarter. The same client may appear more than once when separate services or contacts occurred.':'Count each qualifying activity or event once during this quarter.',_templateMeasureId:tm.id,_measureCode:ml.code,_fieldIds:fieldIds});
-    }else if(['rate','calculated_rate'].includes(tm.entry_mode)){
-      let g=mapOutcomeGuidance(ml.code);
-      outcomes.push({id:OUTCOME_UI_IDS[ml.code]||ml.code,area,outcomeDomain,name:g.name,target:Number(tm.target_value||0),targetSource:'',denominator:g.denominator,denominatorQuestion:g.denominatorQuestion,numeratorQuestion:g.numeratorQuestion,methodNote:g.methodNote,duplicationNote:g.duplicationNote,_templateMeasureId:tm.id,_measureCode:ml.code,_fieldIds:fieldIds});
-    }
-  });
-  let narratives=server.templateNarratives.filter(x=>x.template_version_id===version.id&&x.active).sort((a,b)=>a.display_order-b.display_order).map(x=>({id:NARRATIVE_UI_IDS[x.code]||x.code,label:x.title,required:x.required,conditional:x.code==='performance_factors'||x.code==='corrective_strategies'?'variance':x.code==='staffing_changes'?'staffing':x.code==='budget_modification'?'budget':'',_promptId:x.id,_code:x.code,prompt:x.prompt}));
-  return{id:version.id,programId:version.program_id,name:`${program?.name||'Program'} Reporting Template`,version:version.version_name,versionNumber:version.version_number,status:version.status,active:version.status==='published',threeYearGoal:Number(three?.target_value||0),threeYearGoalSource:'',bipocTarget:Number(bipoc?.target_value||0),bipocTargetSource:'',ageBands:clone(AGES),races:clone(RACES),affiliations:clone(AFFILIATIONS),languages:clone(LANGUAGES),serviceMetrics,outcomes,narratives};
-}
+
 
 function blankServerReport(row,template,user){
   let services={};(template?.serviceMetrics||[]).forEach(m=>services[m.id]={actual:'',override:'',explanation:''});
@@ -1300,23 +1283,8 @@ async function loadPortalData(portalUser){
 function reportPayload(r){return{schemaVersion:2,access:clone(r.access),services:clone(r.services),outcomes:clone(r.outcomes),narratives:clone(r.narratives),certification:clone(r.certification),comments:clone(r.comments)}}
 function setAutosave(message,kind='saved'){let el=document.getElementById('autosave');if(!el)return;el.textContent=message;el.className=`autosave ${kind}`}
 function showAutosave(){setAutosave('Saving to the secure portal…','saving')}
-function scheduleReportSave(reportId){
-  if(!reportId||!state.authUser)return;state.server=state.server||{};state.server.saveTimers=state.server.saveTimers||{};
-  clearTimeout(state.server.saveTimers[reportId]);showAutosave();
-  state.server.saveTimers[reportId]=setTimeout(()=>persistReportNow(reportId),850);
-}
-async function persistReportNow(reportId,forceNormalize=false){
-  let r=reportById(reportId);if(!r)return;
-  clearTimeout(state.server?.saveTimers?.[reportId]);
-  let prior=state.server.saveChains?.[reportId]||Promise.resolve();
-  let task=prior.catch(()=>{}).then(async()=>{
-    let{data,error}=await supabaseClient.from('report_workspaces').upsert({report_id:r.id,payload:reportPayload(r),updated_by:state.authUser.id},{onConflict:'report_id'}).select('updated_at').single();
-    if(error)throw error;r.updatedAt=data.updated_at;setAutosave(`Saved to the secure portal ${new Date(data.updated_at).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}`,'saved');
-    if(forceNormalize)await syncNormalizedReport(r);else scheduleNormalizedSync(r.id);
-  });
-  state.server.saveChains[reportId]=task;
-  try{await task}catch(error){console.error(error);setAutosave('Not saved. Check your connection and try again.','saving');toast(`Save failed: ${error.message}`,'err');throw error}
-}
+
+
 function scheduleNormalizedSync(reportId){state.server.normalizeTimers=state.server.normalizeTimers||{};clearTimeout(state.server.normalizeTimers[reportId]);state.server.normalizeTimers[reportId]=setTimeout(()=>{let r=reportById(reportId);if(r)syncNormalizedReport(r).catch(e=>console.error('Background report sync failed',e))},2500)}
 function valueOrNull(v){return v===''||v===null||v===undefined?null:Number(v)}
 function statusCode(v){return v?DB_STATUS_CODES[v]||null:null}
@@ -1367,7 +1335,7 @@ async function syncDemographics(r){
   for(let row of updates){let{error:e}=await supabaseClient.from('report_demographic_values').update({value:row.value,updated_by:row.updated_by}).eq('id',row.id);if(e)throw e}
 }
 
-function updateComment(section,value){let r=reportById(state.currentReportId);if(!r||!canComment())return;r.comments[section]=value;r.updatedAt=now();showAutosave();saveDb()}
+
 function addActivity(){}
 function notify(){}
 
@@ -1378,7 +1346,7 @@ function notify(){}
 async function refreshAfterWorkflow(reportId){let user=await resolvePortalUser(state.authUser);await loadPortalData(user);state.currentReportId=reportId;renderShell();openReport(reportId)}
 async function submitReport(id){let r=reportById(id),comp=completeness(r);if(!canEditReport(r)){toast('This report cannot be edited or submitted in its current status.','err');return}if(!comp.ready){toast('Complete all required report items before submission.','err');return}try{setAutosave('Saving final changes before submission…','saving');await persistReportNow(id,true);let c=r.certification,{error}=await supabaseClient.rpc('submit_report',{p_report_id:id,p_certified_name:c.name,p_certified_title:c.title,p_certification_date:c.date,p_accuracy_certified:c.accuracy,p_supporting_records_certified:c.recordsAvailable,p_deidentified_story_certified:c.noPhi});if(error)throw error;await refreshAfterWorkflow(id);toast('Report submitted and locked.','ok')}catch(error){toast(`Submission failed: ${error.message}`,'err')}}
 async function startReview(id){let r=reportById(id);if(!isCity()||!['submitted','resubmitted'].includes(r.status))return;try{let{error}=await supabaseClient.rpc('start_report_review',{p_report_id:id});if(error)throw error;await refreshAfterWorkflow(id);toast('City review started.','ok')}catch(error){toast(error.message,'err')}}
-async function returnReport(id){let r=reportById(id);if(!isCity()||r.status!=='under_review')return;promptDialog('Reason for returning the report:',async(reason)=>{try{await persistReportNow(id);let{error}=await supabaseClient.rpc('return_report_for_revision',{p_report_id:id,p_reason:reason});if(error)throw error;await refreshAfterWorkflow(id);toast('Report returned for agency revision.','ok')}catch(error){toast(error.message,'err')}},{title:'Return report for revision',defaultValue:r.comments.overall||'Corrections requested by City review.',confirmLabel:'Return report',requiredMessage:'A return reason is required.'})}
+
 async function approveReport(id){let r=reportById(id);if(!isCity()||r.status!=='under_review')return;confirmDialog('Approve this quarterly report?',async()=>{try{let{error}=await supabaseClient.rpc('approve_report',{p_report_id:id});if(error)throw error;await refreshAfterWorkflow(id);toast('Report approved.','ok')}catch(error){toast(error.message,'err')}},{title:'Approve report',confirmLabel:'Approve'})}
 async function reopenApprovedReport(id){if(!isAdmin())return;promptDialog('Reason for reopening the approved report:',async(reason)=>{try{let{error}=await supabaseClient.rpc('reopen_approved_report',{p_report_id:id,p_reason:reason});if(error)throw error;await refreshAfterWorkflow(id);toast('Approved report reopened.','ok')}catch(error){toast(error.message,'err')}},{title:'Reopen approved report',confirmLabel:'Reopen report',requiredMessage:'A reopening reason is required.'})}
 function cityWorkflowButtons(r){if(!isCity())return'';if(r.status==='submitted'||r.status==='resubmitted')return`<button class="btn" onclick="startReview('${r.id}')">Start City Review</button>`;if(r.status==='under_review')return`<button class="btn danger" onclick="returnReport('${r.id}')">Return for Revision</button><button class="btn gold" onclick="approveReport('${r.id}')">Approve Report</button>`;if(r.status==='approved')return isAdmin()?`<button class="btn danger" onclick="reopenApprovedReport('${r.id}')">Reopen Approved Report</button>`:'<button class="btn" disabled>Approved</button>';return'<button class="btn" disabled>Awaiting agency submission</button>'}
@@ -1594,8 +1562,8 @@ const CHART_PALETTE={navy:'#1B2F5B',blue:'#315F9B',gold:'#C9A24A',purple:'#6D4EB
   if(ctx)state.charts.outcomes=new Chart(ctx,{type:'line',data:{labels,datasets:(template.outcomes||[]).map((o,i)=>{let c=palette[i%palette.length];return{label:o.name,data:reps.map(r=>{let den=n(r.outcomes[o.id]?.denominator),num=outcomeQuarterNumerator(r,o);return den?Math.round(num/den*100):null}),tension:.25,spanGaps:true,borderColor:c,backgroundColor:c,pointBackgroundColor:c,borderWidth:2,fill:false}})},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true,max:100,ticks:{callback:v=>v+'%'}}}}})
 }
 
-function renderProviders(){if(!isAdmin())return;let rows=state.db.programs.map(p=>`<tr><td><strong>${esc(providerName(p.providerId))}</strong></td><td><strong>${esc(p.name)}</strong><br><span style="color:var(--muted);font-size:11px">${esc(p.contractYears)}</span></td><td>${esc(templateById(p.templateId)?.name||'—')}<br><span style="color:var(--muted);font-size:11px">${esc(templateById(p.templateId)?.version||'')}</span></td><td>${esc(p.monitorName)}<br><span style="color:var(--muted);font-size:11px">${esc(p.monitorEmail)}</span></td><td><span class="status ${p.active?'approved':'draft'}">${p.active?'Active':'Inactive'}</span></td></tr>`).join('');document.getElementById('view-providers').innerHTML=`<div class="page-head"><div><h1 class="page-title">Providers & Programs</h1><p class="page-sub">Provider and program records currently available in the portal.</p></div></div><div class="notice">Provider and program configuration is available to City Administrators.</div><div class="table-wrap"><table><thead><tr><th>Provider</th><th>Program / Contract</th><th>Assigned Template</th><th>Program Monitor</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table></div>`}
-function renderTemplates(){if(!isCity())return;let list=manageableTemplates();document.getElementById('view-templates').innerHTML=`<div class="page-head"><div><h1 class="page-title">Reporting Templates</h1><p class="page-sub">Published reporting requirements currently available in the portal.</p></div></div><div class="notice">Template editing is temporarily read-only so published reporting requirements cannot be changed accidentally during launch.</div>${list.map(t=>`<div class="card" style="margin-bottom:16px"><div class="card-head"><div><h2 class="card-title">${esc(t.name)}</h2><p class="page-sub" style="font-size:12px;margin-top:4px">${esc(t.version)}</p></div><span class="status approved">${esc(t.status||'published')}</span></div><div class="card-body"><strong>${t.serviceMetrics.length}</strong> service measures · <strong>${t.outcomes.length}</strong> outcome measures · <strong>${t.narratives.length}</strong> narrative prompts</div></div>`).join('')}`}
+
+
 
 
 /* ========================================================================== */
@@ -1772,27 +1740,9 @@ function demographicTotalNote(total,enrollment,label){
   return`<div class="demographic-total-note ${matches?'match':'review'}"><span>${esc(text)}</span><strong>${matches?'Complete':'Review'}</strong></div>`;
 }
 
-function updateBipocCount(value){
-  let r=reportById(state.currentReportId);
-  if(!r||!canEditReport(r))return;
-  let requested=Math.max(0,n(value));
-  r.access.bipocCorrection=requested-calculatedBipoc(r);
-  r.updatedAt=now();
-  showAutosave();
-  saveDb();
-  refreshCurrentReportTabLive('access.bipocFinal');
-}
 
-function resetBipocCount(){
-  let r=reportById(state.currentReportId);
-  if(!r||!canEditReport(r))return;
-  r.access.bipocCorrection=0;
-  r.access.bipocCorrectionExplanation='';
-  r.updatedAt=now();
-  showAutosave();
-  saveDb();
-  refreshCurrentReportTabLive('access.bipocFinal');
-}
+
+
 
 function updatePath(path,value,type='text'){
   let r=reportById(state.currentReportId);
@@ -1975,71 +1925,14 @@ function outcomeYtdText(o){
   return o.methodNote||'The portal combines YTD result counts and reporting populations, then calculates one weighted rate.';
 }
 
-function renderOutcomesBase(r){
-  let disabled=!canEditReport(r),t=getTemplateForReport(r);
-  let cards=t.outcomes.map(o=>{
-    let x=r.outcomes[o.id]||(r.outcomes[o.id]={numerator:'',denominator:'',override:'',explanation:'',transitional:'',permanent:'',ascenciaGlendale:'',holloway:''});
-    let qNum=outcomeQuarterNumerator(r,o),qDen=n(x.denominator),qRate=qDen?qNum/qDen:0;
-    let yNum=o.id==='housing'?priorReports(r).reduce((s,z)=>s+outcomeQuarterNumerator(z,o),0):ytdOutcome(r,o.id,'numerator');
-    let yDen=ytdOutcome(r,o.id,'denominator'),yRate=yDen?yNum/yDen:0,calculated=outcomeSuggestedStatus(r,o),final=finalOutcomeStatus(r,o),over=qNum>qDen;
-    let resultFields=o.id==='housing'?`<div class="outcome-question"><label>${esc(o.numeratorQuestion)}</label><div class="form-grid"><div class="field"><label>Transitional housing placements</label><input data-live-key="outcome.${o.id}.transitional" type="text" inputmode="numeric" pattern="[0-9]*" value="${esc(x.transitional)}" ${disabled?'disabled':''} oninput="this.value=this.value.replace(/[^0-9]/g,'');updateOutcome('${o.id}','transitional',this.value)"></div><div class="field"><label>Permanent housing placements</label><input data-live-key="outcome.${o.id}.permanent" type="text" inputmode="numeric" pattern="[0-9]*" value="${esc(x.permanent)}" ${disabled?'disabled':''} oninput="this.value=this.value.replace(/[^0-9]/g,'');updateOutcome('${o.id}','permanent',this.value)"></div></div><div class="help">Quarter placements counted in the rate: ${fmt(qNum)}. A client may appear in only one placement type.</div></div>`:`<div class="outcome-question"><label>${esc(o.numeratorQuestion)}</label><input data-live-key="outcome.${o.id}.numerator" type="text" inputmode="numeric" pattern="[0-9]*" value="${esc(x.numerator)}" ${disabled?'disabled':''} oninput="this.value=this.value.replace(/[^0-9]/g,'');updateOutcome('${o.id}','numerator',this.value)"><div class="help">This result must be a subset of the reporting population.</div></div>`;
-    return`<div class="outcome-card">
-      <div class="outcome-card-head"><div><h3>${esc(o.name)}</h3><div class="outcome-source">${esc(outcomeYtdText(o))}</div></div><div class="outcome-target">Target: ≥${pct(o.target)}</div></div>
-      <div class="outcome-body">
-        <div class="outcome-counting"><strong>${esc(o.area)}</strong><span>${esc(AREA_DESCRIPTIONS[o.area]||'')}</span></div>
-        <div class="outcome-counting"><strong>Count each client once</strong><span>${esc(outcomeCountingText(o))}</span></div>
-        <div class="outcome-question-grid">
-          <div class="outcome-question"><label>${esc(o.denominatorQuestion)}</label><input data-live-key="outcome.${o.id}.denominator" type="text" inputmode="numeric" pattern="[0-9]*" value="${esc(x.denominator)}" ${disabled?'disabled':''} oninput="this.value=this.value.replace(/[^0-9]/g,'');updateOutcome('${o.id}','denominator',this.value)"><div class="help">This is the quarter reporting population used for the rate.</div></div>
-          ${resultFields}
-        </div>
-        ${over?`<div class="notice danger"><strong>Review this outcome:</strong> The result count (${fmt(qNum)}) is greater than the reporting population (${fmt(qDen)}).</div>`:''}
-        <div class="outcome-result-grid">
-          <div class="outcome-result"><div class="label">Quarter result</div><div class="value">${fmt(qNum)} of ${fmt(qDen)}</div></div>
-          <div class="outcome-result"><div class="label">Quarter rate</div><div class="value">${qDen?pct(qRate):'—'}</div></div>
-          <div class="outcome-result"><div class="label">YTD result</div><div class="value">${fmt(yNum)} of ${fmt(yDen)}</div></div>
-          <div class="outcome-result"><div class="label">YTD rate</div><div class="value">${yDen?pct(yRate):'—'}</div></div>
-        </div>
-        <div class="outcome-review-grid">
-          <div><label>Final status</label>${statusLabel(final)}<div class="help" style="margin-top:6px">Calculated: ${esc(calculated)}</div></div>
-          <div><label>Optional status adjustment</label><select data-live-key="outcome.${o.id}.override" ${disabled?'disabled':''} onchange="updateOutcome('${o.id}','override',this.value)"><option value="">Use calculated status</option>${['Exceeds Pace','On Track','Watch','Off Track','Not Reported','Not Applicable'].map(v=>`<option ${x.override===v?'selected':''}>${v}</option>`).join('')}</select></div>
-          <div style="grid-column:span 2"><label>Explanation</label><textarea data-live-key="outcome.${o.id}.explanation" ${disabled?'disabled':''} placeholder="Explain results above or below target" oninput="updateOutcome('${o.id}','explanation',this.value)">${esc(x.explanation)}</textarea></div>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-  return`<div class="section"><div class="section-title"><span>Outcomes</span><small>Unique clients and weighted YTD rates</small></div><div class="section-body"><div class="guidance-box prominent"><strong>YTD rates</strong><span>The portal adds the result counts across included quarters, adds the reporting populations across those quarters, and divides the combined totals. Quarterly percentages are never averaged.</span></div><div class="outcome-list">${cards}</div>${reviewComment('outcomes',r)}</div></div>`;
-}
+
 
 function renderCertification(r){
   let disabled=!canEditReport(r),c=r.certification;
   return`<div class="section"><div class="section-title"><span>Agency Certification</span><small>Aggregate reporting only</small></div><div class="section-body"><p class="section-intro">Review the report, complete each certification, and identify the person submitting it. Supporting records remain with the agency and may be reviewed during City monitoring or audits.</p><div class="certification-list"><div class="checkbox-row"><input type="checkbox" ${c.recordsAvailable?'checked':''} ${disabled?'disabled':''} onchange="updatePath('certification.recordsAvailable',this.checked,'checkbox')"><label>I certify that supporting records are maintained by the agency and are available for City review during monitoring or audits.</label></div><div class="checkbox-row"><input type="checkbox" ${c.noPhi?'checked':''} ${disabled?'disabled':''} onchange="updatePath('certification.noPhi',this.checked,'checkbox')"><label>I certify that the success story and narrative contain no names, exact birth dates, medical record numbers, identifiable photographs, or other identifying health information.</label></div><div class="checkbox-row"><input type="checkbox" ${c.accuracy?'checked':''} ${disabled?'disabled':''} onchange="updatePath('certification.accuracy',this.checked,'checkbox')"><label>I certify that the aggregate figures and narrative are accurate to the best of the agency’s knowledge and are supported by underlying agency records.</label></div></div><div class="form-grid" style="margin-top:16px">${fieldInput('Person completing report','certification.name',c.name,'text','',false,disabled)}${fieldInput('Title','certification.title',c.title,'text','',false,disabled)}${fieldInput('Email','certification.email',c.email,'email','',false,disabled)}${fieldInput('Certification date','certification.date',c.date,'date','',false,disabled)}</div>${reviewComment('certification',r)}</div></div>`;
 }
 
-function qualityChecks(r){
-  let e=n(r.access.enrollment),t=getTemplateForReport(r),checks=[],add=(id,label,ok,detail,advisory)=>checks.push({id,label,ok,detail,advisory:!!advisory});
-  add('enrollment','New unduplicated enrollment entered',r.access.enrollment!=='','Enter the number of people enrolled for the first time during this quarter, including zero when applicable.');
-  add('age','Age and gender matrix equals enrollment',ageGenderTotal(r)===e,`Current subtotal: ${ageGenderTotal(r)}; enrollment: ${e}.`);
-  add('race','Race/ethnicity responses equal enrollment',sumObject(r.access.race)===e,`Current subtotal: ${sumObject(r.access.race)}; enrollment: ${e}.`);
-  add('language','Household language responses equal enrollment',sumObject(r.access.language)===e,`Current subtotal: ${sumObject(r.access.language)}; enrollment: ${e}.`);
-  add('lgbtq','LGBTQ+ responses equal enrollment',sumObject(r.access.lgbtq)===e,`Current subtotal: ${sumObject(r.access.lgbtq)}; enrollment: ${e}.`);
-  add('affiliation','West Hollywood connection responses equal enrollment',sumObject(r.access.affiliation)===e,`Current subtotal: ${sumObject(r.access.affiliation)}; enrollment: ${e}.`);
-  let trans=sumObject(r.access.transgender);
-  add('transgender','Transgender identity is complete or left uncollected',trans===0||trans===e,`Current subtotal: ${trans}; enrollment: ${e}.`);
-  add('bipoc','BIPOC adjustment is documented',n(r.access.bipocCorrection)===0||r.access.bipocCorrectionExplanation.trim().length>0,'Explain any agency adjustment to the BIPOC count.');
-  add('services','All service-delivery totals entered',t.serviceMetrics.every(m=>r.services[m.id]?.actual!==''),'Enter a quarterly total, including zero when applicable.');
-  add('serviceVariance','Service explanations complete',t.serviceMetrics.every(m=>!FINAL_VARIANCE_STATUSES.includes(finalServiceStatus(r,m))||r.services[m.id]?.explanation?.trim()),'Required for Exceeds Pace, Watch, or Off Track.');
-  add('outcomes','All outcome questions completed',t.outcomes.every(o=>(o.id==='housing'?(r.outcomes[o.id]?.transitional!==''&&r.outcomes[o.id]?.permanent!==''):r.outcomes[o.id]?.numerator!=='')&&r.outcomes[o.id]?.denominator!==''),'Enter a value for each reporting population and result, including zero when applicable.');
-  add('outcomePopulation','Outcome counts do not exceed reporting populations',t.outcomes.every(o=>outcomeQuarterNumerator(r,o)<=n(r.outcomes[o.id]?.denominator)),'For each outcome, the result count must be less than or equal to its reporting population.');
-  add('outcomeVariance','Outcome explanations complete',t.outcomes.every(o=>!FINAL_VARIANCE_STATUSES.includes(finalOutcomeStatus(r,o))||r.outcomes[o.id]?.explanation?.trim()),'Required for Exceeds Pace, Watch, or Off Track.');
-  let reportNarratives=narrativesForReport(r);
-  reportNarratives.filter(x=>x.required).forEach(x=>add('narrative_'+x.id,x.label+' completed',Boolean(r.narratives.values[x.id]?.trim()),'Required narrative section.'));
-  if(varianceExists(r)){add('narrative_factors','Factors affecting performance completed',Boolean(r.narratives.values.factors?.trim()),'Required because one or more measures vary from pace.');add('narrative_corrective','Corrective strategies completed',Boolean(r.narratives.values.corrective?.trim()),'Required because one or more measures vary from pace.');}
-  ['staffing','budget'].forEach(flag=>{if(r.narratives.flags[flag]==='Yes')add('conditional_'+flag,(reportNarratives.find(x=>x.id===flag)?.label||flag)+' completed',Boolean(r.narratives.values[flag]?.trim()),'Required because Yes was selected.')});
-  let c=r.certification;
-  add('certs','Agency certifications acknowledged',c.recordsAvailable&&c.noPhi&&c.accuracy,'All three certifications are required.');
-  add('signer','Certification completed',Boolean(c.name&&c.title&&c.email&&c.date),'Name, title, email, and date are required.');
-  return checks;
-}
+
 
 function renderReportBase(){
   let r=reportById(state.currentReportId);
