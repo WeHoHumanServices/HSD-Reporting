@@ -402,11 +402,11 @@ input[inputmode="numeric"]{direction:ltr;text-align:left;font-variant-numeric:ta
 .pr-demo-block{border:1px solid var(--line);border-radius:10px;padding:12px;break-inside:avoid;page-break-inside:avoid}
 .pr-demo-block h3{margin:0 0 4px;font-size:11px;color:var(--navy)}
 .pr-demo-total{font-size:9.5px;color:var(--muted);margin-bottom:8px}
-.pr-demo-row{display:grid;grid-template-columns:108px 1fr 66px;align-items:center;gap:8px;margin-bottom:6px}
+.pr-demo-row{display:grid;grid-template-columns:100px 1fr 84px;align-items:start;gap:8px;margin-bottom:6px}
 .pr-demo-label{font-size:10px;color:var(--text);overflow-wrap:break-word}
-.pr-demo-bar-track{background:#EDF0F3;border-radius:4px;height:9px;overflow:hidden}
+.pr-demo-bar-track{background:#EDF0F3;border-radius:4px;height:9px;overflow:hidden;margin-top:2px}
 .pr-demo-bar-fill{background:var(--blue);height:100%}
-.pr-demo-count{font-size:9.5px;color:var(--muted);text-align:right;white-space:nowrap}
+.pr-demo-count{font-size:9.5px;color:var(--muted);text-align:right}
 .pr-demo-zero-note{margin-top:6px;font-style:italic;font-size:9.5px;color:var(--muted)}
 
 .pr-impact-card{border:1px solid var(--line);border-left:4px solid var(--navy);border-radius:0 10px 10px 0;background:var(--soft);padding:14px 16px;margin-bottom:10px;break-inside:avoid;page-break-inside:avoid}
@@ -2048,18 +2048,19 @@ function printSummaryCardsHtml(cards){
   }).join('')}</div>`;
 }
 
-function printDemoBlock(title,rows,total,unitLabel){
+function printDemoBlock(title,rows,total,ytdTotal,isQ1,unitLabel){
   unitLabel=unitLabel||'participants';
-  let nonZero=rows.filter(([,v])=>n(v)>0),zero=rows.filter(([,v])=>n(v)===0);
+  let nonZero=rows.filter(([,v,yv])=>n(v)>0||n(yv)>0),zero=rows.filter(([,v,yv])=>n(v)===0&&n(yv)===0);
   let unknownRow=nonZero.find(([label])=>/unknown|declined/i.test(label));
   let unknownShare=total?n(unknownRow?.[1]||0)/total:0;
-  let bars=nonZero.map(([label,v])=>{
+  let bars=nonZero.map(([label,v,yv])=>{
     let share=total?n(v)/total:0;
-    return`<div class="pr-demo-row"><div class="pr-demo-label">${esc(label)}</div><div class="pr-demo-bar-track"><div class="pr-demo-bar-fill" style="width:${Math.round(share*100)}%"></div></div><div class="pr-demo-count">${fmt(v)} · ${pct(share)}</div></div>`;
+    let ytdLine=isQ1?'':`<div style="margin-top:1px">YTD ${fmt(yv)}${ytdTotal?` (${pct(ytdTotal?n(yv)/ytdTotal:0)})`:''}</div>`;
+    return `<div class="pr-demo-row"><div class="pr-demo-label">${esc(label)}</div><div class="pr-demo-bar-track"><div class="pr-demo-bar-fill" style="width:${Math.round(share*100)}%"></div></div><div class="pr-demo-count"><div>${fmt(v)} · ${pct(share)}</div>${ytdLine}</div></div>`;
   }).join('');
   let zeroNote=zero.length?`<div class="pr-demo-zero-note">No participants reported in the remaining ${zero.length===1?'category':'categories'}: ${zero.map(([label])=>esc(label)).join(', ')}.</div>`:'';
-  let completenessNote=unknownShare>=.15?`<div class="pr-note">${pct(unknownShare)} of responses in this category are Unknown or Declined. Interpret this distribution with that limitation in mind.</div>`:'';
-  return`<div class="pr-demo-block"><h3>${esc(title)}</h3>${total?`<div class="pr-demo-total">${fmt(total)} ${esc(unitLabel)} reporting</div>`:''}${bars||'<div class="pr-muted">No data reported for this category.</div>'}${zeroNote}${completenessNote}</div>`;
+  let completenessNote=unknownShare>.15?`<div class="pr-note">${pct(unknownShare)} of responses in this category are Unknown or Declined. Interpret this distribution with that limitation in mind.</div>`:'';
+  return `<div class="pr-demo-block"><h3>${esc(title)}</h3>${total?`<div class="pr-demo-total">${fmt(total)} ${esc(unitLabel)} reporting${isQ1?'':` · ${fmt(ytdTotal)} YTD`}</div>`:''}${bars||'<div class="pr-muted">No data reported for this category.</div>'}${zeroNote}${completenessNote}</div>`;
 }
 
 function printFilename(program,p,r,ext){
@@ -2137,10 +2138,11 @@ function printReport(id){
     peopleSection=`<div class="pr-section"><h2>People Served</h2><p class="pr-section-intro">Unique participants are counted once, in the quarter they first enrolled. This is distinct from the service totals in the next section, which may include repeat contacts with the same participant.</p>${peopleTable}</div>`;
 
     let raceTotal=sumObject(r.access.race),langTotal=sumObject(r.access.language),lgbtqTotal=sumObject(r.access.lgbtq);
+    let raceYtdTotal=RACES.reduce((sum,k)=>sum+ytdAccess(r,['race',k]),0),langYtdTotal=LANGUAGES.reduce((sum,k)=>sum+ytdAccess(r,['language',k]),0),lgbtqYtdTotal=['yes','no','unknown'].reduce((sum,k)=>sum+ytdAccess(r,['lgbtq',k]),0);
     let demoBlocks=[];
-    if(raceTotal)demoBlocks.push(printDemoBlock('Race and Ethnicity',RACES.map(k=>[k,r.access.race[k]]),raceTotal));
-    if(langTotal)demoBlocks.push(printDemoBlock('Household Language',LANGUAGES.map(k=>[k,r.access.language[k]]),langTotal));
-    if(lgbtqTotal)demoBlocks.push(printDemoBlock('LGBTQ+ Identity',[['Yes',r.access.lgbtq.yes],['No',r.access.lgbtq.no],['Unknown/Declined',r.access.lgbtq.unknown]],lgbtqTotal));
+    if(raceTotal)demoBlocks.push(printDemoBlock('Race and Ethnicity',RACES.map(k=>[k,r.access.race[k],ytdAccess(r,['race',k])]),raceTotal,raceYtdTotal,isQ1));
+    if(langTotal)demoBlocks.push(printDemoBlock('Household Language',LANGUAGES.map(k=>[k,r.access.language[k],ytdAccess(r,['language',k])]),langTotal,langYtdTotal,isQ1));
+    if(lgbtqTotal)demoBlocks.push(printDemoBlock('LGBTQ+ Identity',[['Yes',r.access.lgbtq.yes,ytdAccess(r,['lgbtq','yes'])],['No',r.access.lgbtq.no,ytdAccess(r,['lgbtq','no'])],['Unknown/Declined',r.access.lgbtq.unknown,ytdAccess(r,['lgbtq','unknown'])]],lgbtqTotal,lgbtqYtdTotal,isQ1));
     let ageTotal=ageGenderTotal(r);
     if(demoBlocks.length||ageTotal){
       let denomTotals=[ageTotal,raceTotal,langTotal,lgbtqTotal].filter(Boolean);
@@ -2148,7 +2150,10 @@ function printReport(id){
       let introText=allMatch
         ?'Demographic categories reflect the same newly enrolled participants counted in People Served.'
         :`Demographic response totals are shown individually below because one or more categories do not exactly match the ${fmt(qEnroll)} newly enrolled participants reported in People Served. This can happen when a demographic question was left blank for some participants.`;
-      let ageTable=ageTotal?`<table class="pr-table"><thead><tr><th>Age</th>${GENDERS.map(g=>`<th>${esc(g)}</th>`).join('')}<th>Total</th></tr></thead><tbody>${AGES.filter(a=>GENDERS.some(g=>n(r.access.ageGender[a][g])>0)).map(a=>`<tr><td>${esc(a)}</td>${GENDERS.map(g=>`<td class="num">${fmt(r.access.ageGender[a][g])}</td>`).join('')}<td class="num"><strong>${fmt(sumObject(r.access.ageGender[a]))}</strong></td></tr>`).join('')}</tbody></table>${ageTotal!==qEnroll?`<div class="pr-note">Age and gender responses total ${fmt(ageTotal)}, reporting against ${fmt(qEnroll)} newly enrolled participants.</div>`:''}`:'';
+      let ageTable=ageTotal?(isQ1
+      ?`<table class="pr-table"><thead><tr><th>Age</th>${GENDERS.map(g=>`<th>${esc(HSD_GENDER_TABLE_LABELS[g]||g)}</th>`).join('')}<th>Total</th></tr></thead><tbody>${AGES.filter(a=>GENDERS.some(g=>n(r.access.ageGender[a][g])>0)).map(a=>`<tr><td>${esc(a)}</td>${GENDERS.map(g=>`<td class="num">${fmt(r.access.ageGender[a][g])}</td>`).join('')}<td class="num"><strong>${fmt(sumObject(r.access.ageGender[a]))}</strong></td></tr>`).join('')}</tbody></table><div class="pr-note">Because this is the first quarter of the contract year, quarterly and year-to-date totals are the same.</div>`
+      :`<table class="pr-table"><thead><tr><th rowspan="2">Age</th><th colspan="${GENDERS.length+1}" style="text-align:center">Quarter</th><th colspan="${GENDERS.length+1}" style="text-align:center">Year to Date</th></tr><tr>${GENDERS.map(g=>`<th>${esc(HSD_GENDER_TABLE_LABELS[g]||g)}</th>`).join('')}<th>Total</th>${GENDERS.map(g=>`<th>${esc(HSD_GENDER_TABLE_LABELS[g]||g)}</th>`).join('')}<th>Total</th></tr></thead><tbody>${AGES.filter(a=>GENDERS.some(g=>n(r.access.ageGender[a][g])>0||ytdAccess(r,['ageGender',a,g])>0)).map(a=>`<tr><td>${esc(a)}</td>${GENDERS.map(g=>`<td class="num">${fmt(r.access.ageGender[a][g])}</td>`).join('')}<td class="num"><strong>${fmt(sumObject(r.access.ageGender[a]))}</strong></td>${GENDERS.map(g=>`<td class="num">${fmt(ytdAccess(r,['ageGender',a,g]))}</td>`).join('')}<td class="num"><strong>${fmt(GENDERS.reduce((sum,g)=>sum+ytdAccess(r,['ageGender',a,g]),0))}</strong></td></tr>`).join('')}</tbody></table>`
+      )+(ageTotal!==qEnroll?`<div class="pr-note">Age and gender responses total ${fmt(ageTotal)}, reporting against ${fmt(qEnroll)} newly enrolled participants.</div>`:''):'';
       let charSection=`<div class="pr-section"><div class="pr-keep-together"><h2>Participant Characteristics</h2><p class="pr-section-intro">${introText}</p>${ageTable}</div><div class="pr-demo-grid">${demoBlocks.join('')}</div></div>`;
       peopleSection+=charSection;
     }
@@ -2693,14 +2698,17 @@ function hsdGenderHeader(g){return`<span title="${esc(g)}">${esc(HSD_GENDER_TABL
 function hsdRenderAgeAndTransSection(r){
   hsdEnsureAccessShape(r);
   let disabled=!canEditReport(r);
-  let quarterRows=AGES.map(age=>`<tr><td>${esc(age)}</td>${GENDERS.map(g=>`<td>${inputNum(`access.ageGender.${age}.${g}`,r.access.ageGender[age][g],{disabled,ariaLabel:`${age}, ${g}, quarter`})}</td>`).join('')}<td class="total">${fmt(sumObject(r.access.ageGender[age]))}</td></tr>`).join('');
-  let ytdRows=AGES.map(age=>`<tr><td>${esc(age)}</td>${GENDERS.map(g=>`<td class="num readonly">${fmt(ytdAccess(r,['ageGender',age,g]))}</td>`).join('')}<td class="total">${fmt(GENDERS.reduce((sum,g)=>sum+ytdAccess(r,['ageGender',age,g]),0))}</td></tr>`).join('');
+  let agRows=AGES.map(age=>{
+    let qTotal=sumObject(r.access.ageGender[age]),yTotal=GENDERS.reduce((sum,g)=>sum+ytdAccess(r,['ageGender',age,g]),0);
+    return `<tr><td>${esc(age)}</td>${GENDERS.map(g=>`<td>${inputNum(`access.ageGender.${age}.${g}`,r.access.ageGender[age][g],{disabled,ariaLabel:`${age}, ${g}, quarter`})}</td>`).join('')}<td class="total">${fmt(qTotal)}</td>${GENDERS.map(g=>`<td class="num readonly">${fmt(ytdAccess(r,['ageGender',age,g]))}</td>`).join('')}<td class="total">${fmt(yTotal)}</td></tr>`;
+  }).join('');
   let quarterTotals=GENDERS.map(g=>AGES.reduce((sum,a)=>sum+n(r.access.ageGender[a][g]),0));
   let ytdTotals=GENDERS.map(g=>AGES.reduce((sum,a)=>sum+ytdAccess(r,['ageGender',a,g]),0));
+  
   let transTotal=sumObject(r.access.transgender),detailTotal=hsdTransgenderDetailTotal(r),showDetail=n(r.access.transgender.yes)>0||detailTotal>0;
   let statusRows=[['yes','Identifies as transgender'],['no','Does not identify as transgender'],['unknown','Unknown/Declined']].map(([key,label])=>`<tr><td>${esc(label)}</td><td>${inputNum(`access.transgender.${key}`,r.access.transgender[key],{disabled,ariaLabel:`${label}, quarter`})}</td><td class="num readonly">${fmt(ytdAccess(r,['transgender',key]))}</td></tr>`).join('');
   let detailRows=HSD_TRANS_DETAIL_KEYS.map(key=>`<tr><td>${esc(HSD_TRANS_DETAIL_LABELS[key])}</td><td>${inputNum(`access.transgenderDetail.${key}`,r.access.transgenderDetail[key],{disabled,ariaLabel:`${HSD_TRANS_DETAIL_LABELS[key]}, quarter`})}</td><td class="num readonly">${fmt(ytdAccess(r,['transgenderDetail',key]))}</td></tr>`).join('');
-  return`<div class="section"><div class="section-title"><span>Age and Gender Identity</span><small>Quarter and year-to-date totals</small></div><div class="section-body"><p class="section-intro">Enter the quarter counts below. Year-to-date counts are shown in a separate table to keep the entry area easier to read.</p><div class="age-gender-panels"><div class="demographic-table-panel"><h3>Quarter</h3><div class="matrix-wrap"><table class="matrix age-compact"><thead><tr><th>Age</th>${GENDERS.map(hsdGenderHeader).map(x=>`<th>${x}</th>`).join('')}<th>Total</th></tr></thead><tbody>${quarterRows}<tr><td class="total">Total</td>${quarterTotals.map(value=>`<td class="total">${fmt(value)}</td>`).join('')}<td class="total">${fmt(ageGenderTotal(r))}</td></tr></tbody></table></div></div><div class="demographic-table-panel"><h3>Year to Date</h3><div class="matrix-wrap"><table class="matrix age-compact"><thead><tr><th>Age</th>${GENDERS.map(hsdGenderHeader).map(x=>`<th>${x}</th>`).join('')}<th>Total</th></tr></thead><tbody>${ytdRows}<tr><td class="total">Total</td>${ytdTotals.map(value=>`<td class="total">${fmt(value)}</td>`).join('')}<td class="total">${fmt(ytdTotals.reduce((sum,value)=>sum+value,0))}</td></tr></tbody></table></div></div></div>${demographicTotalNote(ageGenderTotal(r),r.access.enrollment,'Age and gender')}<h3 class="card-title" style="margin-top:19px">Transgender identity <span style="font-weight:500;color:var(--muted)">(optional, when collected)</span></h3><p class="trans-identity-intro">A participant may identify as transgender and also be represented in the gender identity table above. When this information is collected, enter one response for each newly enrolled participant.</p><div class="table-wrap" style="box-shadow:none;max-width:720px"><table><thead><tr><th>Response</th><th>Quarter</th><th>YTD</th></tr></thead><tbody>${statusRows}<tr><td><strong>Total reported</strong></td><td class="num"><strong>${fmt(transTotal)}</strong></td><td class="num"><strong>${fmt(['yes','no','unknown'].reduce((sum,key)=>sum+ytdAccess(r,['transgender',key]),0))}</strong></td></tr></tbody></table></div>${showDetail?`<div class="trans-detail-panel"><h4>Participants who identify as transgender</h4><p>Break down the quarter’s “Identifies as transgender” total using the categories below. Count each participant once.</p><div class="table-wrap" style="box-shadow:none;max-width:720px"><table><thead><tr><th>Identity</th><th>Quarter</th><th>YTD</th></tr></thead><tbody>${detailRows}<tr><td><strong>Total</strong></td><td class="num"><strong>${fmt(detailTotal)}</strong></td><td class="num"><strong>${fmt(HSD_TRANS_DETAIL_KEYS.reduce((sum,key)=>sum+ytdAccess(r,['transgenderDetail',key]),0))}</strong></td></tr></tbody></table></div>${demographicTotalNote(detailTotal,r.access.transgender.yes,'Transgender identity breakdown')}</div>`:`<div class="help" style="margin-top:8px">The identity breakdown will appear after a quarter count is entered under “Identifies as transgender.”</div>`}</div></div>`;
+  return `<div class="section"><div class="section-title"><span>Age and Gender Identity</span><small>Quarter and year-to-date totals</small></div><div class="section-body"><div class="matrix-wrap"><table class="matrix age-ytd"><thead><tr><th rowspan="2">Age</th><th class="group-head" colspan="${GENDERS.length+1}">Quarter</th><th class="group-head" colspan="${GENDERS.length+1}">Year to date</th></tr><tr>${GENDERS.map(hsdGenderHeader).map(x=>`<th>${x}</th>`).join('')}<th>Total</th>${GENDERS.map(hsdGenderHeader).map(x=>`<th>${x}</th>`).join('')}<th>Total</th></tr></thead><tbody>${agRows}<tr><td class="total">Total</td>${quarterTotals.map(value=>`<td class="total">${fmt(value)}</td>`).join('')}<td class="total">${fmt(ageGenderTotal(r))}</td>${ytdTotals.map(value=>`<td class="total">${fmt(value)}</td>`).join('')}<td class="total">${fmt(ytdTotals.reduce((sum,value)=>sum+value,0))}</td></tr></tbody></table></div>${demographicTotalNote(ageGenderTotal(r),r.access.enrollment,'Age and gender')}<h3 class="card-title" style="margin-top:19px">Transgender identity <span style="font-weight:500;color:var(--muted)">(optional, when collected)</span></h3><p class="trans-identity-intro">A participant may identify as transgender and also be represented in the gender identity table above. When this information is collected, enter one response for each newly enrolled participant.</p><div class="table-wrap" style="box-shadow:none;max-width:720px"><table><thead><tr><th>Response</th><th>Quarter</th><th>YTD</th></tr></thead><tbody>${statusRows}<tr><td><strong>Total reported</strong></td><td class="num"><strong>${fmt(transTotal)}</strong></td><td class="num"><strong>${fmt(['yes','no','unknown'].reduce((sum,key)=>sum+ytdAccess(r,['transgender',key]),0))}</strong></td></tr></tbody></table></div>${showDetail?`<div class="trans-detail-panel"><h4>Participants who identify as transgender</h4><p>Break down the quarter’s “Identifies as transgender” total using the categories below. Count each participant once.</p><div class="table-wrap" style="box-shadow:none;max-width:720px"><table><thead><tr><th>Identity</th><th>Quarter</th><th>YTD</th></tr></thead><tbody>${detailRows}<tr><td><strong>Total</strong></td><td class="num"><strong>${fmt(detailTotal)}</strong></td><td class="num"><strong>${fmt(HSD_TRANS_DETAIL_KEYS.reduce((sum,key)=>sum+ytdAccess(r,['transgenderDetail',key]),0))}</strong></td></tr></tbody></table></div>${demographicTotalNote(detailTotal,r.access.transgender.yes,'Transgender identity breakdown')}</div>`:`<div class="help" style="margin-top:8px">The identity breakdown will appear after a quarter count is entered under “Identifies as transgender.”</div>`}</div></div>`;
 }
 
 const hsdPreviousRenderAccess=renderAccess;
