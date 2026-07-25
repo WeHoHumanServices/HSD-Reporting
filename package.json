@@ -1,0 +1,9 @@
+{
+  "name": "hsd-reporting",
+  "private": true,
+  "version": "1.0.0",
+  "description": "City of West Hollywood Human Services Contract Reporting Portal",
+  "scripts": {
+    "test": "node tests/report-logic.test.js"
+  }
+}
