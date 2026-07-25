@@ -342,6 +342,104 @@ input[inputmode="numeric"]{direction:ltr;text-align:left;font-variant-numeric:ta
   .demo-block{break-inside:avoid;page-break-inside:avoid}
   .export-subhead{break-after:avoid;page-break-after:avoid}
 }
+
+/* ==========================================================================
+   Quarterly Program Report — screen + print styles (program-agnostic)
+   ========================================================================== */
+.pr-page{background:#fff;max-width:900px;margin:0 auto;padding:40px 44px;color:var(--text);font-size:12px;line-height:1.5}
+.pr-eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:800}
+.pr-page h1{color:var(--navy);font-size:22px;margin:6px 0 10px;border-bottom:3px solid var(--gold);padding-bottom:14px}
+.pr-program-name{font-size:16px;font-weight:700;color:var(--navy);margin-top:0}
+.pr-meta-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px 20px;margin:14px 0;padding:14px;background:var(--soft);border-radius:10px;border:1px solid var(--line)}
+.pr-meta-grid>div{min-width:0}
+.pr-meta-label{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
+.pr-meta-value{display:block;font-size:12.5px;color:var(--text);font-weight:600;margin-top:2px;overflow-wrap:break-word}
+.pr-draft-chip{display:inline-block;background:var(--amber-bg);color:var(--amber);border:1px solid #E8C976;border-radius:999px;padding:1px 8px;font-size:9px;font-weight:800;letter-spacing:.05em;vertical-align:middle}
+.pr-program-desc{font-size:12px;color:var(--muted);line-height:1.6;margin:4px 0 18px;max-width:80ch}
+
+.pr-cards{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:14px 0 8px}
+.pr-card{border:1px solid var(--line);border-top:3px solid var(--gold);border-radius:10px;padding:12px 12px 10px;background:#fff;break-inside:avoid}
+.pr-card-value{font-size:17px;font-weight:800;color:var(--navy);line-height:1.2;overflow-wrap:break-word}
+.pr-card-label{font-size:10px;color:var(--text);margin-top:4px;font-weight:600;line-height:1.35}
+.pr-card-sub{font-size:9px;color:var(--muted);margin-top:4px;line-height:1.4}
+
+.pr-section{margin-top:26px}
+.pr-section h2{font-size:13px;color:var(--navy);text-transform:uppercase;letter-spacing:.05em;border-bottom:2px solid var(--line);padding-bottom:7px;margin:0 0 10px}
+.pr-section-intro{font-size:11px;color:var(--muted);margin:0 0 10px;line-height:1.55;max-width:85ch}
+.pr-subsection{margin-top:14px}
+.pr-subsection h3{font-size:11.5px;color:var(--navy);margin:0 0 6px;font-weight:700}
+.pr-narrative-item{margin-bottom:10px}
+.pr-narrative-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+.pr-narrative-item p{margin:0;font-size:11.5px;line-height:1.65}
+
+.pr-table{width:100%;border-collapse:collapse;font-size:11px;margin-top:4px}
+.pr-table th,.pr-table td{border:1px solid #D9DEE5;padding:7px 8px;vertical-align:top;text-align:left}
+.pr-table th{background:#F5F7FA;color:var(--navy);font-size:9.5px;text-transform:uppercase;letter-spacing:.03em}
+.pr-table td.num{text-align:right;font-variant-numeric:tabular-nums}
+.pr-measure-name{font-weight:700;color:var(--text)}
+.pr-measure-unit{font-size:9.5px;color:var(--muted);margin-top:1px}
+
+.pr-note{border-left:4px solid var(--gold);background:var(--gold-soft);padding:9px 11px;font-size:10.5px;line-height:1.5;margin-top:10px;border-radius:0 6px 6px 0}
+.pr-muted{color:var(--muted);font-size:11px}
+
+.pr-progress-track{background:#E7EBF0;border:1px solid #D2D9E2;border-radius:5px;height:8px;overflow:hidden;min-width:80px}
+.pr-progress-fill{background:var(--navy);height:100%}
+.pr-progress-text{font-size:9px;color:var(--muted);margin-top:3px;white-space:normal;line-height:1.4}
+
+.pr-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;padding:3px 8px 3px 6px;border-radius:999px;border:1px solid;white-space:nowrap}
+.pr-badge-icon{display:inline-flex;align-items:center;justify-content:center;width:13px;height:13px;border-radius:50%;font-size:8.5px;line-height:1;border:1.4px solid currentColor;flex:0 0 auto}
+.pr-badge-ahead{color:var(--green);background:var(--green-bg);border-color:#BFE3CD}
+.pr-badge-ontrack{color:var(--blue);background:#EAF1FB;border-color:#C7D9F0}
+.pr-badge-watch{color:var(--amber);background:var(--amber-bg);border-color:#F0D89A}
+.pr-badge-below{color:var(--red);background:var(--red-bg);border-color:#F1C6C1}
+.pr-badge-pending{color:var(--purple);background:var(--purple-bg);border-color:#D6C9EF}
+.pr-badge-nodata{color:#7A3B3B;background:#F4E7E7;border-color:#DCC0C0}
+.pr-badge-na{color:var(--muted);background:#EEF1F4;border-color:var(--line)}
+
+.pr-oc-result strong{font-size:12px;color:var(--text)}
+.pr-oc-rate{display:block;font-size:10px;color:var(--muted);margin-top:1px}
+.pr-oc-empty{color:var(--muted);font-style:italic;font-size:11px;display:block}
+.pr-cell-note{font-style:normal;font-size:9.5px;color:var(--muted);margin-top:2px;max-width:28ch;line-height:1.4}
+
+.pr-demo-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px}
+.pr-demo-block{border:1px solid var(--line);border-radius:10px;padding:12px;break-inside:avoid;page-break-inside:avoid}
+.pr-demo-block h3{margin:0 0 4px;font-size:11px;color:var(--navy)}
+.pr-demo-total{font-size:9.5px;color:var(--muted);margin-bottom:8px}
+.pr-demo-row{display:grid;grid-template-columns:108px 1fr 66px;align-items:center;gap:8px;margin-bottom:6px}
+.pr-demo-label{font-size:10px;color:var(--text);overflow-wrap:break-word}
+.pr-demo-bar-track{background:#EDF0F3;border-radius:4px;height:9px;overflow:hidden}
+.pr-demo-bar-fill{background:var(--blue);height:100%}
+.pr-demo-count{font-size:9.5px;color:var(--muted);text-align:right;white-space:nowrap}
+.pr-demo-zero-note{margin-top:6px;font-style:italic;font-size:9.5px;color:var(--muted)}
+
+.pr-impact-card{border:1px solid var(--line);border-left:4px solid var(--navy);border-radius:0 10px 10px 0;background:var(--soft);padding:14px 16px;margin-bottom:10px;break-inside:avoid;page-break-inside:avoid}
+.pr-impact-card p{margin:0;font-size:12px;line-height:1.65;color:var(--text)}
+
+.pr-cert-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--soft);margin-bottom:12px}
+.pr-glossary{font-size:9.5px;color:var(--muted);line-height:1.65;border-top:1px solid var(--line);padding-top:10px}
+
+.pr-print-footer{display:none}
+
+@media(max-width:900px){
+  .pr-cards{grid-template-columns:repeat(2,1fr)}
+  .pr-demo-grid{grid-template-columns:1fr}
+  .pr-cert-grid{grid-template-columns:1fr}
+}
+
+@media print{
+  @page{size:letter;margin:.55in .55in .8in .55in}
+  #print-view .pr-page{max-width:none;padding:0;font-size:10.5px}
+  #print-view .pr-page h1{font-size:19px}
+  #print-view .pr-cards{grid-template-columns:repeat(5,1fr);gap:8px}
+  #print-view .pr-card,#print-view .pr-demo-block,#print-view .pr-impact-card,#print-view .pr-cert-grid{break-inside:avoid;page-break-inside:avoid}
+  #print-view .pr-table thead{display:table-header-group}
+  #print-view .pr-table tbody tr{break-inside:avoid;page-break-inside:avoid}
+  #print-view .pr-section h2,#print-view .pr-subsection h3{break-after:avoid;page-break-after:avoid}
+  #print-view .pr-impact-section{break-before:page;page-break-before:always}
+  #print-view .pr-print-footer{display:block;position:fixed;left:.55in;right:.55in;bottom:.25in;font-size:8.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:5px;text-align:center}
+  #print-view .pr-badge{border-width:1.6px}
+}
+
 .guidance-box{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;margin:0 0 14px;border:1px solid #C9D7E7;border-radius:10px;background:#F5F9FD;color:#33445A;line-height:1.5}
 .guidance-box strong{flex:0 0 auto;color:var(--navy);font-size:12px;text-transform:uppercase;letter-spacing:.04em}
 .guidance-box span{display:block}
@@ -1123,7 +1221,7 @@ async function loadPortalData(portalUser){
   let published=server.templateVersions.filter(v=>v.status==='published');
   let templates=server.templateVersions.map(v=>buildTemplate(v,server));
   let categoryById=Object.fromEntries(server.serviceCategories.map(x=>[x.id,x.name]));
-  let programs=server.programs.map(p=>{let latest=published.filter(v=>v.program_id===p.id).sort((a,b)=>b.version_number-a.version_number)[0];return{id:p.id,providerId:p.organization_id,name:p.name,contractYears:p.service_year_label||'',templateId:latest?.id||'',monitorName:'Francisco Gomez',monitorEmail:'fgomez@weho.org',primaryServiceCategory:categoryById[p.primary_service_category_id]||'',active:p.active}});
+  let programs=server.programs.map(p=>{let latest=published.filter(v=>v.program_id===p.id).sort((a,b)=>b.version_number-a.version_number)[0];return{id:p.id,providerId:p.organization_id,name:p.name,description:p.description||'',contractStartDate:p.contract_start_date||'',contractEndDate:p.contract_end_date||'',contractYears:p.service_year_label||'',templateId:latest?.id||'',monitorName:'Francisco Gomez',monitorEmail:'fgomez@weho.org',primaryServiceCategory:categoryById[p.primary_service_category_id]||'',active:p.active}});
 
   let roleMap={};server.user_roles.forEach(x=>(roleMap[x.user_id]||(roleMap[x.user_id]=[])).push(x.role));
   let assignmentMap={};server.user_program_assignments.forEach(x=>(assignmentMap[x.user_id]||(assignmentMap[x.user_id]=[])).push(x.program_id));
@@ -1923,16 +2021,226 @@ function flattenReport(r){
   return rows;
 }
 
+const PRINT_STATUS_META={
+  'Exceeds Pace':{label:'Ahead of Pace',glyph:'✓',cls:'ahead'},
+  'On Track':{label:'On Track',glyph:'●',cls:'ontrack'},
+  'Watch':{label:'Watch',glyph:'▲',cls:'watch'},
+  'Off Track':{label:'Below Target',glyph:'▼',cls:'below'},
+  'Not Yet Measurable':{label:'Not Yet Measurable',glyph:'◷',cls:'pending'},
+  'Not Reported':{label:'Data Not Reported',glyph:'!',cls:'nodata'},
+  'Not Applicable':{label:'Not Applicable',glyph:'–',cls:'na'}
+};
+function printBadge(label){
+  let meta=PRINT_STATUS_META[label]||PRINT_STATUS_META['Not Applicable'];
+  return`<span class="pr-badge pr-badge-${meta.cls}"><span class="pr-badge-icon" aria-hidden="true">${meta.glyph}</span>${esc(meta.label)}</span>`;
+}
+function printExpectedFraction(entity,period){
+  let sched=entity.paceSchedule;
+  if(sched){let v=sched[String(period.quarterNumber)]??sched[period.quarterNumber];if(v!==undefined&&v!==null)return Number(v)}
+  return period.pace;
+}
+function printIsQ1(period){return Number(period.quarterNumber)===1}
+
+function printOutcomeQuarterState(r,o){
+  let x=r.outcomes[o.id]||{},denRaw=x.denominator;
+  if(denRaw===''||denRaw===undefined||denRaw===null){
+    return o.required===false
+      ?{state:'not_applicable',text:'Not applicable this quarter',note:'This measure is not expected to be reported every quarter for this program.'}
+      :{state:'no_data',text:'Data not reported',note:'The agency did not provide sufficient information to calculate this measure this quarter.'};
+  }
+  let den=n(denRaw);
+  if(den===0)return{state:'no_eligible',text:'No eligible participants',note:'No participants entered the denominator this quarter.'};
+  let numBlank=o.id==='housing'?(x.transitional===''&&x.permanent===''):(x.numerator===''||x.numerator===undefined);
+  if(numBlank)return{state:'not_measurable',text:'Not yet measurable',note:'No participants had reached the required follow-up period, or a result has not yet been recorded.'};
+  let num=outcomeQuarterNumerator(r,o);
+  return{state:'result',num,den};
+}
+function printOutcomeYtdState(r,o){
+  let den=ytdOutcome(r,o.id,'denominator');
+  if(den===0)return{state:'no_eligible',text:'No eligible participants',note:'No participants have entered the denominator so far this contract year.'};
+  let num=o.id==='housing'?priorReports(r).reduce((s,x)=>s+outcomeQuarterNumerator(x,o),0):ytdOutcome(r,o.id,'numerator');
+  return{state:'result',num,den};
+}
+function printOutcomeCell(st){
+  if(st.state==='result')return`<div class="pr-oc-result"><strong>${fmt(st.num)} of ${fmt(st.den)}</strong><span class="pr-oc-rate">${pct(st.den?st.num/st.den:0)}</span></div>`;
+  return`<div class="pr-oc-empty"><span>${esc(st.text)}</span>${st.note?`<div class="pr-cell-note">${esc(st.note)}</div>`:''}</div>`;
+}
+
+function printSummaryCards(r,t,p,program){
+  let cards=[];
+  let hasPopulation=r.access&&r.access.enrollment!==undefined;
+  if(hasPopulation){
+    let ytd=ytdAccess(r,['enrollment']);
+    cards.push({order:1,value:fmt(ytd),label:'unique participants served this contract year',sub:`${fmt(n(r.access.enrollment))} newly enrolled in ${esc(p.label)}`,kind:'people'});
+  }
+  let services=t.serviceMetrics||[];
+  let flaggedServices=services.filter(m=>m.summaryCard).sort((a,b)=>(a.summaryCard.order||0)-(b.summaryCard.order||0));
+  let chosenServices=flaggedServices.length?flaggedServices.slice(0,2):services.slice().sort((a,b)=>n(b.goal)-n(a.goal)).slice(0,2);
+  chosenServices.forEach((m,i)=>{
+    let ytd=ytdService(r,m.id);
+    cards.push({order:(m.summaryCard&&m.summaryCard.order)||(2+i),value:`${fmt(ytd)} ${esc(m.unit||'')}`,label:m.name,sub:m.duplicatedCount?'Totals may include multiple services to the same participant.':'Unique activity count, year to date',kind:'service'});
+  });
+  let outcomes=t.outcomes||[];
+  let flaggedOutcomes=outcomes.filter(o=>o.summaryCard);
+  let chosenOutcome=flaggedOutcomes[0]||outcomes[0];
+  if(chosenOutcome){
+    let st=printOutcomeYtdState(r,chosenOutcome);
+    let value=st.state==='result'?pct(st.den?st.num/st.den:0):st.text;
+    cards.push({order:(chosenOutcome.summaryCard&&chosenOutcome.summaryCard.order)||4,value,label:chosenOutcome.name,sub:st.state==='result'?`${fmt(st.num)} of ${fmt(st.den)} — target ≥${pct(chosenOutcome.target)}`:`Target: ≥${pct(chosenOutcome.target)}`,kind:'outcome'});
+  }
+  let statuses=[...services.map(m=>finalServiceStatus(r,m)),...outcomes.map(o=>finalOutcomeStatus(r,o))].filter(s=>s&&!['Not Applicable'].includes(s));
+  let scored=statuses.filter(s=>s!=='Not Reported');
+  let overall=scored.length===0?'Not Reported':scored.every(s=>s==='Exceeds Pace')?'Exceeds Pace':scored.some(s=>s==='Off Track')?'Watch':scored.some(s=>s==='Watch')?'Watch':'On Track';
+  cards.push({order:5,value:printBadge(overall),label:'Overall contract performance',sub:scored.length?`${fmt(scored.filter(s=>['Exceeds Pace','On Track'].includes(s)).length)} of ${fmt(scored.length)} tracked measures on pace or better`:'Not enough data reported yet this quarter',kind:'status',isBadge:true});
+  return cards.sort((a,b)=>a.order-b.order).slice(0,5);
+}
+function printSummaryCardsHtml(cards){
+  return`<div class="pr-cards">${cards.map(c=>`<div class="pr-card"><div class="pr-card-value">${c.isBadge?c.value:esc(c.value)}</div><div class="pr-card-label">${esc(c.label)}</div>${c.sub?`<div class="pr-card-sub">${esc(c.sub)}</div>`:''}</div>`).join('')}</div>`;
+}
+
+function printDemoBlock(title,rows,total,unitLabel){
+  unitLabel=unitLabel||'participants';
+  let nonZero=rows.filter(([,v])=>n(v)>0),zero=rows.filter(([,v])=>n(v)===0);
+  let unknownRow=nonZero.find(([label])=>/unknown|declined/i.test(label));
+  let unknownShare=total?n(unknownRow?.[1]||0)/total:0;
+  let bars=nonZero.map(([label,v])=>{
+    let share=total?n(v)/total:0;
+    return`<div class="pr-demo-row"><div class="pr-demo-label">${esc(label)}</div><div class="pr-demo-bar-track"><div class="pr-demo-bar-fill" style="width:${Math.round(share*100)}%"></div></div><div class="pr-demo-count">${fmt(v)} · ${pct(share)}</div></div>`;
+  }).join('');
+  let zeroNote=zero.length?`<div class="pr-demo-zero-note">No participants reported in the remaining ${zero.length===1?'category':'categories'}: ${zero.map(([label])=>esc(label)).join(', ')}.</div>`:'';
+  let completenessNote=unknownShare>=.15?`<div class="pr-note">${pct(unknownShare)} of responses in this category are Unknown or Declined. Interpret this distribution with that limitation in mind.</div>`:'';
+  return`<div class="pr-demo-block"><h3>${esc(title)}</h3>${total?`<div class="pr-demo-total">${fmt(total)} ${esc(unitLabel)} reporting</div>`:''}${bars||'<div class="pr-muted">No data reported for this category.</div>'}${zeroNote}${completenessNote}</div>`;
+}
+
+function printFilename(program,p,r,ext){
+  let cyMatch=(program.contractYears||'').match(/\d{4}/g)||[];
+  let cyStart=cyMatch[0]||(program.contractStartDate?program.contractStartDate.slice(0,4):'');
+  let cyEnd=cyMatch.length?cyMatch[cyMatch.length-1]:(program.contractEndDate?program.contractEndDate.slice(0,4):'');
+  let cyLabel=cyStart?(cyEnd&&cyEnd!==cyStart?`CY${cyStart}-${cyEnd}`:`CY${cyStart}`):'';
+  let revisedSuffix=(r.status==='resubmitted'||r.returnedAt)?`_Revised-${new Date().toISOString().slice(0,10)}`:'';
+  let base=[program.name,cyLabel,p.label,'Program-Report'].filter(Boolean).join('_')+revisedSuffix;
+  base=base.replace(/[\\/:*?"<>|]/g,'').replace(/\s+/g,'-').replace(/-{2,}/g,'-');
+  return`${base}.${ext}`;
+}
+
+const PRINT_STATUS_DISPLAY={draft:'Draft',submitted:'Submitted',under_review:'Under Review',returned:'Returned for Revision',resubmitted:'Resubmitted',approved:'Approved'};
+
 function printReport(id){
   let r=reportById(id),p=periodById(r.periodId),program=programById(r.programId),t=getTemplateForReport(r);
-  let serviceRows=t.serviceMetrics.map(m=>`<tr><td>${esc(m.name)}</td><td class="num">${fmt(m.goal)}</td><td class="num">${fmt(r.services[m.id]?.actual)}</td><td class="num">${fmt(ytdService(r,m.id))}</td><td class="num">${fmt(Math.round(n(m.goal)*p.pace))}</td><td>${esc(finalServiceStatus(r,m))}</td></tr>`).join('');
-  let outcomeRows=t.outcomes.map(o=>{let qn=outcomeQuarterNumerator(r,o),qd=n(r.outcomes[o.id]?.denominator),yn=o.id==='housing'?priorReports(r).reduce((s,x)=>s+outcomeQuarterNumerator(x,o),0):ytdOutcome(r,o.id,'numerator'),yd=ytdOutcome(r,o.id,'denominator');return`<tr><td><strong>${esc(o.name)}</strong></td><td>≥${pct(o.target)}</td><td>${fmt(qn)} / ${fmt(qd)}</td><td>${qd?pct(qn/qd):'—'}</td><td>${fmt(yn)} / ${fmt(yd)}</td><td>${yd?pct(yn/yd):'—'}</td></tr>`}).join('');
-  let narratives=t.narratives.filter(x=>r.narratives.values[x.id]).map(x=>`<div class="export-section"><h2>${esc(x.label)}</h2><p style="white-space:pre-wrap;line-height:1.55">${esc(r.narratives.values[x.id])}</p></div>`).join('');
-  document.getElementById('print-view').innerHTML=`<div class="export-page"><div class="export-head"><div><p style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:800">City of West Hollywood Human Services Division</p><h1>Quarterly Program Report</h1><p>${esc(program.name)}</p></div><div class="export-meta"><strong>${esc(p.label)}</strong><br>Reporting quarter: ${esc(p.period)}<br>Service year: ${esc(p.serviceYearLabel||program.contractYears)}<br>Status: ${esc(DB_STATUS_LABELS[r.status]||r.status)}</div></div><div class="export-note" style="margin-top:16px">This report contains aggregate information only. Unduplicated enrollment and time-based outcomes are reported and certified by the agency and may be verified through City monitoring or audits.</div><div class="export-section"><h2>Enrollment and Access Summary</h2><table class="export-table"><tbody><tr><th>New, unduplicated enrollment</th><td>${fmt(r.access.enrollment)}</td><th>YTD enrollment</th><td>${fmt(ytdAccess(r,['enrollment']))}</td></tr><tr><th>BIPOC participants</th><td>${fmt(finalBipoc(r))}</td><th>BIPOC rate</th><td>${n(r.access.enrollment)?pct(finalBipoc(r)/n(r.access.enrollment)):'—'}</td></tr><tr><th>LGBTQ+ Yes</th><td>${fmt(r.access.lgbtq.yes)}</td><th>YTD LGBTQ+ Yes</th><td>${fmt(ytdAccess(r,['lgbtq','yes']))}</td></tr></tbody></table></div><div class="export-section"><h2>Service Delivery</h2><table class="export-table"><thead><tr><th>Measure</th><th>Annual Goal</th><th>Quarter</th><th>YTD</th><th>Expected YTD</th><th>Status</th></tr></thead><tbody>${serviceRows}</tbody></table></div><div class="export-section"><h2>Outcomes</h2><table class="export-table"><thead><tr><th>Outcome</th><th>Target</th><th>Quarter Result</th><th>Quarter Rate</th><th>YTD Result</th><th>YTD Rate</th></tr></thead><tbody>${outcomeRows}</tbody></table></div><div class="page-break">${narratives}</div><div class="export-section"><h2>Certification</h2><div class="signature-grid"><div class="signature-line">${esc(r.certification.name||'')} · ${esc(r.certification.title||'')}<br>${esc(r.certification.email||'')}<br>Agency representative</div><div class="signature-line">${esc(r.certification.date||'')}<br>Date</div></div></div></div>`;
+  let isQ1=printIsQ1(p),isDraft=['draft','returned'].includes(r.status);
+  let statusText=PRINT_STATUS_DISPLAY[r.status]||DB_STATUS_LABELS[r.status]||r.status;
+
+  let cards=printSummaryCardsHtml(printSummaryCards(r,t,p,program));
+  let programSummary=`<div class="pr-section" id="pr-summary"><div class="pr-eyebrow">City of West Hollywood Human Services Division</div>
+    <h1>Quarterly Program Report</h1>
+    <div class="pr-program-name">${esc(program.name)}</div>
+    <div class="pr-meta-grid">
+      <div><span class="pr-meta-label">Contract Year</span><span class="pr-meta-value">${esc(program.contractYears||'—')}</span></div>
+      <div><span class="pr-meta-label">Reporting Quarter</span><span class="pr-meta-value">${esc(p.label)}</span></div>
+      <div><span class="pr-meta-label">Reporting Period</span><span class="pr-meta-value">${esc(p.period)}</span></div>
+      <div><span class="pr-meta-label">Report Status</span><span class="pr-meta-value">${esc(statusText)}${isDraft?' <span class="pr-draft-chip">DRAFT</span>':''}</span></div>
+      ${program.providerId?`<div><span class="pr-meta-label">Service Provider</span><span class="pr-meta-value">${esc(providerName(program.providerId))}</span></div>`:''}
+    </div>
+    ${program.description?`<p class="pr-program-desc">${esc(program.description)}</p>`:''}
+    ${cards}
+  </div>`;
+
+  let peopleSection='';
+  if(r.access&&r.access.enrollment!==undefined){
+    let ytdEnroll=ytdAccess(r,['enrollment']),qEnroll=n(r.access.enrollment);
+    let sameTable=isQ1;
+    let peopleTable=sameTable
+      ?`<table class="pr-table"><thead><tr><th>Measure</th><th>Quarter and Year to Date</th></tr></thead><tbody><tr><td>New, unduplicated participants enrolled</td><td class="num">${fmt(qEnroll)}</td></tr></tbody></table><div class="pr-note">Because this is the first quarter of the contract year, quarterly and year-to-date totals are the same.</div>`
+      :`<table class="pr-table"><thead><tr><th>Measure</th><th>Quarter</th><th>Year to Date</th></tr></thead><tbody><tr><td>New, unduplicated participants enrolled</td><td class="num">${fmt(qEnroll)}</td><td class="num">${fmt(ytdEnroll)}</td></tr></tbody></table>`;
+    peopleSection=`<div class="pr-section"><h2>People Served</h2><p class="pr-section-intro">Unique participants are counted once, in the quarter they first enrolled. This is distinct from the service totals in the next section, which may include repeat contacts with the same participant.</p>${peopleTable}</div>`;
+
+    let raceTotal=sumObject(r.access.race),langTotal=sumObject(r.access.language),lgbtqTotal=sumObject(r.access.lgbtq);
+    let demoBlocks=[];
+    if(raceTotal)demoBlocks.push(printDemoBlock('Race and Ethnicity',RACES.map(k=>[k,r.access.race[k]]),raceTotal));
+    if(langTotal)demoBlocks.push(printDemoBlock('Household Language',LANGUAGES.map(k=>[k,r.access.language[k]]),langTotal));
+    if(lgbtqTotal)demoBlocks.push(printDemoBlock('LGBTQ+ Identity',[['Yes',r.access.lgbtq.yes],['No',r.access.lgbtq.no],['Unknown/Declined',r.access.lgbtq.unknown]],lgbtqTotal));
+    let ageTotal=ageGenderTotal(r);
+    let charSection=demoBlocks.length||ageTotal?`<div class="pr-section"><h2>Participant Characteristics</h2><p class="pr-section-intro">Demographic categories reflect the same newly enrolled participants counted in People Served.</p>${ageTotal?`<table class="pr-table"><thead><tr><th>Age</th>${GENDERS.map(g=>`<th>${esc(g)}</th>`).join('')}<th>Total</th></tr></thead><tbody>${AGES.filter(a=>GENDERS.some(g=>n(r.access.ageGender[a][g])>0)).map(a=>`<tr><td>${esc(a)}</td>${GENDERS.map(g=>`<td class="num">${fmt(r.access.ageGender[a][g])}</td>`).join('')}<td class="num"><strong>${fmt(sumObject(r.access.ageGender[a]))}</strong></td></tr>`).join('')}</tbody></table>`:''}<div class="pr-demo-grid">${demoBlocks.join('')}</div></div>`:'';
+    peopleSection+=charSection;
+  }
+
+  let servicesSection='';
+  if((t.serviceMetrics||[]).length){
+    let rows=t.serviceMetrics.map(m=>{
+      let ytd=ytdService(r,m.id),expectedFrac=printExpectedFraction(m,p),status=finalServiceStatus(r,m),progressPct=n(m.goal)?ytd/n(m.goal):0;
+      let qCell=isQ1?'':`<td class="num">${fmt(r.services[m.id]?.actual)}</td>`;
+      return`<tr><td><div class="pr-measure-name">${esc(m.name)}</div><div class="pr-measure-unit">${esc(m.unit||'')}${m.duplicatedCount?' · may include repeat contacts with the same participant':''}</div></td><td class="num">${fmt(m.goal)}</td>${qCell}<td class="num">${fmt(ytd)}</td><td><div class="pr-progress-track"><div class="pr-progress-fill" style="width:${Math.min(100,Math.round(progressPct*100))}%"></div></div><div class="pr-progress-text">${pct(progressPct)} complete; ${pct(expectedFrac)} expected by ${esc(p.label)}</div></td><td>${printBadge(status)}</td></tr>`;
+    }).join('');
+    servicesSection=`<div class="pr-section"><h2>Services Delivered</h2><p class="pr-section-intro">Service totals count activities and contacts, which may include more than one interaction with the same participant. This is different from the unique-participant counts in People Served.</p>
+      <table class="pr-table pr-services-table"><thead><tr><th>Measure</th><th>Annual Goal</th>${isQ1?'':'<th>Quarter</th>'}<th>${isQ1?'Quarter and YTD':'Year to Date'}</th><th>Progress</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>
+      ${isQ1?'<div class="pr-note">Because this is the first quarter of the contract year, quarterly and year-to-date totals are the same.</div>':''}
+    </div>`;
+  }
+
+  let outcomesSection='';
+  if((t.outcomes||[]).length){
+    let rows=t.outcomes.map(o=>{
+      let qSt=printOutcomeQuarterState(r,o),ySt=printOutcomeYtdState(r,o),status=finalOutcomeStatus(r,o);
+      let qCell=isQ1?'':`<td>${printOutcomeCell(qSt)}</td>`;
+      return`<tr><td><div class="pr-measure-name">${esc(o.name)}</div><div class="pr-measure-unit">Target: ≥${pct(o.target)}</div></td>${qCell}<td>${printOutcomeCell(isQ1?qSt:ySt)}</td><td>${printBadge(status)}</td></tr>`;
+    }).join('');
+    outcomesSection=`<div class="pr-section"><h2>Participant Outcomes</h2><p class="pr-section-intro">Outcome rates show the number of participants who achieved the result out of the number who were eligible to be measured (the denominator). A blank result is explained rather than shown as a bare zero.</p>
+      <table class="pr-table"><thead><tr><th>Outcome</th>${isQ1?'':'<th>Quarter</th>'}<th>${isQ1?'Quarter and YTD':'Year to Date'}</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>
+      ${isQ1?'<div class="pr-note">Because this is the first quarter of the contract year, quarterly and year-to-date totals are the same.</div>':''}
+    </div>`;
+  }
+
+  let narrValues=r.narratives?.values||{};
+  let bucketOf=x=>{
+    let key=(x._code||x.id||'').toLowerCase();
+    if(/success|story|impact/.test(key))return'impact';
+    if(/challenge/.test(key))return'challenges';
+    if(/correct/.test(key))return'actions';
+    if(/collab/.test(key))return'collaboration';
+    if(/staffing|budget|factor/.test(key))return'changed';
+    return'operations';
+  };
+  let byBucket={changed:[],operations:[],actions:[],collaboration:[],challenges:[],impact:[]};
+  (t.narratives||[]).forEach(x=>{let v=narrValues[x.id];if(v&&String(v).trim())byBucket[bucketOf(x)].push({label:x.label,value:v})});
+  let narrBlock=(heading,items)=>items.length?`<div class="pr-subsection"><h3>${esc(heading)}</h3>${items.map(it=>`<div class="pr-narrative-item">${items.length>1?`<div class="pr-narrative-label">${esc(it.label)}</div>`:''}<p>${esc(it.value).replace(/\n/g,'<br>')}</p></div>`).join('')}</div>`:'';
+  let opsSection=(byBucket.changed.length||byBucket.operations.length||byBucket.actions.length||byBucket.collaboration.length)
+    ?`<div class="pr-section"><h2>Program Operations</h2>${narrBlock('What Changed This Quarter',byBucket.changed)}${narrBlock('Community Collaboration',byBucket.collaboration)}${narrBlock('Actions Taken',byBucket.actions)}${narrBlock('Program Notes',byBucket.operations)}</div>`:'';
+  let challengesSection=byBucket.challenges.length?`<div class="pr-section"><h2>Challenges and Corrective Actions</h2>${narrBlock('Primary Challenges',byBucket.challenges)}</div>`:'';
+  let impactSection=byBucket.impact.length?`<div class="pr-section pr-impact-section"><h2>Participant Impact</h2>${byBucket.impact.map(it=>`<div class="pr-impact-card"><p>${esc(it.value).replace(/\n/g,'<br>')}</p></div>`).join('')}<div class="pr-note">Identifying details are removed to protect participant privacy.</div></div>`:'';
+
+  let c=r.certification||{};
+  let certSection=`<div class="pr-section"><h2>Certification and Data Notes</h2>
+    ${c.name?`<div class="pr-cert-grid"><div><span class="pr-meta-label">Certifying Representative</span><span class="pr-meta-value">${esc(c.name)}${c.title?', '+esc(c.title):''}</span></div><div><span class="pr-meta-label">Agency</span><span class="pr-meta-value">${esc(providerName(program.providerId))}</span></div><div><span class="pr-meta-label">Certification Date</span><span class="pr-meta-value">${esc(c.date||'—')}</span></div></div>`
+      :`<p class="pr-muted">This report has not yet been certified by the agency.</p>`}
+    <div class="pr-glossary"><strong>Data notes:</strong> YTD = year to date, the cumulative total since the start of this contract year. BIPOC = Black, Indigenous, and People of Color. LGBTQ+ = lesbian, gay, bisexual, transgender, queer, and related identities. Rates show a numerator (participants who achieved the result) over a denominator (participants eligible to be measured). This report reflects aggregate, de-identified data only.</div>
+  </div>`;
+
+  let footerMeta=`${esc(program.name)} · Contract Year ${esc(program.contractYears||'—')} · ${esc(p.label)}`;
+
+  document.getElementById('print-view').innerHTML=`<div class="pr-page">
+    ${programSummary}
+    ${peopleSection}
+    ${servicesSection}
+    ${outcomesSection}
+    ${opsSection}
+    ${challengesSection}
+    ${impactSection}
+    ${certSection}
+    <div class="pr-print-footer no-screen">${footerMeta}</div>
+  </div>`;
+
   document.querySelectorAll('.view').forEach(v=>v.classList.add('hidden'));
   document.getElementById('print-view').classList.remove('hidden');
-  setTimeout(()=>{window.print();document.getElementById('print-view').classList.add('hidden');document.getElementById('view-report').classList.remove('hidden')},100);
+  let priorTitle=document.title;
+  document.title=printFilename(program,p,r,'pdf').replace(/\.pdf$/,'');
+  setTimeout(()=>{
+    window.print();
+    document.title=priorTitle;
+    document.getElementById('print-view').classList.add('hidden');
+    document.getElementById('view-report').classList.remove('hidden');
+  },100);
 }
+
 
 
 /* ========================================================================== */
@@ -2075,7 +2383,7 @@ function buildSectionRequest(r,section){
         if(field&&x.actual!=='')measureValues.push({template_measure_field_id:field,numeric_value:Number(x.actual),text_value:null,boolean_value:null});
         measureReviews.push({template_measure_id:m._templateMeasureId,calculated_status:statusCode(serviceSuggestedStatus(r,m)),agency_override_status:statusCode(x.override),variance_explanation:x.explanation||null});
       }else{
-        let x=r.outcomes[m.id]||{},fields=m._fieldIds||{},values=m.id==='housing'?{housing_navigation_clients:x.denominator,transitional_placements:x.transitional,permanent_placements:x.permanent}:m.id==='specialty_care'?{clients_needing_specialty_care:x.denominator,linked_within_90_days:x.numerator}:m.id==='psychiatric_followup'?{followup_recommended:x.denominator,followup_completed_60_days:x.numerator}:{clients_prescribed_psychiatric_medication:x.denominator,refill_or_adherence_60_days:x.numerator};
+        let x=r.outcomes[m.id]||{},fields=m._fieldIds||{},values=m.id==='housing'?{housing_navigation_clients:x.denominator,transitional_placements:x.transitional,permanent_placements:x.permanent,ascencia_glendale_placements:x.ascenciaGlendale,holloway_placements:x.holloway}:m.id==='specialty_care'?{clients_needing_specialty_care:x.denominator,linked_within_90_days:x.numerator}:m.id==='psychiatric_followup'?{followup_recommended:x.denominator,followup_completed_60_days:x.numerator}:{clients_prescribed_psychiatric_medication:x.denominator,refill_or_adherence_60_days:x.numerator};
         Object.entries(values).forEach(([code,value])=>{if(fields[code]&&value!=='')measureValues.push({template_measure_field_id:fields[code],numeric_value:Number(value),text_value:null,boolean_value:null})});
         measureReviews.push({template_measure_id:m._templateMeasureId,calculated_status:statusCode(outcomeSuggestedStatus(r,m)),agency_override_status:statusCode(x.override),variance_explanation:x.explanation||null});
       }
@@ -2981,12 +3289,13 @@ function buildTemplate(version,server){
     let ml=server.measureLibrary.find(x=>x.id===tm.measure_id);if(!ml)return;
     let fields=server.templateFields.filter(f=>f.template_measure_id===tm.id).sort((a,b)=>a.display_order-b.display_order),fieldIds=Object.fromEntries(fields.map(f=>[f.code,f.id]));
     let area=server.serviceCategories.find(x=>x.id===tm.reporting_service_category_id)?.name||'',outcomeDomain=(server.outcomeDomains||[]).find(x=>x.id===ml.outcome_domain_id)?.name||'';
+    let config=tm.calculation_config||{},paceSchedule=(config.pace_schedule&&typeof config.pace_schedule==='object')?config.pace_schedule:null,summaryCard=(config.summary_card&&config.summary_card.enabled)?config.summary_card:null;
     if(tm.entry_mode==='count'){
-      serviceMetrics.push({id:SERVICE_UI_IDS[ml.code]||ml.code,name:tm.display_name||ml.name,goal:Number(tm.annual_goal||0),unit:ml.unit_label,area,outcomeDomain,targetSource:tm.target_source||'',targetSourcePage:tm.target_source_page||'',instructions:tm.instructions||'',countingRule:tm.instructions||(ml.duplicated_count?'Count all qualifying activities delivered during this quarter. The same client may appear more than once when separate services or contacts occurred.':'Count each qualifying activity or event once during this quarter.'),required:tm.required!==false,paceTracking:tm.pace_tracking_enabled!==false,displayOrder:tm.display_order||0,serviceCategoryId:tm.reporting_service_category_id||'',measureId:ml.id,measureCode:ml.code,definition:ml.definition||'',duplicatedCount:Boolean(ml.duplicated_count),_templateMeasureId:tm.id,_measureCode:ml.code,_fieldIds:fieldIds,fieldRows:fields});
+      serviceMetrics.push({id:SERVICE_UI_IDS[ml.code]||ml.code,name:tm.display_name||ml.name,goal:Number(tm.annual_goal||0),unit:ml.unit_label,area,outcomeDomain,targetSource:tm.target_source||'',targetSourcePage:tm.target_source_page||'',instructions:tm.instructions||'',countingRule:tm.instructions||(ml.duplicated_count?'Count all qualifying activities delivered during this quarter. The same client may appear more than once when separate services or contacts occurred.':'Count each qualifying activity or event once during this quarter.'),required:tm.required!==false,paceTracking:tm.pace_tracking_enabled!==false,displayOrder:tm.display_order||0,serviceCategoryId:tm.reporting_service_category_id||'',measureId:ml.id,measureCode:ml.code,definition:ml.definition||'',duplicatedCount:Boolean(ml.duplicated_count),paceSchedule,summaryCard,_templateMeasureId:tm.id,_measureCode:ml.code,_fieldIds:fieldIds,fieldRows:fields});
     }else if(['rate','calculated_rate'].includes(tm.entry_mode)){
       let g=mapOutcomeGuidance(ml.code),denField=fields.find(f=>f.field_role==='denominator'),numFields=fields.filter(f=>['numerator','numerator_component'].includes(f.field_role));
-      let config=tm.calculation_config||{},numeratorQuestion=numFields.length===1?(numFields[0].label||g.numeratorQuestion):(tm.instructions||g.numeratorQuestion);
-      outcomes.push({id:OUTCOME_UI_IDS[ml.code]||ml.code,area,outcomeDomain,name:tm.display_name||ml.name||g.name,target:Number(tm.target_value||0),targetSource:tm.target_source||'',targetSourcePage:tm.target_source_page||'',denominator:ml.default_denominator_definition||g.denominator,denominatorQuestion:denField?.label||g.denominatorQuestion,numeratorQuestion,methodNote:tm.instructions||config.method_note||g.methodNote,duplicationNote:config.duplication_note||g.duplicationNote,required:tm.required!==false,displayOrder:tm.display_order||0,serviceCategoryId:tm.reporting_service_category_id||'',measureId:ml.id,measureCode:ml.code,definition:ml.definition||'',_templateMeasureId:tm.id,_measureCode:ml.code,_fieldIds:fieldIds,fieldRows:fields});
+      let numeratorQuestion=numFields.length===1?(numFields[0].label||g.numeratorQuestion):(tm.instructions||g.numeratorQuestion);
+      outcomes.push({id:OUTCOME_UI_IDS[ml.code]||ml.code,area,outcomeDomain,name:tm.display_name||ml.name||g.name,target:Number(tm.target_value||0),targetSource:tm.target_source||'',targetSourcePage:tm.target_source_page||'',denominator:ml.default_denominator_definition||g.denominator,summaryCard,denominatorQuestion:denField?.label||g.denominatorQuestion,numeratorQuestion,methodNote:tm.instructions||config.method_note||g.methodNote,duplicationNote:config.duplication_note||g.duplicationNote,required:tm.required!==false,displayOrder:tm.display_order||0,serviceCategoryId:tm.reporting_service_category_id||'',measureId:ml.id,measureCode:ml.code,definition:ml.definition||'',_templateMeasureId:tm.id,_measureCode:ml.code,_fieldIds:fieldIds,fieldRows:fields});
     }
   });
   let narratives=server.templateNarratives.filter(x=>x.template_version_id===version.id&&x.active).sort((a,b)=>a.display_order-b.display_order).map(x=>({id:NARRATIVE_UI_IDS[x.code]||x.code,label:x.title,required:x.required,conditional:hsdTemplateConditionalFromRow(x),_promptId:x.id,_code:x.code,prompt:x.prompt,displayOrder:x.display_order||0,active:x.active!==false,conditionalRule:x.conditional_rule||{}}));
