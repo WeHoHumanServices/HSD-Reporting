@@ -115,10 +115,10 @@ assertEq(printServiceUnitLabel({ unit: 'street outreach contacts' }).length <= 3
 // ---- Date / name formatting ----
 assertEq(longDate('2026-04-21'), 'April 21, 2026', 'ISO date -> readable long date, no timezone rollback');
 assertEq(cleanDisplayName('Nancy, Nguyen'), 'Nancy Nguyen', 'Stray comma in name is stripped');
-assertEq(cyShortLabel({ contractYears: '2025-2026' }), 'CY 2025â26', 'Short contract-year label for footer');
+assertEq(cyShortLabel({ contractYears: '2025-2026' }), 'CY 2025–26', 'Short contract-year label for footer');
 
 // ---- Filename regression (bug fixed in a prior session; must still hold) ----
-let program = { name: 'Healthcare in ActionâWest Hollywood', contractYears: '2025-2026', contractStartDate: '2025-10-01', contractEndDate: '2028-09-30' };
+let program = { name: 'Healthcare in Action—West Hollywood', contractYears: '2025-2026', contractStartDate: '2025-10-01', contractEndDate: '2028-09-30' };
 let period = { label: 'Q1' };
 let rpt = { status: 'submitted' };
 let fn = printFilename(program, period, rpt, 'pdf');
