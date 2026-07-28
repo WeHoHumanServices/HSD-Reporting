@@ -910,13 +910,71 @@ async function logout(){
   document.getElementById('app').classList.add('hidden');document.getElementById('login').classList.remove('hidden');
   document.getElementById('login-password').value='';setLoginMessage('')
 }
+/* True when the URL fragment carries a Supabase recovery token. Read this BEFORE
+   the client strips the hash, so the initial getSession() does not race us. */
+function hasRecoveryToken(){
+  let h=window.location.hash||'';
+  return h.includes('type=recovery')&&h.includes('access_token=');
+}
 async function initializeAuth(){
+  let recoveryPending=hasRecoveryToken();
   let {data:{session}}=await supabaseClient.auth.getSession();
-  if(session?.user){state.sessionAccessToken=session.access_token;await enterPortal(session.user);}
   supabaseClient.auth.onAuthStateChange(async(event,session)=>{
-    if(event==='SIGNED_OUT'||!session){state.sessionAccessToken=null;state.authUser=null;state.userId=null;document.getElementById('app').classList.add('hidden');document.getElementById('login').classList.remove('hidden');return}
-    if(event==='SIGNED_IN'&&session.user){state.sessionAccessToken=session.access_token;if(!state.userId)await enterPortal(session.user)}
-  })
+    if(event==='PASSWORD_RECOVERY'){state.recoveryMode=true;state.sessionAccessToken=session?.access_token||null;openPasswordRecovery();return}
+    if(event==='SIGNED_OUT'||!session){state.recoveryMode=false;state.sessionAccessToken=null;state.authUser=null;state.userId=null;document.getElementById('app').classList.add('hidden');document.getElementById('login').classList.remove('hidden');return}
+    if(event==='SIGNED_IN'&&session.user){
+      state.sessionAccessToken=session.access_token;
+      /* A recovery link also fires SIGNED_IN. Do not drop the user into the
+         portal - hold them on the set-new-password screen. */
+      if(state.recoveryMode||hasRecoveryToken()){state.recoveryMode=true;openPasswordRecovery();return}
+      if(!state.userId)await enterPortal(session.user);
+    }
+  });
+  if(recoveryPending){state.recoveryMode=true;openPasswordRecovery();return}
+  if(session?.user){state.sessionAccessToken=session.access_token;await enterPortal(session.user);}
+}
+/* Set-new-password screen shown after following a recovery link. Rendered over the
+   login card so it works whether or not a portal profile has loaded. */
+function openPasswordRecovery(){
+  if(document.getElementById('recovery-form'))return;
+  document.getElementById('app').classList.add('hidden');
+  document.getElementById('login').classList.remove('hidden');
+  let form=document.getElementById('login-form');if(!form)return;
+  form.outerHTML=`<form id="recovery-form" class="login-form" onsubmit="completePasswordRecovery(event)">
+    <div class="login-field"><label for="recovery-password">New password</label>
+      <input id="recovery-password" type="password" minlength="12" autocomplete="new-password" required>
+      <div class="help">Use at least 12 characters.</div></div>
+    <div class="login-field"><label for="recovery-confirm">Confirm new password</label>
+      <input id="recovery-confirm" type="password" minlength="12" autocomplete="new-password" required></div>
+    <div id="login-message" class="login-message" role="status" aria-live="polite"></div>
+    <button id="recovery-submit" class="btn login-submit" type="submit">Save New Password</button>
+  </form>`;
+  let heading=document.querySelector('.login-body h2');if(heading)heading.textContent='Choose a New Password';
+  let intro=document.querySelector('.login-body > p');if(intro)intro.textContent='Your reset link has been verified. Enter a new password to finish signing in.';
+  let help=document.querySelector('.login-help');if(help)help.style.display='none';
+}
+async function completePasswordRecovery(event){
+  event.preventDefault();
+  let password=document.getElementById('recovery-password').value,
+      confirm=document.getElementById('recovery-confirm').value,
+      problem=validateTemporaryPassword(password);
+  if(problem){setLoginMessage(problem,'error');return}
+  if(password!==confirm){setLoginMessage('The passwords do not match.','error');return}
+  let button=document.getElementById('recovery-submit');button.disabled=true;button.textContent='Saving…';
+  try{
+    let{error}=await supabaseClient.auth.updateUser({password});if(error)throw error;
+    /* Clear must_change_password if the RPC exists; a missing RPC is not fatal here. */
+    try{await supabaseClient.rpc('complete_password_change')}catch(rpcError){console.warn('complete_password_change skipped:',rpcError)}
+    state.recoveryMode=false;
+    history.replaceState(null,'',location.pathname+location.search);
+    setLoginMessage('Password updated. Signing you in…','success');
+    let{data:{user}}=await supabaseClient.auth.getUser();
+    if(user)await enterPortal(user);else location.reload();
+  }catch(error){
+    console.error(error);
+    setLoginMessage(error?.message||'The password could not be updated. Request a new reset link and try again.','error');
+    button.disabled=false;button.textContent='Save New Password';
+  }
 }
 function renderShell(){let u=currentUser();document.getElementById('user-agency').textContent=u.role==='agency'?providerName(u.providerId):'City of West Hollywood';document.getElementById('user-role').textContent=ROLE_LABELS[u.role];document.getElementById('user-name').textContent=u.name;let admin=isAdmin();let city=isCity();document.getElementById('sidebar').innerHTML=`
   <div class="side-label">Workspace</div>
@@ -1613,13 +1671,13 @@ function renderUsers(){
   if(!isAdmin())return;
   let rows=state.db.users
     .slice()
-    .sort((a,b)=>(a.name||a.email).localeCompare(b.name||b.email))
+    .sort((a,b)=>String(a.name||a.email||'').localeCompare(String(b.name||b.email||'')))
     .map(u=>`<tr>
       <td><strong>${esc(u.name||'Unnamed user')}</strong><br><span style="color:var(--muted);font-size:11px">${esc(u.email)}</span>${u.title?`<br><span style="color:var(--muted);font-size:11px">${esc(u.title)}</span>`:''}</td>
       <td>${esc(roleLabelsForUser(u))}</td>
       <td>${esc(programNamesForUser(u))}</td>
       <td><span class="status ${u.active?'approved':'draft'}">${u.active?'Active':'Inactive'}</span>${u.mustChangePassword?'<br><span style="color:var(--muted);font-size:11px">Password change required</span>':''}</td>
-      <td><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn secondary sm" onclick="editUser('${u.id}')">Edit</button><button class="btn secondary sm" onclick="resetUserPassword('${u.id}')">Reset password</button></div></td>
+      <td><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn secondary sm" onclick="editUser('${u.id}')">Edit</button>${u.id===state.userId?'<span class="help" style="align-self:center">Use Reset password on the sign-in screen for your own account.</span>':`<button class="btn secondary sm" onclick="resetUserPassword('${u.id}')">Reset password</button>`}</div></td>
     </tr>`).join('');
   document.getElementById('view-users').innerHTML=`<div class="page-head"><div><h1 class="page-title">User Management</h1><p class="page-sub">Create portal accounts, assign roles and programs, reset temporary passwords, and activate or deactivate access.</p></div><button class="btn" onclick="addUser()">Add User</button></div><div class="notice"><strong>Temporary password:</strong> The administrator sets a temporary password when creating or resetting an account. The user must choose a new password at the first sign-in.</div><div class="table-wrap"><table><thead><tr><th>User</th><th>Role</th><th>Program Access</th><th>Status</th><th>Actions</th></tr></thead><tbody>${rows||'<tr><td colspan="5">No users found.</td></tr>'}</tbody></table></div>`;
 }
@@ -1654,12 +1712,30 @@ async function saveUser(event,id){
   let button=document.getElementById('usr-save');button.disabled=true;button.textContent=id?'Saving…':'Creating…';
   try{await invokeUserManagement(body);closeModal();await refreshPortalAfterUserChange();toast(id?'User updated.':'User created.','ok')}catch(error){console.error(error);toast(error.message,'err');button.disabled=false;button.textContent=id?'Save Changes':'Create User'}
 }
+/* A target whose credentials carry elevated reach. Resetting one of these locks a
+   colleague out of administration, so it requires deliberate confirmation. */
+function isPrivilegedTarget(user){return ['admin','supervisor','monitor'].includes(user?.role)}
 function resetUserPassword(id){
   let user=state.db.users.find(u=>u.id===id);if(!user)return;
-  openModal('Reset Temporary Password',`<form onsubmit="saveTemporaryPassword(event,'${id}')"><p class="page-sub" style="margin-bottom:16px">Set a temporary password for <strong>${esc(user.name||user.email)}</strong>. The user will be required to replace it at the next sign-in.</p><div class="field"><label>Temporary password</label><input id="reset-temp-password" type="password" minlength="12" autocomplete="new-password" required><div class="help">At least 12 characters.</div></div><div class="modal-actions"><button class="btn secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn" id="reset-save" type="submit">Reset Password</button></div></form>`)
+  if(id===state.userId){toast('You cannot reset your own password here. Use Reset password on the sign-in screen so the link is emailed to you.','err');return}
+  let privileged=isPrivilegedTarget(user),label=user.email||user.name||'';
+  openModal('Reset Temporary Password',`<form onsubmit="saveTemporaryPassword(event,'${id}')">
+    <p class="page-sub" style="margin-bottom:16px">Set a temporary password for <strong>${esc(user.name||user.email)}</strong> (${esc(user.email||'no email on file')}). The user will be required to replace it at the next sign-in.</p>
+    ${privileged?`<div class="notice" style="margin-bottom:16px"><strong>This is a ${esc(ROLE_LABELS[user.role]||user.role)} account.</strong> Resetting it will immediately lock this person out of the portal until you give them the temporary password. Type their email address below to confirm.</div>
+    <div class="field"><label>Confirm the account email</label><input id="reset-confirm-email" type="text" autocomplete="off" spellcheck="false" required placeholder="${esc(label)}"></div>`:''}
+    <div class="field"><label>Temporary password</label><input id="reset-temp-password" type="password" minlength="12" autocomplete="new-password" required><div class="help">At least 12 characters.</div></div>
+    <div class="modal-actions"><button class="btn secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn" id="reset-save" type="submit">Reset Password</button></div></form>`)
 }
 async function saveTemporaryPassword(event,userId){
-  event.preventDefault();let password=document.getElementById('reset-temp-password').value;let error=validateTemporaryPassword(password);if(error){toast(error,'err');return}
+  event.preventDefault();
+  if(userId===state.userId){toast('You cannot reset your own password here.','err');return}
+  let target=state.db.users.find(u=>u.id===userId);
+  let confirmField=document.getElementById('reset-confirm-email');
+  if(confirmField){
+    let typed=confirmField.value.trim().toLowerCase(),expected=String(target?.email||'').trim().toLowerCase();
+    if(!expected||typed!==expected){toast('The email address you typed does not match this account. The password was not reset.','err');return}
+  }
+  let password=document.getElementById('reset-temp-password').value;let error=validateTemporaryPassword(password);if(error){toast(error,'err');return}
   let button=document.getElementById('reset-save');button.disabled=true;button.textContent='Resetting…';
   try{await invokeUserManagement({action:'reset_password',userId,temporaryPassword:password});closeModal();await refreshPortalAfterUserChange();toast('Temporary password reset.','ok')}catch(error){console.error(error);toast(error.message,'err');button.disabled=false;button.textContent='Reset Password'}
 }
@@ -1682,14 +1758,35 @@ async function completeRequiredPasswordChange(event){
   }catch(error){console.error(error);toast(error.message||'Unable to update the password.','err');button.disabled=false;button.textContent='Save New Password'}
 }
 async function enterPortal(authUser){
+  /* Phase 1 - authentication and data load. A failure here is genuinely fatal,
+     so signing the user out is the correct response. */
+  let portalUser;
   try{
     setLoginMessage('Loading your secure reporting workspace…','info',true);
-    let portalUser=await resolvePortalUser(authUser);
+    portalUser=await resolvePortalUser(authUser);
     if(!portalUser){await supabaseClient.auth.signOut();setLoginMessage('Your account is valid, but it has not been assigned access to this portal. Contact the Human Services Division.','error');return}
     state.authUser=authUser;await loadPortalData(portalUser);
-    document.getElementById('login').classList.add('hidden');document.getElementById('app').classList.remove('hidden');setLoginMessage('');renderShell();applyRoute();
-    if(currentUser()?.mustChangePassword)setTimeout(openRequiredPasswordChange,50);
-  }catch(error){console.error(error);await supabaseClient.auth.signOut();setLoginMessage(`The portal could not load its shared data: ${error.message}. Confirm the database upgrades have been installed and try again.`,'error')}
+  }catch(error){
+    console.error('Portal data load failed:',error);
+    await supabaseClient.auth.signOut();
+    setLoginMessage(`The portal could not load its shared data: ${error.message}. Confirm the database upgrades have been installed and try again.`,'error');
+    return;
+  }
+  /* Phase 2 - rendering. A bug in a single view must NOT sign the user out or
+     masquerade as a failed login. Fall back to the home view and surface a toast. */
+  document.getElementById('login').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  setLoginMessage('');
+  try{
+    renderShell();applyRoute();
+  }catch(error){
+    console.error('Portal render failed:',error);
+    try{history.replaceState(null,'',location.pathname+location.search);nav('home',{fromHash:true})}
+    catch(fallbackError){console.error('Home fallback also failed:',fallbackError)}
+    toast('A screen failed to load and was skipped. You are still signed in. Details are in the browser console.','err');
+  }
+  try{if(currentUser()?.mustChangePassword)setTimeout(openRequiredPasswordChange,50)}
+  catch(error){console.error('Password-change check failed:',error)}
 }
 
 
