@@ -4,6 +4,6 @@
   "version": "1.0.0",
   "description": "City of West Hollywood Human Services Contract Reporting Portal",
   "scripts": {
-    "test": "node tests/report-logic.test.js"
+    "test": "node tests/report-logic.test.js && node tests/report-restructure.test.js"
   }
 }

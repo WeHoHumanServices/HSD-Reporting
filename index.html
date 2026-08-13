@@ -352,6 +352,7 @@ input[inputmode="numeric"]{direction:ltr;text-align:left;font-variant-numeric:ta
 .pr-program-desc{font-size:12px;color:var(--muted);line-height:1.6;margin:4px 0 18px;max-width:80ch}
 
 .pr-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-flow:row dense;gap:10px;margin:14px 0 8px}
+.pr-cards--exec{grid-template-columns:repeat(2,minmax(0,1fr))}
 .pr-card--wide{grid-column:span 2}
 .pr-card{border:1px solid var(--line);border-top:3px solid var(--gold);border-radius:10px;padding:12px 12px 10px;background:#fff;break-inside:avoid}
 .pr-card-value{font-size:17px;font-weight:800;color:var(--navy);line-height:1.2;overflow-wrap:break-word}
@@ -414,6 +415,26 @@ input[inputmode="numeric"]{direction:ltr;text-align:left;font-variant-numeric:ta
 
 .pr-cert-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px 16px;padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--soft);margin-bottom:12px}
 .pr-glossary{font-size:9.5px;color:var(--muted);line-height:1.65;border-top:1px solid var(--line);padding-top:10px}
+
+/* Report restructure: page breaks between major sections, status pair cards,
+   attention box, completeness lines, and quarter-over-quarter trend text. */
+.pr-page-break{page-break-before:always;break-before:page}
+.pr-section-intro strong{color:var(--text)}
+.pr-attention-box{border:1px solid #F0D89A;border-left:4px solid var(--amber);background:var(--amber-bg);border-radius:0 10px 10px 0;padding:12px 14px;margin:16px 0 4px;break-inside:avoid;page-break-inside:avoid}
+.pr-attention-box h3{margin:0 0 6px;font-size:11px;color:var(--amber);text-transform:uppercase;letter-spacing:.04em}
+.pr-attention-box ul{margin:0;padding-left:16px}
+.pr-attention-box li{font-size:11px;color:var(--text);line-height:1.55;margin-bottom:2px}
+.pr-completeness-line{font-size:9.5px;color:var(--muted);margin-top:6px;padding-top:6px;border-top:1px dashed var(--line)}
+.pr-completeness-line strong{color:var(--text)}
+.pr-trend{font-size:9px;color:var(--muted);margin-top:2px;white-space:nowrap}
+.pr-outputs-outcomes-note{font-size:11px;color:var(--muted);margin:0 0 12px;line-height:1.55;max-width:85ch;font-style:italic}
+.pr-completeness-summary{display:flex;gap:18px;flex-wrap:wrap;margin:10px 0 16px;padding:11px 14px;background:var(--soft);border:1px solid var(--line);border-radius:10px}
+.pr-completeness-stat{font-size:11px;color:var(--text)}
+.pr-completeness-stat strong{color:var(--navy);display:block;font-size:16px;font-weight:800}
+.pr-issue-kind{display:inline-block;font-size:8.5px;text-transform:uppercase;letter-spacing:.04em;font-weight:800;padding:1px 6px;border-radius:999px;margin-right:6px;vertical-align:middle}
+.pr-issue-kind.data{color:var(--purple);background:var(--purple-bg)}
+.pr-issue-kind.perf{color:var(--amber);background:var(--amber-bg)}
+.pr-demo-secondary{color:var(--muted);font-weight:400}
 
 @media(max-width:900px){
   .pr-cards{grid-template-columns:repeat(2,1fr)}
@@ -2125,34 +2146,30 @@ function printSummaryCards(r,t,p,program){
   let hasPopulation=r.access&&r.access.enrollment!==undefined;
   if(hasPopulation){
     let ytd=ytdAccess(r,['enrollment']);
-    cards.push({order:1,value:fmt(ytd),label:'unique participants served this contract year',sub:`${fmt(n(r.access.enrollment))} newly enrolled in ${esc(p.label)}`,kind:'people'});
+    cards.push({order:1,value:fmt(ytd),label:'unique participants served, year to date',sub:`${fmt(n(r.access.enrollment))} newly enrolled in ${esc(p.label)}`,kind:'people'});
   }
   let services=t.serviceMetrics||[];
-  let flaggedServices=services.filter(m=>m.summaryCard).sort((a,b)=>(a.summaryCard.order||0)-(b.summaryCard.order||0));
-  let chosenServices=flaggedServices.length?flaggedServices.slice(0,2):services.slice().sort((a,b)=>n(b.goal)-n(a.goal)).slice(0,2);
-  chosenServices.forEach((m,i)=>{
-    let ytd=ytdService(r,m.id);
-    cards.push({order:(m.summaryCard&&m.summaryCard.order)||(2+i),value:`${fmt(ytd)} ${esc(m.unit||'')}`,label:m.name,sub:m.duplicatedCount?'Totals may include multiple services to the same participant.':'Unique activity count, year to date',kind:'service'});
-  });
   let outcomes=t.outcomes||[];
-  let flaggedOutcomes=outcomes.filter(o=>o.summaryCard);
-  let chosenOutcome=flaggedOutcomes[0]||outcomes[0];
-  if(chosenOutcome){
-    let st=printOutcomeYtdState(r,chosenOutcome);
-    let value=st.state==='result'?pct(st.den?st.num/st.den:0):st.text;
-    cards.push({order:(chosenOutcome.summaryCard&&chosenOutcome.summaryCard.order)||4,value,label:chosenOutcome.name,sub:st.state==='result'?`${fmt(st.num)} of ${fmt(st.den)} — target ≥${pct(chosenOutcome.target)}`:`Target: ≥${pct(chosenOutcome.target)}`,kind:'outcome'});
+  let flaggedServices=services.filter(m=>m.summaryCard).sort((a,b)=>(a.summaryCard.order||0)-(b.summaryCard.order||0));
+  let chosenService=flaggedServices[0]||services.slice().sort((a,b)=>n(b.goal)-n(a.goal))[0];
+  if(chosenService){
+    let ytd=ytdService(r,chosenService.id);
+    cards.push({order:2,value:`${fmt(ytd)} ${esc(chosenService.unit||'')}`,label:chosenService.name,sub:chosenService.duplicatedCount?'Totals may include multiple services to the same participant.':'Unique activity count, year to date',kind:'service'});
   }
-  let attentionNames=[...services.filter(m=>['Watch','Off Track'].includes(finalServiceStatus(r,m))).map(m=>m.name),...outcomes.filter(o=>['Watch','Off Track'].includes(finalOutcomeStatus(r,o))).map(o=>o.name)];
-  let statuses=[...services.map(m=>finalServiceStatus(r,m)),...outcomes.map(o=>finalOutcomeStatus(r,o))].filter(s=>s&&s!=='Not Applicable');
-  let scored=statuses.filter(s=>s!=='Not Reported');
-  let overall=printOverallPerformance(scored,attentionNames);
-  cards.push({order:5,value:printOverallBadge(overall.level),label:'Overall contract performance',sub:overall.sub,kind:'status',isBadge:true,wide:true});
-  return cards.sort((a,b)=>a.order-b.order).slice(0,5);
+  let serviceSummary=reportServiceSummary(r,t);
+  cards.push({order:3,value:printOverallBadge(serviceSummary.overall.level),label:'Service Delivery',sub:serviceSummary.overall.sub,kind:'status',isBadge:true,wide:true});
+  let outcomeCompleteness=reportOutcomeCompleteness(r,t);
+  let outcomeStatus=reportOutcomeStatus(outcomeCompleteness);
+  cards.push({order:4,value:printOutcomeStatusBadge(outcomeStatus.level),label:'Participant Outcomes',sub:outcomeStatus.sub,kind:'status',isBadge:true,wide:true});
+  return cards.sort((a,b)=>a.order-b.order);
+}
+function printAttentionBox(items){
+  if(!items.length)return'';
+  return`<div class="pr-attention-box"><h3>Items Needing Attention</h3><ul>${items.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`;
 }
 function printSummaryCardsHtml(cards){
-  return`<div class="pr-cards">${cards.map(c=>{
-    let wide=c.wide||(c.label.length+(c.sub||'').length)>34;
-    return`<div class="pr-card${wide?' pr-card--wide':''}"><div class="pr-card-value">${c.isBadge?c.value:esc(c.value)}</div><div class="pr-card-label">${esc(c.label)}</div>${c.sub?`<div class="pr-card-sub">${esc(c.sub)}</div>`:''}</div>`;
+  return`<div class="pr-cards pr-cards--exec">${cards.map(c=>{
+    return`<div class="pr-card"><div class="pr-card-value">${c.isBadge?c.value:esc(c.value)}</div><div class="pr-card-label">${esc(c.label)}</div>${c.sub?`<div class="pr-card-sub">${esc(c.sub)}</div>`:''}</div>`;
   }).join('')}</div>`;
 }
 
@@ -2168,7 +2185,10 @@ function printDemoBlock(title,rows,total,ytdTotal,isQ1,unitLabel){
   }).join('');
   let zeroNote=zero.length?`<div class="pr-demo-zero-note">No participants reported in the remaining ${zero.length===1?'category':'categories'}: ${zero.map(([label])=>esc(label)).join(', ')}.</div>`:'';
   let completenessNote=unknownShare>.15?`<div class="pr-note">${pct(unknownShare)} of responses in this category are Unknown or Declined. Interpret this distribution with that limitation in mind.</div>`:'';
-  return `<div class="pr-demo-block"><h3>${esc(title)}</h3>${total?`<div class="pr-demo-total">${fmt(total)} ${esc(unitLabel)} reporting${isQ1?'':` · ${fmt(ytdTotal)} YTD`}</div>`:''}${bars||'<div class="pr-muted">No data reported for this category.</div>'}${zeroNote}${completenessNote}</div>`;
+  let compBasis=isQ1?total:(ytdTotal||total),compUnknown=isQ1?n(unknownRow?.[1]||0):n(unknownRow?.[2]??unknownRow?.[1]??0);
+  let completeness=reportDemographicCompleteness(compBasis,compUnknown);
+  let completenessLine=completeness?`<div class="pr-completeness-line"><strong>${esc(title)}</strong> — ${pct(completeness.pct)} known${isQ1?'':' (YTD)'}</div>`:'';
+  return `<div class="pr-demo-block"><h3>${esc(title)}</h3>${total?`<div class="pr-demo-total">${fmt(total)} ${esc(unitLabel)} reporting${isQ1?'':` · ${fmt(ytdTotal)} YTD`}</div>`:''}${bars||'<div class="pr-muted">No data reported for this category.</div>'}${zeroNote}${completenessNote}${completenessLine}</div>`;
 }
 
 function printFilename(program,p,r,ext){
@@ -2214,6 +2234,143 @@ function printServiceUnitLabel(m){
   return short.charAt(0).toUpperCase()+short.slice(1);
 }
 
+/* ==========================================================================
+   Report-restructure helpers (Page 1 status summary, outcome completeness,
+   demographic completeness, attention items, quarter trend). These build on
+   top of the existing calculation functions above rather than duplicating
+   them — printOverallPerformance, outcomeQuarterState/outcomeYtdStatus,
+   finalServiceStatus/finalOutcomeStatus, and ytdService/ytdAccess remain the
+   single source of truth for the underlying numbers and pace/target logic.
+   ========================================================================== */
+
+/* Service-only pace/status rollup for the Page 1 "Service Delivery" card.
+   Delegates to the existing, tested printOverallPerformance() so the pace
+   tiering logic itself is defined in exactly one place. */
+function reportServiceSummary(r,t){
+  let services=t.serviceMetrics||[];
+  let statuses=services.map(m=>finalServiceStatus(r,m)).filter(s=>s&&s!=='Not Applicable');
+  let scored=statuses.filter(s=>s!=='Not Reported');
+  let attentionNames=services.filter(m=>['Watch','Off Track'].includes(finalServiceStatus(r,m))).map(m=>m.name);
+  let overall=printOverallPerformance(scored,attentionNames);
+  return{services,statuses,scored,attentionNames,overall};
+}
+
+/* Friendly label/badge class for a single outcome's YTD (or quarter, for Q1)
+   data state. Reuses the pr-badge-* color tokens already defined for
+   service-measure status badges so no new CSS palette is required. */
+function reportOutcomeDataStatus(state){
+  return{
+    result:{label:'Complete',cls:'ahead'},
+    no_eligible:{label:'Complete — No Eligible Participants',cls:'ontrack'},
+    not_yet_due:{label:'Not Yet Measurable',cls:'pending'},
+    insufficient:{label:'Partial YTD Data',cls:'watch'},
+    no_data:{label:'Not Reported',cls:'nodata'},
+    not_applicable:{label:'Not Applicable',cls:'na'}
+  }[state]||{label:'Not Reported',cls:'nodata'};
+}
+function printDataStatusBadge(state){
+  let meta=reportOutcomeDataStatus(state);
+  return`<span class="pr-badge pr-badge-${meta.cls}">${esc(meta.label)}</span>`;
+}
+
+/* Outcome completeness + performance rollup for a report. Distinguishes
+   "was this measured" (data completeness) from "how did it perform"
+   (target pace) — this pair of questions is the core requirement of the
+   Page 1 Participant Outcomes card and the Page 3 completeness summary. */
+function reportOutcomeCompleteness(r,t){
+  let outcomes=(t.outcomes||[]).filter(o=>o.required!==false);
+  let rows=outcomes.map(o=>{
+    let qState=printOutcomeQuarterState(r,o),yState=printOutcomeYtdState(r,o),perf=finalOutcomeStatus(r,o);
+    let reportedThisQuarter=qState.state==='result'||qState.state==='no_eligible';
+    let completeYtd=yState.state==='result'||yState.state==='no_eligible';
+    return{outcome:o,qState,yState,perf,reportedThisQuarter,completeYtd};
+  });
+  let total=rows.length;
+  let reportedThisQuarter=rows.filter(x=>x.reportedThisQuarter).length;
+  let completeYtd=rows.filter(x=>x.completeYtd).length;
+  let belowTarget=rows.filter(x=>x.completeYtd&&['Watch','Off Track'].includes(x.perf));
+  let unreportedNames=rows.filter(x=>x.yState.state==='no_data').map(x=>x.outcome.name);
+  let partialYtdNames=rows.filter(x=>x.yState.state==='insufficient').map(x=>x.outcome.name);
+  return{rows,total,reportedThisQuarter,completeYtd,belowTarget,unreportedNames,partialYtdNames};
+}
+
+const PR_OUTCOME_META={
+  strong:{label:'Strong Performance',glyph:'✓',cls:'ahead'},
+  on_track:{label:'On Track',glyph:'●',cls:'ontrack'},
+  mixed:{label:'Mixed Performance',glyph:'▲',cls:'watch'},
+  needs_attention:{label:'Needs Attention',glyph:'▼',cls:'below'},
+  partial:{label:'Partial Data',glyph:'◷',cls:'pending'},
+  insufficient:{label:'Insufficient Data',glyph:'!',cls:'nodata'}
+};
+function printOutcomeStatusBadge(level){
+  let meta=PR_OUTCOME_META[level]||PR_OUTCOME_META.insufficient;
+  return`<span class="pr-badge pr-badge-${meta.cls}"><span class="pr-badge-icon" aria-hidden="true">${meta.glyph}</span>${esc(meta.label)}</span>`;
+}
+/* Participant Outcomes status for Page 1. Data completeness gates the
+   rating first — a program cannot earn a positive outcome rating while
+   required outcomes remain unmeasured this contract year, per the reporting
+   standard for this document. Only once every required outcome has a
+   complete year-to-date result does this assess pace against target. */
+function reportOutcomeStatus(comp){
+  if(!comp.total)return{level:'insufficient',sub:'No participant outcome measures are defined for this program.'};
+  if(comp.completeYtd===0&&comp.reportedThisQuarter===0)
+    return{level:'insufficient',sub:`Data has not yet been reported for ${fmt(comp.total)} outcome measure${comp.total===1?'':'s'} this contract year.`};
+  if(comp.completeYtd<comp.total){
+    let pendingCount=comp.total-comp.completeYtd;
+    return{level:'partial',sub:`${fmt(comp.reportedThisQuarter)} of ${fmt(comp.total)} outcome measures reported this quarter. Complete year-to-date results remain pending for ${fmt(pendingCount)}.`};
+  }
+  let belowCount=comp.belowTarget.length,ratioBelow=belowCount/comp.total;
+  let exceedsCount=comp.rows.filter(x=>x.perf==='Exceeds Pace').length;
+  let level=ratioBelow>=.34?'needs_attention':(exceedsCount/comp.total>=.6&&belowCount===0)?'strong':belowCount===0?'on_track':'mixed';
+  let sub=`${fmt(comp.total-belowCount)} of ${fmt(comp.total)} outcomes meeting or exceeding target.`;
+  if(belowCount)sub+=` ${belowCount===1?'One outcome is':fmt(belowCount)+' outcomes are'} below target: ${comp.belowTarget.map(x=>x.outcome.name).join(', ')}.`;
+  return{level,sub};
+}
+
+/* Prior-quarter value for a service measure, for the Page 2 trend line.
+   Returns null (not zero) when there is no prior quarter, so callers can
+   distinguish "no comparison available" from "prior quarter was zero." */
+function reportPriorQuarterValue(r,metricId){
+  let list=priorReports(r).filter(x=>x.id!==r.id);
+  if(!list.length)return null;
+  let prior=list[list.length-1],val=prior.services[metricId]?.actual;
+  return(val===''||val===undefined||val===null)?null:n(val);
+}
+function reportPriorQuarterLabel(r){
+  let list=priorReports(r).filter(x=>x.id!==r.id);
+  if(!list.length)return null;
+  return periodById(list[list.length-1].periodId)?.label||null;
+}
+
+/* Known/Unknown completeness for a demographic category, e.g. "91% known". */
+function reportDemographicCompleteness(total,unknownCount){
+  if(!total)return null;
+  let known=Math.max(0,total-n(unknownCount));
+  return{known,total,pct:known/total};
+}
+
+/* Dynamic "Items Needing Attention" list for Page 1 — combines service-pace
+   concerns with outcome reporting-completeness and performance concerns.
+   Capped to keep the box compact per the design requirement. */
+function reportAttentionItems(r,t,serviceSummary,outcomeCompleteness){
+  let items=[];
+  serviceSummary.attentionNames.forEach(name=>items.push(`${name} is below expected pace this quarter.`));
+  outcomeCompleteness.unreportedNames.forEach(name=>items.push(`${name} has not been reported this contract year.`));
+  outcomeCompleteness.partialYtdNames.forEach(name=>items.push(`Complete year-to-date ${name} data is not yet available.`));
+  outcomeCompleteness.belowTarget.forEach(x=>items.push(`${x.outcome.name} is below target.`));
+  return items.slice(0,6);
+}
+/* Outstanding reporting/completeness items for the final page. Distinct from
+   reportAttentionItems: this lists data-completeness gaps only (not
+   performance concerns), matching the report requirement that incomplete
+   data never be presented as a performance issue. */
+function reportOutstandingItems(outcomeCompleteness,t){
+  let items=[];
+  outcomeCompleteness.unreportedNames.forEach(name=>items.push(`${name} data not reported`));
+  outcomeCompleteness.partialYtdNames.forEach(name=>items.push(`${name} — prior-quarter data pending, YTD incomplete`));
+  return items;
+}
+
 function printReport(id){
   let r=reportById(id),p=periodById(r.periodId),program=programById(r.programId),t=getTemplateForReport(r);
   let isQ1=printIsQ1(p),isDraft=['draft','returned'].includes(r.status);
@@ -2221,6 +2378,13 @@ function printReport(id){
   let statusText=PRINT_STATUS_DISPLAY[r.status]||DB_STATUS_LABELS[r.status]||r.status;
 
   alert('Your report is about to open in the print dialog.\n\nFor the cleanest PDF, open "More settings" and turn OFF "Headers and footers." This report already includes its own footer with the program name, contract year, quarter, and page numbers — the browser’s built-in header/footer would just duplicate that information.');
+
+  // Computed once, reused across the executive summary, the attention box,
+  // and the final-page reporting-completeness list — single source of truth
+  // for each, per the report's own data-quality standard.
+  let serviceSummary=reportServiceSummary(r,t);
+  let outcomeCompleteness=reportOutcomeCompleteness(r,t);
+  let attentionItems=reportAttentionItems(r,t,serviceSummary,outcomeCompleteness);
 
   let cards=printSummaryCardsHtml(printSummaryCards(r,t,p,program));
   let programSummary=`<div class="pr-section" id="pr-summary"><div class="pr-eyebrow">City of West Hollywood Human Services Division</div>
@@ -2235,16 +2399,54 @@ function printReport(id){
     </div>
     ${program.description?`<p class="pr-program-desc">${esc(program.description)}</p>`:''}
     ${cards}
+    ${printAttentionBox(attentionItems)}
   </div>`;
+
+  let servicesSection='';
+  if((t.serviceMetrics||[]).length){
+    let rows=t.serviceMetrics.map(m=>{
+      let ytd=ytdService(r,m.id),expectedFrac=printExpectedFraction(m,p),status=finalServiceStatus(r,m),progressPct=n(m.goal)?ytd/n(m.goal):0;
+      let priorVal=isQ1?null:reportPriorQuarterValue(r,m.id),priorLabel=isQ1?null:reportPriorQuarterLabel(r);
+      let trendLine=(priorVal!==null&&priorLabel)?`<div class="pr-trend">${esc(priorLabel)}: ${fmt(priorVal)} → ${esc(p.label)}: ${fmt(r.services[m.id]?.actual)}</div>`:'';
+      let qCell=isQ1?'':`<td class="num">${fmt(r.services[m.id]?.actual)}${trendLine}</td>`;
+      let unitLabel=printServiceUnitLabel(m);
+      let extraNote=m.uniqueNote?`<div class="pr-measure-unit">${esc(m.uniqueNote)}</div>`:'';
+      return`<tr><td><div class="pr-measure-name">${esc(m.name)}</div><div class="pr-measure-unit">${esc(unitLabel)}</div>${extraNote}</td><td class="num">${fmt(m.goal)}</td>${qCell}<td class="num">${fmt(ytd)}</td><td><div class="pr-progress-track"><div class="pr-progress-fill" style="width:${Math.min(100,Math.round(progressPct*100))}%"></div></div><div class="pr-progress-text">${pct(progressPct)} complete; ${pct(expectedFrac)} expected by ${esc(p.label)}</div></td><td>${printBadge(status)}</td></tr>`;
+    }).join('');
+    servicesSection=`<div class="pr-section pr-page-break"><h2>Service Delivery</h2><p class="pr-section-intro">Service totals count activities and contacts and may include more than one interaction with the same participant. This is different from the unique-participant counts reported in People Served and Demographics. <strong>Outputs</strong> — what the program did — are reported here; participant <strong>outcomes</strong> — what happened for participants — follow in the next section.</p>
+      <table class="pr-table pr-services-table"><thead><tr><th>Measure</th><th>Annual Goal</th>${isQ1?'':'<th>Quarter</th>'}<th>${isQ1?'Quarter and YTD':'Year to Date'}</th><th>Progress</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>
+      ${isQ1?'<div class="pr-note">Because this is the first quarter of the contract year, quarterly and year-to-date totals are the same.</div>':''}
+    </div>`;
+  }
+
+  let outcomesSection='';
+  if((t.outcomes||[]).length){
+    let rows=t.outcomes.map(o=>{
+      let qSt=printOutcomeQuarterState(r,o),ySt=printOutcomeYtdState(r,o),status=finalOutcomeStatus(r,o);
+      let dataState=isQ1?qSt.state:ySt.state;
+      let qCell=isQ1?'':`<td>${printOutcomeCell(qSt)}</td>`;
+      return`<tr><td><div class="pr-measure-name">${esc(o.name)}</div><div class="pr-measure-unit">Target: ≥${pct(o.target)}</div></td>${qCell}<td>${printOutcomeCell(isQ1?qSt:ySt)}</td><td>${printDataStatusBadge(dataState)}</td><td>${printBadge(status)}</td></tr>`;
+    }).join('');
+    let compSummary=`<div class="pr-completeness-summary">
+      <div class="pr-completeness-stat"><strong>${fmt(outcomeCompleteness.reportedThisQuarter)} of ${fmt(outcomeCompleteness.total)}</strong>outcomes reported this quarter</div>
+      <div class="pr-completeness-stat"><strong>${fmt(outcomeCompleteness.completeYtd)} of ${fmt(outcomeCompleteness.total)}</strong>have complete year-to-date data</div>
+    </div>`;
+    outcomesSection=`<div class="pr-section pr-page-break"><h2>Participant Outcomes</h2><p class="pr-outputs-outcomes-note">Outcomes reflect what happened for participants, not the volume of services delivered.</p><p class="pr-section-intro">Outcome rates show the number of participants who achieved the result out of the number who were eligible to be measured (the denominator). A blank result is explained rather than shown as a bare zero.</p>
+      ${compSummary}
+      <table class="pr-table"><thead><tr><th>Outcome</th>${isQ1?'':'<th>Quarter</th>'}<th>${isQ1?'Quarter and YTD':'Year to Date'}</th><th>Data Status</th><th>Performance</th></tr></thead><tbody>${rows}</tbody></table>
+      ${isQ1?'<div class="pr-note">Because this is the first quarter of the contract year, quarterly and year-to-date totals are the same.</div>':''}
+    </div>`;
+  }
 
   let peopleSection='';
   if(r.access&&r.access.enrollment!==undefined){
     let ytdEnroll=ytdAccess(r,['enrollment']),qEnroll=n(r.access.enrollment);
     let sameTable=isQ1;
+    let snapshot=`<div class="pr-cards"><div class="pr-card"><div class="pr-card-value">${fmt(ytdEnroll)}</div><div class="pr-card-label">unique participants served, year to date</div></div><div class="pr-card"><div class="pr-card-value">${fmt(qEnroll)}</div><div class="pr-card-label">newly enrolled in ${esc(p.label)}</div></div></div>`;
     let peopleTable=sameTable
       ?`<table class="pr-table"><thead><tr><th>Measure</th><th>Quarter and Year to Date</th></tr></thead><tbody><tr><td>New, unduplicated participants enrolled</td><td class="num">${fmt(qEnroll)}</td></tr></tbody></table><div class="pr-note">Because this is the first quarter of the contract year, quarterly and year-to-date totals are the same.</div>`
       :`<table class="pr-table"><thead><tr><th>Measure</th><th>Quarter</th><th>Year to Date</th></tr></thead><tbody><tr><td>New, unduplicated participants enrolled</td><td class="num">${fmt(qEnroll)}</td><td class="num">${fmt(ytdEnroll)}</td></tr></tbody></table>`;
-    peopleSection=`<div class="pr-section"><h2>People Served</h2><p class="pr-section-intro">Unique participants are counted once, in the quarter they first enrolled. This is distinct from the service totals in the next section, which may include repeat contacts with the same participant.</p>${peopleTable}</div>`;
+    peopleSection=`<div class="pr-section pr-page-break"><h2>People Served and Demographics</h2><p class="pr-section-intro">Unique participants are counted once, in the quarter they first enrolled. This is distinct from the service totals reported under Service Delivery, which may include repeat contacts with the same participant.</p>${snapshot}${peopleTable}</div>`;
 
     let raceTotal=sumObject(r.access.race),langTotal=sumObject(r.access.language),lgbtqTotal=sumObject(r.access.lgbtq);
     let raceYtdTotal=RACES.reduce((sum,k)=>sum+ytdAccess(r,['race',k]),0),langYtdTotal=LANGUAGES.reduce((sum,k)=>sum+ytdAccess(r,['language',k]),0),lgbtqYtdTotal=['yes','no','unknown'].reduce((sum,k)=>sum+ytdAccess(r,['lgbtq',k]),0);
@@ -2261,57 +2463,31 @@ function printReport(id){
         :`Demographic response totals are shown individually below because one or more categories do not exactly match the ${fmt(qEnroll)} newly enrolled participants reported in People Served. This can happen when a demographic question was left blank for some participants.`;
       let ageTable=ageTotal?(isQ1
       ?`<table class="pr-table"><thead><tr><th>Age</th>${GENDERS.map(g=>`<th>${esc(HSD_GENDER_TABLE_LABELS[g]||g)}</th>`).join('')}<th>Total</th></tr></thead><tbody>${AGES.filter(a=>GENDERS.some(g=>n(r.access.ageGender[a][g])>0)).map(a=>`<tr><td>${esc(a)}</td>${GENDERS.map(g=>`<td class="num">${fmt(r.access.ageGender[a][g])}</td>`).join('')}<td class="num"><strong>${fmt(sumObject(r.access.ageGender[a]))}</strong></td></tr>`).join('')}</tbody></table><div class="pr-note">Because this is the first quarter of the contract year, quarterly and year-to-date totals are the same.</div>`
-      :`<table class="pr-table"><thead><tr><th rowspan="2">Age</th><th colspan="${GENDERS.length+1}" style="text-align:center">Quarter</th><th colspan="${GENDERS.length+1}" style="text-align:center">Year to Date</th></tr><tr>${GENDERS.map(g=>`<th>${esc(HSD_GENDER_TABLE_LABELS[g]||g)}</th>`).join('')}<th>Total</th>${GENDERS.map(g=>`<th>${esc(HSD_GENDER_TABLE_LABELS[g]||g)}</th>`).join('')}<th>Total</th></tr></thead><tbody>${AGES.filter(a=>GENDERS.some(g=>n(r.access.ageGender[a][g])>0||ytdAccess(r,['ageGender',a,g])>0)).map(a=>`<tr><td>${esc(a)}</td>${GENDERS.map(g=>`<td class="num">${fmt(r.access.ageGender[a][g])}</td>`).join('')}<td class="num"><strong>${fmt(sumObject(r.access.ageGender[a]))}</strong></td>${GENDERS.map(g=>`<td class="num">${fmt(ytdAccess(r,['ageGender',a,g]))}</td>`).join('')}<td class="num"><strong>${fmt(GENDERS.reduce((sum,g)=>sum+ytdAccess(r,['ageGender',a,g]),0))}</strong></td></tr>`).join('')}</tbody></table>`
+      :`<table class="pr-table"><thead><tr><th rowspan="2">Age</th><th colspan="${GENDERS.length+1}" style="text-align:center">Year to Date</th><th colspan="${GENDERS.length+1}" style="text-align:center">Quarter</th></tr><tr>${GENDERS.map(g=>`<th>${esc(HSD_GENDER_TABLE_LABELS[g]||g)}</th>`).join('')}<th>Total</th>${GENDERS.map(g=>`<th class="pr-demo-secondary">${esc(HSD_GENDER_TABLE_LABELS[g]||g)}</th>`).join('')}<th class="pr-demo-secondary">Total</th></tr></thead><tbody>${AGES.filter(a=>GENDERS.some(g=>n(r.access.ageGender[a][g])>0||ytdAccess(r,['ageGender',a,g])>0)).map(a=>`<tr><td>${esc(a)}</td>${GENDERS.map(g=>`<td class="num"><strong>${fmt(ytdAccess(r,['ageGender',a,g]))}</strong></td>`).join('')}<td class="num"><strong>${fmt(GENDERS.reduce((sum,g)=>sum+ytdAccess(r,['ageGender',a,g]),0))}</strong></td>${GENDERS.map(g=>`<td class="num pr-demo-secondary">${fmt(r.access.ageGender[a][g])}</td>`).join('')}<td class="num pr-demo-secondary">${fmt(sumObject(r.access.ageGender[a]))}</td></tr>`).join('')}</tbody></table>`
       )+(ageTotal!==qEnroll?`<div class="pr-note">Age and gender responses total ${fmt(ageTotal)}, reporting against ${fmt(qEnroll)} newly enrolled participants.</div>`:''):'';
       let charSection=`<div class="pr-section"><div class="pr-keep-together"><h2>Participant Characteristics</h2><p class="pr-section-intro">${introText}</p>${ageTable}</div><div class="pr-demo-grid">${demoBlocks.join('')}</div></div>`;
       peopleSection+=charSection;
     }
   }
 
-  let servicesSection='';
-  if((t.serviceMetrics||[]).length){
-    let rows=t.serviceMetrics.map(m=>{
-      let ytd=ytdService(r,m.id),expectedFrac=printExpectedFraction(m,p),status=finalServiceStatus(r,m),progressPct=n(m.goal)?ytd/n(m.goal):0;
-      let qCell=isQ1?'':`<td class="num">${fmt(r.services[m.id]?.actual)}</td>`;
-      let unitLabel=printServiceUnitLabel(m);
-      let extraNote=m.uniqueNote?`<div class="pr-measure-unit">${esc(m.uniqueNote)}</div>`:'';
-      return`<tr><td><div class="pr-measure-name">${esc(m.name)}</div><div class="pr-measure-unit">${esc(unitLabel)}</div>${extraNote}</td><td class="num">${fmt(m.goal)}</td>${qCell}<td class="num">${fmt(ytd)}</td><td><div class="pr-progress-track"><div class="pr-progress-fill" style="width:${Math.min(100,Math.round(progressPct*100))}%"></div></div><div class="pr-progress-text">${pct(progressPct)} complete; ${pct(expectedFrac)} expected by ${esc(p.label)}</div></td><td>${printBadge(status)}</td></tr>`;
-    }).join('');
-    servicesSection=`<div class="pr-section"><h2>Services Delivered</h2><p class="pr-section-intro">Service totals count activities and contacts and may include more than one interaction with the same participant. This is different from the unique-participant counts in People Served.</p>
-      <table class="pr-table pr-services-table"><thead><tr><th>Measure</th><th>Annual Goal</th>${isQ1?'':'<th>Quarter</th>'}<th>${isQ1?'Quarter and YTD':'Year to Date'}</th><th>Progress</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>
-      ${isQ1?'<div class="pr-note">Because this is the first quarter of the contract year, quarterly and year-to-date totals are the same.</div>':''}
-    </div>`;
-  }
-
-  let outcomesSection='';
-  if((t.outcomes||[]).length){
-    let rows=t.outcomes.map(o=>{
-      let qSt=printOutcomeQuarterState(r,o),ySt=printOutcomeYtdState(r,o),status=finalOutcomeStatus(r,o);
-      let qCell=isQ1?'':`<td>${printOutcomeCell(qSt)}</td>`;
-      return`<tr><td><div class="pr-measure-name">${esc(o.name)}</div><div class="pr-measure-unit">Target: ≥${pct(o.target)}</div></td>${qCell}<td>${printOutcomeCell(isQ1?qSt:ySt)}</td><td>${printBadge(status)}</td></tr>`;
-    }).join('');
-    outcomesSection=`<div class="pr-section"><h2>Participant Outcomes</h2><p class="pr-section-intro">Outcome rates show the number of participants who achieved the result out of the number who were eligible to be measured (the denominator). A blank result is explained rather than shown as a bare zero.</p>
-      <table class="pr-table"><thead><tr><th>Outcome</th>${isQ1?'':'<th>Quarter</th>'}<th>${isQ1?'Quarter and YTD':'Year to Date'}</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>
-      ${isQ1?'<div class="pr-note">Because this is the first quarter of the contract year, quarterly and year-to-date totals are the same.</div>':''}
-    </div>`;
-  }
-
   let narrValues=r.narratives?.values||{};
-  let sectionOf=x=>{
-    let key=(x._code||x.id||'').toLowerCase();
-    if(/success|story|impact/.test(key))return'impact';
-    if(/challenge|barrier/.test(key))return'challenges';
-    return'operations';
-  };
-  let bySection={operations:[],challenges:[],impact:[]};
+  const NARRATIVE_SECTION_MAP={performance_summary:'highlights',outcome_progress:'highlights',community_collaboration:'highlights',additional_activities:'highlights',client_feedback:'highlights',performance_factors:'challenges',challenges_barriers:'challenges',corrective_strategies:'actions',staffing_changes:'staffing',budget_modification:'staffing',success_story:'impact'};
+  let sectionOf=x=>NARRATIVE_SECTION_MAP[(x._code||x.id||'').toLowerCase()]||'highlights';
+  let bySection={highlights:[],challenges:[],actions:[],staffing:[],impact:[]};
   (t.narratives||[]).forEach(x=>{let v=narrValues[x.id];if(v&&String(v).trim())bySection[sectionOf(x)].push({label:x.label,value:v})});
   let narrativeBlocks=items=>items.map(it=>`<div class="pr-narrative-item"><div class="pr-narrative-label">${esc(it.label)}</div><p>${esc(it.value).replace(/\n/g,'<br>')}</p></div>`).join('');
-  let opsSection=bySection.operations.length?`<div class="pr-section"><h2>Program Operations</h2>${narrativeBlocks(bySection.operations)}</div>`:'';
-  let challengesSection=bySection.challenges.length?`<div class="pr-section"><h2>Challenges and Corrective Actions</h2>${narrativeBlocks(bySection.challenges)}</div>`:'';
-  let impactSection=bySection.impact.length?`<div class="pr-section pr-impact-section"><h2>Participant Impact</h2>${bySection.impact.map(it=>`<div class="pr-impact-card"><div class="pr-narrative-label">${esc(it.label)}</div><p>${esc(it.value).replace(/\n/g,'<br>')}</p></div>`).join('')}<div class="pr-note">Identifying details are removed to protect participant privacy.</div></div>`:'';
+  let hasAnyNarrative=Object.values(bySection).some(x=>x.length);
+  let highlightsSection=bySection.highlights.length?`<div class="pr-section${hasAnyNarrative?' pr-page-break':''}"><h2>Quarter Highlights</h2>${narrativeBlocks(bySection.highlights)}</div>`:'';
+  let challengesSection=bySection.challenges.length?`<div class="pr-section${hasAnyNarrative&&!bySection.highlights.length?' pr-page-break':''}"><h2>Challenges and Variances</h2>${narrativeBlocks(bySection.challenges)}</div>`:'';
+  let actionsSection=bySection.actions.length?`<div class="pr-section"><h2>Actions Underway and Next Steps</h2>${narrativeBlocks(bySection.actions)}</div>`:'';
+  let staffingSection=bySection.staffing.length?`<div class="pr-section"><h2>Staffing and Fiscal Changes</h2>${narrativeBlocks(bySection.staffing)}</div>`:'';
+  let impactSection=bySection.impact.length?`<div class="pr-section pr-impact-section"><h2>Client Impact and Success Story</h2>${bySection.impact.map(it=>`<div class="pr-impact-card"><div class="pr-narrative-label">${esc(it.label)}</div><p>${esc(it.value).replace(/\n/g,'<br>')}</p></div>`).join('')}<div class="pr-note">Identifying details are removed to protect participant privacy.</div></div>`:'';
+
+  let outstandingItems=reportOutstandingItems(outcomeCompleteness,t);
+  let outstandingSection=outstandingItems.length?`<div class="pr-section pr-page-break"><h2>Reporting Completeness and Outstanding Items</h2><p class="pr-section-intro">These are data-completeness gaps, not performance findings. An outcome listed here may still be performing well once complete data are available.</p><div class="pr-attention-box"><ul>${outstandingItems.map(x=>`<li><span class="pr-issue-kind data">Data</span>${esc(x)}</li>`).join('')}</ul></div></div>`:'';
 
   let c=r.certification||{};
-  let certSection=`<div class="pr-section"><h2>Certification and Data Notes</h2>
+  let certSection=`<div class="pr-section${outstandingItems.length?'':' pr-page-break'}"><h2>Certification and Data Notes</h2>
     <div class="pr-keep-together">
     ${c.name?`<div class="pr-cert-grid"><div><span class="pr-meta-label">Certifying Representative</span><span class="pr-meta-value">${esc(cleanDisplayName(c.name))}</span></div>${c.title?`<div><span class="pr-meta-label">Title</span><span class="pr-meta-value">${esc(c.title)}</span></div>`:''}<div><span class="pr-meta-label">Agency</span><span class="pr-meta-value">${esc(providerName(program.providerId))}</span></div><div><span class="pr-meta-label">Certification Date</span><span class="pr-meta-value">${esc(longDate(c.date))}</span></div></div>`
       :`<p class="pr-muted">This report has not yet been certified by the agency.</p>`}
@@ -2327,12 +2503,15 @@ function printReport(id){
 
   document.getElementById('print-view').innerHTML=`<div class="pr-page">
     ${programSummary}
-    ${peopleSection}
     ${servicesSection}
     ${outcomesSection}
-    ${opsSection}
+    ${peopleSection}
+    ${highlightsSection}
     ${challengesSection}
+    ${actionsSection}
+    ${staffingSection}
     ${impactSection}
+    ${outstandingSection}
     ${certSection}
     <!--pr-append-point-->
   </div>`;
