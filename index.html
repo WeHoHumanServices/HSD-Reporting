@@ -2177,18 +2177,16 @@ function printDemoBlock(title,rows,total,ytdTotal,isQ1,unitLabel){
   unitLabel=unitLabel||'participants';
   let nonZero=rows.filter(([,v,yv])=>n(v)>0||n(yv)>0),zero=rows.filter(([,v,yv])=>n(v)===0&&n(yv)===0);
   let unknownRow=nonZero.find(([label])=>/unknown|declined/i.test(label));
-  let unknownShare=total?n(unknownRow?.[1]||0)/total:0;
   let bars=nonZero.map(([label,v,yv])=>{
     let share=total?n(v)/total:0;
     let ytdLine=isQ1?'':`<div style="margin-top:1px">YTD ${fmt(yv)}${ytdTotal?` (${pct(ytdTotal?n(yv)/ytdTotal:0)})`:''}</div>`;
     return `<div class="pr-demo-row"><div class="pr-demo-label">${esc(label)}</div><div class="pr-demo-bar-track"><div class="pr-demo-bar-fill" style="width:${Math.round(share*100)}%"></div></div><div class="pr-demo-count"><div>${fmt(v)} · ${pct(share)}</div>${ytdLine}</div></div>`;
   }).join('');
   let zeroNote=zero.length?`<div class="pr-demo-zero-note">No participants reported in the remaining ${zero.length===1?'category':'categories'}: ${zero.map(([label])=>esc(label)).join(', ')}.</div>`:'';
-  let completenessNote=unknownShare>.15?`<div class="pr-note">${pct(unknownShare)} of responses in this category are Unknown or Declined. Interpret this distribution with that limitation in mind.</div>`:'';
   let compBasis=isQ1?total:(ytdTotal||total),compUnknown=isQ1?n(unknownRow?.[1]||0):n(unknownRow?.[2]??unknownRow?.[1]??0);
   let completeness=reportDemographicCompleteness(compBasis,compUnknown);
   let completenessLine=completeness?`<div class="pr-completeness-line"><strong>${esc(title)}</strong> — ${pct(completeness.pct)} known${isQ1?'':' (YTD)'}</div>`:'';
-  return `<div class="pr-demo-block"><h3>${esc(title)}</h3>${total?`<div class="pr-demo-total">${fmt(total)} ${esc(unitLabel)} reporting${isQ1?'':` · ${fmt(ytdTotal)} YTD`}</div>`:''}${bars||'<div class="pr-muted">No data reported for this category.</div>'}${zeroNote}${completenessNote}${completenessLine}</div>`;
+  return `<div class="pr-demo-block"><h3>${esc(title)}</h3>${total?`<div class="pr-demo-total">${fmt(total)} ${esc(unitLabel)} reporting${isQ1?'':` · ${fmt(ytdTotal)} YTD`}</div>`:''}${bars||'<div class="pr-muted">No data reported for this category.</div>'}${zeroNote}${completenessLine}</div>`;
 }
 
 function printFilename(program,p,r,ext){
@@ -2456,15 +2454,11 @@ function printReport(id){
     if(lgbtqTotal)demoBlocks.push(printDemoBlock('LGBTQ+ Identity',[['Yes',r.access.lgbtq.yes,ytdAccess(r,['lgbtq','yes'])],['No',r.access.lgbtq.no,ytdAccess(r,['lgbtq','no'])],['Unknown/Declined',r.access.lgbtq.unknown,ytdAccess(r,['lgbtq','unknown'])]],lgbtqTotal,lgbtqYtdTotal,isQ1));
     let ageTotal=ageGenderTotal(r);
     if(demoBlocks.length||ageTotal){
-      let denomTotals=[ageTotal,raceTotal,langTotal,lgbtqTotal].filter(Boolean);
-      let allMatch=denomTotals.every(v=>v===qEnroll);
-      let introText=allMatch
-        ?'Demographic categories reflect the same newly enrolled participants counted in People Served.'
-        :`Demographic response totals are shown individually below because one or more categories do not exactly match the ${fmt(qEnroll)} newly enrolled participants reported in People Served. This can happen when a demographic question was left blank for some participants.`;
+      let introText='Demographic categories reflect the participants counted in People Served.';
       let ageTable=ageTotal?(isQ1
-      ?`<table class="pr-table"><thead><tr><th>Age</th>${GENDERS.map(g=>`<th>${esc(HSD_GENDER_TABLE_LABELS[g]||g)}</th>`).join('')}<th>Total</th></tr></thead><tbody>${AGES.filter(a=>GENDERS.some(g=>n(r.access.ageGender[a][g])>0)).map(a=>`<tr><td>${esc(a)}</td>${GENDERS.map(g=>`<td class="num">${fmt(r.access.ageGender[a][g])}</td>`).join('')}<td class="num"><strong>${fmt(sumObject(r.access.ageGender[a]))}</strong></td></tr>`).join('')}</tbody></table><div class="pr-note">Because this is the first quarter of the contract year, quarterly and year-to-date totals are the same.</div>`
-      :`<table class="pr-table"><thead><tr><th rowspan="2">Age</th><th colspan="${GENDERS.length+1}" style="text-align:center">Year to Date</th><th colspan="${GENDERS.length+1}" style="text-align:center">Quarter</th></tr><tr>${GENDERS.map(g=>`<th>${esc(HSD_GENDER_TABLE_LABELS[g]||g)}</th>`).join('')}<th>Total</th>${GENDERS.map(g=>`<th class="pr-demo-secondary">${esc(HSD_GENDER_TABLE_LABELS[g]||g)}</th>`).join('')}<th class="pr-demo-secondary">Total</th></tr></thead><tbody>${AGES.filter(a=>GENDERS.some(g=>n(r.access.ageGender[a][g])>0||ytdAccess(r,['ageGender',a,g])>0)).map(a=>`<tr><td>${esc(a)}</td>${GENDERS.map(g=>`<td class="num"><strong>${fmt(ytdAccess(r,['ageGender',a,g]))}</strong></td>`).join('')}<td class="num"><strong>${fmt(GENDERS.reduce((sum,g)=>sum+ytdAccess(r,['ageGender',a,g]),0))}</strong></td>${GENDERS.map(g=>`<td class="num pr-demo-secondary">${fmt(r.access.ageGender[a][g])}</td>`).join('')}<td class="num pr-demo-secondary">${fmt(sumObject(r.access.ageGender[a]))}</td></tr>`).join('')}</tbody></table>`
-      )+(ageTotal!==qEnroll?`<div class="pr-note">Age and gender responses total ${fmt(ageTotal)}, reporting against ${fmt(qEnroll)} newly enrolled participants.</div>`:''):'';
+      ?`<table class="pr-table"><thead><tr><th>Age</th>${GENDERS.map(g=>`<th>${esc(HSD_GENDER_TABLE_LABELS[g]||g)}</th>`).join('')}<th>Total</th></tr></thead><tbody>${AGES.filter(a=>GENDERS.some(g=>n(r.access.ageGender[a][g])>0)).map(a=>{let rowTotal=sumObject(r.access.ageGender[a]);return`<tr><td>${esc(a)}</td>${GENDERS.map(g=>`<td class="num">${fmt(r.access.ageGender[a][g])}</td>`).join('')}<td class="num"><strong>${fmt(rowTotal)}</strong>${qEnroll?` <span class="pr-demo-secondary">(${pct(rowTotal/qEnroll)})</span>`:''}</td></tr>`}).join('')}</tbody></table><div class="pr-note">Because this is the first quarter of the contract year, quarterly and year-to-date totals are the same.</div>`
+      :`<table class="pr-table"><thead><tr><th rowspan="2">Age</th><th colspan="${GENDERS.length+1}" style="text-align:center">Quarter</th><th colspan="${GENDERS.length+1}" style="text-align:center">Year to Date</th></tr><tr>${GENDERS.map(g=>`<th class="pr-demo-secondary">${esc(HSD_GENDER_TABLE_LABELS[g]||g)}</th>`).join('')}<th class="pr-demo-secondary">Total</th>${GENDERS.map(g=>`<th>${esc(HSD_GENDER_TABLE_LABELS[g]||g)}</th>`).join('')}<th>Total</th></tr></thead><tbody>${AGES.filter(a=>GENDERS.some(g=>n(r.access.ageGender[a][g])>0||ytdAccess(r,['ageGender',a,g])>0)).map(a=>{let ytdRowTotal=GENDERS.reduce((sum,g)=>sum+ytdAccess(r,['ageGender',a,g]),0);return`<tr><td>${esc(a)}</td>${GENDERS.map(g=>`<td class="num pr-demo-secondary">${fmt(r.access.ageGender[a][g])}</td>`).join('')}<td class="num pr-demo-secondary">${fmt(sumObject(r.access.ageGender[a]))}</td>${GENDERS.map(g=>`<td class="num"><strong>${fmt(ytdAccess(r,['ageGender',a,g]))}</strong></td>`).join('')}<td class="num"><strong>${fmt(ytdRowTotal)}</strong>${ytdEnroll?` <span class="pr-demo-secondary">(${pct(ytdRowTotal/ytdEnroll)})</span>`:''}</td></tr>`}).join('')}</tbody></table>`
+      ):'';
       let charSection=`<div class="pr-section"><div class="pr-keep-together"><h2>Participant Characteristics</h2><p class="pr-section-intro">${introText}</p>${ageTable}</div><div class="pr-demo-grid">${demoBlocks.join('')}</div></div>`;
       peopleSection+=charSection;
     }
